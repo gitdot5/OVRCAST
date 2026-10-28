@@ -1,0 +1,10 @@
+state/
+board.html
+board.txt
+__pycache__/
+native/.build/
+dist/
+backups/
+config.local.json
+.DS_Store
+*.log

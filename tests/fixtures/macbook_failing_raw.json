@@ -1,0 +1,8 @@
+[{"provider": "codex", "source": "cli", "error": {"message": "Codex RPC timed out waiting for `account/rateLimits/read` reply.", "code": 1, "kind": "provider"}},
+ {"provider": "claude", "source": "cli", "error": {"message": "Could not parse Claude usage: Missing Current session.", "code": 1, "kind": "provider"}},
+ {"usage": {"loginMethod": "offline", "primary": null, "updatedAt": "2026-10-25T01:28:40Z", "tertiary": null,
+            "extraRateWindows": [{"title": "Offline · 6 conversations", "window": {"usedPercent": 0}, "usageKnown": false, "id": "antigravity-offline-conversations"}],
+            "identity": {"providerID": "antigravity", "loginMethod": "offline"}, "secondary": null},
+  "source": "offline",
+  "diagnostic": "Live Antigravity usage is unavailable; showing offline data. Antigravity quota request timed out.",
+  "provider": "antigravity"}]

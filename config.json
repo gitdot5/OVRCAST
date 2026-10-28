@@ -1,0 +1,11 @@
+{
+  "timezone": "UTC",
+  "machines": {
+    "MacBook": {
+      "local_path": "~/Library/Application Support/UsageBoard/snapshot.json"
+    }
+  },
+  "expected": {},
+  "plans": {},
+  "also_used_by": {}
+}
