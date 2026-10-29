@@ -11,9 +11,11 @@ from __future__ import annotations
 
 import json
 import os
+import selectors
 import subprocess
 import sys
 import fcntl
+import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 
@@ -30,6 +32,43 @@ if not os.path.isfile(CONFIG_PATH):
 STATE_DIR = os.path.join(ROOT, "state")
 REMOTE_CMD = 'cat "$HOME/Library/Application Support/UsageBoard/snapshot.json"'
 SSH_TIMEOUT = 40
+MAX_SNAPSHOT_BYTES = 4_000_000
+
+
+def bounded_command(argv, timeout=SSH_TIMEOUT, max_bytes=MAX_SNAPSHOT_BYTES):
+    """Drain both streams with a shared byte limit and a wall-clock deadline."""
+    proc = subprocess.Popen(argv, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                            stdin=subprocess.DEVNULL)
+    selector = selectors.DefaultSelector()
+    output = {proc.stdout: bytearray(), proc.stderr: bytearray()}
+    total = 0
+    deadline = time.monotonic() + timeout
+    try:
+        for pipe in output:
+            selector.register(pipe, selectors.EVENT_READ)
+        while selector.get_map():
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise subprocess.TimeoutExpired(argv, timeout)
+            for key, _ in selector.select(remaining):
+                chunk = os.read(key.fd, min(65536, max_bytes - total + 1))
+                if not chunk:
+                    selector.unregister(key.fileobj)
+                    continue
+                total += len(chunk)
+                if total > max_bytes:
+                    raise ValueError("source output exceeds the size limit")
+                output[key.fileobj].extend(chunk)
+        proc.wait(timeout=max(0, deadline - time.monotonic()))
+        return subprocess.CompletedProcess(argv, proc.returncode,
+            output[proc.stdout].decode("utf-8"), output[proc.stderr].decode("utf-8", errors="replace"))
+    finally:
+        selector.close()
+        if proc.poll() is None:
+            proc.kill()
+        proc.wait()
+        proc.stdout.close()
+        proc.stderr.close()
 
 
 def request_collection(config):
@@ -41,8 +80,8 @@ def request_collection(config):
             args = ["/usr/bin/ssh", "-o", "ClearAllForwardings=yes"] + list(mcfg["ssh"]) + [
                 'launchctl kickstart gui/$(id -u)/com.weekthink.usageboard.collect']
         try:
-            return subprocess.run(args, capture_output=True, timeout=SSH_TIMEOUT, stdin=subprocess.DEVNULL).returncode == 0
-        except (OSError, subprocess.TimeoutExpired):
+            return bounded_command(args).returncode == 0
+        except (OSError, ValueError, subprocess.TimeoutExpired):
             return False
     with ThreadPoolExecutor(max_workers=3) as pool:
         return list(pool.map(request, (config.get("machines") or {}).values()))
@@ -53,15 +92,22 @@ def fetch(mcfg):
     if mcfg.get("local_path"):
         path = os.path.expanduser(mcfg["local_path"])
         try:
-            with open(path) as fh:
-                return fh.read(), None
+            with open(path, "rb") as fh:
+                data = fh.read(MAX_SNAPSHOT_BYTES + 1)
+            if len(data) > MAX_SNAPSHOT_BYTES:
+                return None, "snapshot exceeds the size limit"
+            return data.decode("utf-8"), None
         except OSError:
             return None, "no snapshot file yet"
+        except UnicodeError:
+            return None, "snapshot unreadable"
     argv = ["/usr/bin/ssh", "-o", "ClearAllForwardings=yes"] + list(mcfg["ssh"]) + [REMOTE_CMD]
     try:
-        p = subprocess.run(argv, capture_output=True, text=True, timeout=SSH_TIMEOUT, stdin=subprocess.DEVNULL)
+        p = bounded_command(argv)
     except subprocess.TimeoutExpired:
         return None, "ssh timed out"
+    except (OSError, ValueError):
+        return None, "ssh output unreadable or exceeds the size limit"
     if p.returncode != 0:
         last = (p.stderr.strip().splitlines() or ["exit %d" % p.returncode])[-1]
         return None, "ssh failed: " + last[:160]

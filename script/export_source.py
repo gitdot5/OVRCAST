@@ -12,7 +12,7 @@ FILES = (
     'board.py', 'capacity.py', 'collect.py', 'dashboard.py', 'dashboard.css',
     'dashboard.js', 'gather.py', 'install_agent.py', 'native_snapshot.py',
     'native/Package.swift', 'app/install_app.sh', 'app/build_icon.sh',
-    'app/icon.svg', 'app/icon_1024.png', 'app/UsageBoard.icns',
+    'app/icon.svg', 'app/icon-master.png', 'app/icon_1024.png', 'app/UsageBoard.icns',
     'script/build_and_run.sh', 'script/package_release.sh', 'script/export_source.py', 'assets/README.md', 'docs/preview.png',
 )
 TREES = {

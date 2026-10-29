@@ -23,5 +23,14 @@ install SSH keys, trust unknown hosts, run an OVRCAST server, redeem resets,
 buy credits or start model work. Provider tools have their own network and
 credential behavior. Local snapshots contain private account and usage data.
 
-Apple notarization and the release checks are bounded checks; this preview
-has not received an independent security audit.
+Apple notarization and the release checks are bounded checks; source review has the scope and limits described below.
+
+## Review status
+
+An independent automated baseline reviewed all 60 text files in the initial
+0.3.0 source release, followed by a bounded review of the 0.3.1 changes. The
+review found one low-severity memory-exhaustion issue in optional legacy SSH
+collection. Version 0.3.1 bounds combined stdout/stderr and local snapshot reads
+to 4,000,000 bytes, preserves last-good readings on failure, and adds regression
+tests. No other reportable finding was established in the reviewed source.
+This is an automated source review, not an external human security certification.

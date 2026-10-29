@@ -10,8 +10,8 @@ retain their original names for compatibility.
 
 ## Product identity
 
-Use **OVRCAST** as the product name and the original segmented gauge as its
-app icon. The gauge represents remaining capacity. Keep the same name and icon
+Use **OVRCAST** as the product name and the monochrome interlocking O emblem as its
+app icon. Two black circular ribbons interlock on a warm ivory native macOS tile. Keep the same name and icon
 in the menu bar app, About screen, documentation and downloadable packages.
 
 Describe the app as: “A local macOS menu bar app for tracking AI allowances,
@@ -29,12 +29,12 @@ Keep that credit visible in About and in the README. Preserve the license and
 third-party notices in source archives and app bundles.
 
 Provider names identify supported services; they do not indicate endorsement.
-Only the original gauge artwork is included in public packages. Private
+Only the OVRCAST icon artwork is included in public packages. Private
 development assets extracted from other applications are excluded.
 
 ## Sharing and forks
 
-The MIT license applies to the original source and gauge artwork. Keep its
+The MIT license applies to the original source and OVRCAST icon artwork. Keep its
 copyright and license notice when redistributing them. Modified distributions
 should clearly describe their changes and authorship so users know which
 version they are installing. This guidance adds no restrictions to MIT.

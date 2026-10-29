@@ -2,7 +2,9 @@ import json
 import os
 import sys
 import tempfile
+import subprocess
 import unittest
+from unittest.mock import patch
 from datetime import datetime, timezone
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -47,6 +49,16 @@ class MergeFetchTest(unittest.TestCase):
 
 
 class FetchTest(unittest.TestCase):
+    def test_oversized_local_snapshot_is_refused_before_decode(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = os.path.join(folder, "snapshot.json")
+            with open(path, "wb") as stream:
+                stream.write(b"x" * 1025)
+            with patch.object(gather, "MAX_SNAPSHOT_BYTES", 1024):
+                text, err = gather.fetch({"local_path": path})
+            self.assertIsNone(text)
+            self.assertIn("size limit", err)
+
     def test_local_machine_reads_the_file(self):
         d = tempfile.mkdtemp()
         p = os.path.join(d, "snapshot.json")
@@ -66,6 +78,28 @@ class FetchTest(unittest.TestCase):
                                           "-o", "HostName=127.0.0.1", "-o", "Port=1", "nohost"]})
         self.assertIsNone(text)
         self.assertTrue(err)
+
+
+class BoundedCommandTest(unittest.TestCase):
+    def test_combined_stream_limit_accepts_exact_boundary(self):
+        result = gather.bounded_command([sys.executable, "-c",
+            "import os; os.write(1,b'a'*512); os.write(2,b'b'*512)"], max_bytes=1024)
+        self.assertEqual(result.stdout, "a" * 512)
+        self.assertEqual(result.stderr, "b" * 512)
+        self.assertEqual(result.returncode, 0)
+
+    def test_stdout_and_stderr_both_count_toward_limit(self):
+        for descriptor in (1, 2):
+            with self.subTest(descriptor=descriptor), self.assertRaises(ValueError):
+                gather.bounded_command([sys.executable, "-c",
+                    "import os; os.write(%d,b'x'*2048)" % descriptor], max_bytes=1024)
+        with self.assertRaises(ValueError):
+            gather.bounded_command([sys.executable, "-c",
+                "import os; os.write(1,b'a'*600); os.write(2,b'b'*600)"], max_bytes=1024)
+
+    def test_quiet_process_still_has_a_deadline(self):
+        with self.assertRaises(subprocess.TimeoutExpired):
+            gather.bounded_command([sys.executable, "-c", "import time; time.sleep(3)"], timeout=0.05)
 
 
 class RunTest(unittest.TestCase):

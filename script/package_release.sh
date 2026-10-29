@@ -24,7 +24,7 @@ import plistlib,sys
 with open(sys.argv[1],'wb') as f:
  plistlib.dump({'CFBundleExecutable':'UsageBoardMenuBar','CFBundleIdentifier':'com.weekthink.usageboard',
  'CFBundleName':'OVRCAST','CFBundleDisplayName':'OVRCAST','CFBundlePackageType':'APPL',
- 'CFBundleShortVersionString':'0.3.0','CFBundleVersion':'3','CFBundleIconFile':'UsageBoard.icns',
+ 'CFBundleShortVersionString':'0.3.1','CFBundleVersion':'4','CFBundleIconFile':'UsageBoard.icns',
  'LSMinimumSystemVersion':'14.0','NSPrincipalClass':'NSApplication','LSUIElement':True},f)
 PY
 if [[ -n "${DEVELOPER_ID:-}" ]]; then
@@ -33,7 +33,7 @@ else
  codesign --force --sign - "$APP_DIR"
 fi
 codesign --verify --deep --strict "$APP_DIR"
-ZIP_OUTPUT="$ROOT_DIR/dist/OVRCAST-0.3.0-preview.app.zip"
+ZIP_OUTPUT="$ROOT_DIR/dist/OVRCAST-0.3.1-preview.app.zip"
 /usr/bin/ditto -c -k --keepParent "$APP_DIR" "$ZIP_OUTPUT"
 if [[ -n "${NOTARY_PROFILE:-}" ]]; then
  xcrun notarytool submit "$ZIP_OUTPUT" --keychain-profile "$NOTARY_PROFILE" --wait
@@ -51,7 +51,7 @@ if [[ "$MODE" == "--zip-only" ]]; then
 fi
 ln -s /Applications "$STAGE_DIR/Applications"
 cp "$SOURCE_DIR/docs/QUICK_START.txt" "$STAGE_DIR/Read me first.txt"
-OUTPUT="$ROOT_DIR/dist/OVRCAST-0.3.0-preview.dmg"
+OUTPUT="$ROOT_DIR/dist/OVRCAST-0.3.1-preview.dmg"
 hdiutil create -volname 'OVRCAST' -srcfolder "$STAGE_DIR" -ov -format UDZO "$OUTPUT" >/dev/null
 if [[ -n "${NOTARY_PROFILE:-}" ]]; then
  if [[ -z "${DEVELOPER_ID:-}" ]]; then echo 'Notarization requires DEVELOPER_ID.' >&2; exit 2; fi

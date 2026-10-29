@@ -106,7 +106,7 @@ class CapacityTest(unittest.TestCase):
 
     def test_refresh_only_kicks_existing_usage_agents(self):
         config = {"machines": {"Local": {"local_path": "test"}}}
-        with patch("gather.subprocess.run") as run:
+        with patch("gather.bounded_command") as run:
             run.return_value.returncode = 0
             self.assertEqual(gather.request_collection(config), [True])
             self.assertEqual(run.call_args.args[0][-1].split('/')[-1], "com.weekthink.usageboard.collect")

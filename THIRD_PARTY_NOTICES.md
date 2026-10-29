@@ -15,7 +15,7 @@ review the exact version's bundled dependencies and notices as well.
 
 ## Artwork and names
 
-OVRCAST's original gauge app icon (`app/icon.svg` and rendered variants)
+OVRCAST's OVRCAST monochrome interlocking O app icon (`app/icon.svg` and rendered variants)
 is included under the project's MIT license.
 
 Provider names identify the services being monitored. Third-party names, logos,

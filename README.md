@@ -8,7 +8,7 @@ internal `UsageBoard` storage paths and the `usageboard://` link remain compatib
 A free, local macOS menu bar app for seeing how much AI usage you have left
 across accounts and Macs. Built with SwiftUI, AppKit and Python.
 
-Created by **Git**. An independent project with its own gauge icon and interface,
+Created by **Git**. An independent project with its own monochrome interlocking O icon and interface,
 using [CodexBar](https://github.com/steipete/CodexBar) for usage collection.
 
 ![OVRCAST preview with example accounts](docs/preview.png)
@@ -34,14 +34,16 @@ The native app runs on macOS 14 or later on Apple Silicon or Intel. Unzip the
 download, then drag OVRCAST into Applications. It does not need Python, Terminal,
 a development folder or a separate OVRCAST account.
 
-[Download OVRCAST 0.3.0 for macOS](https://github.com/gitdot5/OVRCAST/releases/tag/v0.3.0)
+[Download OVRCAST 0.3.1 for macOS](https://github.com/gitdot5/OVRCAST/releases/tag/v0.3.1)
 
-This first public preview is Developer ID signed and Apple notarized. Its stapled
-ticket, Gatekeeper assessment and packaged launch passed local checks. It runs on
-Apple Silicon and Intel. CodexBar 0.81.0 was used for compatibility testing.
-A separate-Mac installation test and independent security audit have not been
-completed. See the [release review](docs/RELEASE_REVIEW.md) for the validation scope.
-Older development previews are separate builds.
+This preview uses a monochrome interlocking O icon and is Developer ID signed
+and Apple notarized. It supports Apple Silicon and Intel. Local package checks,
+a separate-Mac fresh-home setup check and the missing-CodexBar screen were
+verified. CodexBar 0.81.0 was used for compatibility testing.
+An independent automated source review found one low-severity legacy SSH
+buffering issue; 0.3.1 fixes it and adds regression tests. This is not an external
+human security certification. See the [release review](docs/RELEASE_REVIEW.md).
+Older development previews and release 0.3.0 are separate builds.
 
 On first launch, the Connect screen detects the separately installed
 [CodexBar](https://github.com/steipete/CodexBar) companion and opens its download
@@ -139,7 +141,7 @@ as a new repository; the original working checkout may have private history.
 
 ## License and credits
 
-Original OVRCAST source and its gauge app icon are MIT licensed. CodexBar
+Original OVRCAST source and its monochrome interlocking O app icon are MIT licensed. CodexBar
 supplies the external collection CLI and inspired the provider/allowance layout.
 Its copyright and license are preserved under [LICENSES](LICENSES/CodexBar-MIT.txt).
 See [third-party notices](THIRD_PARTY_NOTICES.md) for scope and exclusions.

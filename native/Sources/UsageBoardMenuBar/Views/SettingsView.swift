@@ -10,6 +10,8 @@ struct SettingsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
+                Image(nsImage: NSApp.applicationIconImage).resizable().scaledToFit()
+                    .frame(width: 44, height: 44).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 4) {
                     Text(store.preferences.setupComplete ? "Make it yours" : "Welcome to OVRCAST").font(.title2.weight(.semibold))
                     Text("Your AI capacity, at a glance.").foregroundStyle(.secondary).font(.callout)

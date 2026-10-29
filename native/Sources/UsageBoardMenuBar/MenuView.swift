@@ -134,6 +134,8 @@ struct MenuView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
+                Image(nsImage: NSApp.applicationIconImage).resizable().scaledToFit()
+                    .frame(width: 30, height: 30).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("OVRCAST").font(.system(size: 15, weight: .semibold))
                     Text(store.isDemo ? "Demo · example accounts" : floating ? "Drag the title bar to move" : "Every account. Every Mac.").font(.system(size: 10)).foregroundStyle(.secondary)

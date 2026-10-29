@@ -48,11 +48,12 @@ notarization also does not guarantee that an app cannot be exploited.
 ## Current release gates
 
 - Developer ID signing, Apple notarization, ticket validation and local Gatekeeper
-  assessment passed for `OVRCAST-0.3.0-macOS.zip` on October 28, 2026.
+  assessment passed for `OVRCAST-0.3.1-macOS.zip` on October 29, 2026.
 - Verify the final downloaded artifact and checksums. Keep a separate-Mac
   installation test listed as unperformed until it is actually completed.
 - CodexBar 0.81.0 was used for release compatibility checks.
-- A broader independent security review is recommended before general release.
+- Independent automated baseline and bounded fix reviews are complete; an
+  external human security certification has not been performed.
 - Publish the clean source under gitdot5/OVRCAST with private vulnerability
   reporting enabled. See RELEASE_REVIEW.md for the exact validation scope.
 

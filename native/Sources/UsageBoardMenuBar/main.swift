@@ -63,7 +63,7 @@ import UserNotifications
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.autosaveName = "UsageBoardMainStatusItem"
         if let button = statusItem.button {
-            button.image = NSImage(systemSymbolName: "chart.bar.xaxis", accessibilityDescription: "OVRCAST")
+            button.image = NSImage(systemSymbolName: "cloud", accessibilityDescription: "OVRCAST")
             button.image?.isTemplate = true
             button.imagePosition = .imageLeading
             button.font = .monospacedDigitSystemFont(ofSize: 10, weight: .medium)

@@ -93,6 +93,8 @@ struct FullBoardView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
+                Image(nsImage: NSApp.applicationIconImage).resizable().scaledToFit()
+                    .frame(width: 40, height: 40).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 4) {
                     Text("OVRCAST").font(.title.bold())
                     Text("\(store.available) available · \(store.nextReset)").foregroundStyle(.secondary)
