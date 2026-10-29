@@ -137,16 +137,14 @@ func age(_ text: String?) -> String {
 }
 func resetLabel(_ text: String?) -> String {
     guard let date = parsedDate(text) else { return "Reset unknown" }
-    let minutes = Int(date.timeIntervalSinceNow / 60)
-    if minutes <= 0 { return "Awaiting new reading" }
-    if minutes >= 1440 { return "Resets in \(minutes / 1440)d \((minutes % 1440) / 60)h" }
-    if minutes >= 60 { return "Resets in \(minutes / 60)h \(minutes % 60)m" }
-    return "Resets in \(minutes)m"
+    guard date > Date() else { return "Awaiting new reading" }
+    return "Resets \(resetCountdown(until: date))"
 }
 func artwork(_ name: String, device: Bool = false) -> NSImage? {
     let names = device ? ["MacBook": "macbook", "Mini": "mac-mini", "Studio": "mac-studio"] :
         ["Codex": "codex", "Claude": "claude", "Claude Platform": "claude", "Antigravity": "antigravity"]
     guard let file = names[name], let root = Bundle.main.resourceURL else { return nil }
-    return NSImage(contentsOf: root.appendingPathComponent("assets/\(device ? "devices" : "providers")/\(file).png"))
+    let folder = device ? "devices" : "provider-logos"
+    return NSImage(contentsOf: root.appendingPathComponent("assets/\(folder)/\(file).png"))
 }
 

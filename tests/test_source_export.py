@@ -39,6 +39,8 @@ class SourceExportTest(unittest.TestCase):
                 self.assertIn('usage_board/LICENSES/CodexBar-MIT.txt', names)
                 self.assertIn('usage_board/config.json', names)
                 self.assertIn('usage_board/SHA256SUMS', names)
+                for provider in ('codex', 'claude', 'antigravity'):
+                    self.assertIn('usage_board/assets/provider-logos/' + provider + '.png', names)
                 for excluded in ('config.local.json', 'state/', '.git/', 'backups/',
                                  'assets/providers/', 'assets/devices/', 'DESIGN.md'):
                     self.assertFalse(any(excluded in name for name in names), excluded)

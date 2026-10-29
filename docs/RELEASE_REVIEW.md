@@ -1,28 +1,31 @@
-# OVRCAST 0.3.1 release review
+# OVRCAST 0.3.2 release review
 
-Release: https://github.com/gitdot5/OVRCAST/releases/tag/v0.3.1
+Release: https://github.com/gitdot5/OVRCAST/releases/tag/v0.3.2
 Reviewed October 29, 2026. Public preview, macOS 14+, Apple Silicon and Intel.
 
 ## Verified release artifact
 
-- The original monochrome interlocking O icon is embedded in the native macOS
+- The original segmented capacity-ring icon is embedded in the native macOS
   bundle and displayed by the board headers, setup and About screen.
 - Strict Developer ID signature, hardened runtime, Apple notarization, stapled
   ticket and Gatekeeper checks passed for the exact app ZIP.
-- The packaged app rendered successfully in Day and Night appearances.
+- The packaged app rendered successfully in Day and Night appearances, with
+  the three bundled provider marks and per-account next-reset schedule.
+  Each scheduled reset shows its window, countdown, local date/time and time zone.
+  Passed, stale and unknown timestamps do not claim a confirmed refill.
 - The universal executable includes arm64 and x86_64 architectures. Runtime
   checks were performed on Apple Silicon; Intel runtime was not exercised.
-- The exact ZIP also passed signature, ticket, quarantine/Gatekeeper and launch
-  checks on a separate Apple Silicon Mac running macOS 26.6.2. With a fresh
-  application-data home and no discoverable CodexBar helper, setup displayed
-  Get CodexBar and disabled Open my board. Existing provider sessions were
-  untouched. This was not a newly created macOS user account.
+- The preceding 0.3.1 release passed signature, ticket, quarantine/Gatekeeper
+  and launch checks on a separate Apple Silicon Mac running macOS 26.6.2.
+  With a fresh application-data home and no discoverable CodexBar helper, setup
+  displayed Get CodexBar and disabled Open my board. Existing provider sessions
+  were untouched. A separate-Mac check has not been repeated for 0.3.2.
 - The release source is an allowlisted export with example configuration,
   original artwork, license notices and integrity manifests. Private local
   configuration/state, private provider/device images and original private Git
   history are excluded.
-- 89 Python and 37 Swift tests passed for the 0.3.1 code. The four source-export
-  tests also passed after the final artwork update. CodexBar 0.81.0 was used for
+- 89 Python and 44 Swift tests passed for 0.3.2, including seven reset-schedule
+  cases and export checks requiring the three public provider images. CodexBar 0.81.0 was used for
   compatibility review and remains a separately installed dependency.
 
 ## Independent automated security review
@@ -35,8 +38,10 @@ are bounded before decoding, process deadlines remain enforced, and failures
 retain last-good readings. Regression tests exercise the output boundaries,
 combined streams, timeout and oversized local snapshot cases.
 
-No other reportable source finding was established in that review. The final
-monochrome SVG contains static local vector geometry; it does not load external
+No other reportable source finding was established in that review. That review
+predates the 0.3.2 reset UI and public provider-image packaging changes; no new
+independent security scan was performed for this update. The final
+capacity-ring SVG contains static local vector geometry; it does not load external
 resources or execute scripts. This is an automated source review, not an
 external human security certification. Binary artwork forensics, macOS and
 external CodexBar/provider implementations are outside the source audit.

@@ -39,7 +39,12 @@ struct QuotaBar: View {
                     }
                 }.frame(height: compact ? 3 : 5)
             }
-            if !compact { Text(resetLabel(quota.resetsAt)).font(.system(size: 10)).foregroundStyle(.secondary) }
+            if !compact {
+                Text(resetLabel(quota.resetsAt)).font(.system(size: 10)).foregroundStyle(.secondary)
+                if let date = parsedDate(quota.resetsAt), !quota.awaiting {
+                    Text(resetLocalTime(date)).font(.system(size: 10)).foregroundStyle(.secondary)
+                }
+            }
         }.accessibilityElement(children: .combine)
     }
 }
@@ -83,7 +88,8 @@ struct AccountRow: View {
                     if account.quotas.isEmpty { Text("No quota reading").font(.system(size: 10)).foregroundStyle(.secondary) }
                 }
             }
-        }.padding(.horizontal, 12).padding(.vertical, expanded ? 12 : 5)
+            if !expanded { ResetScheduleView(account: account) }
+        }.padding(.horizontal, 12).padding(.vertical, expanded ? 12 : 7)
         .background(.background.opacity(0.7), in: RoundedRectangle(cornerRadius: 10))
         .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.primary.opacity(0.06)))
         .contentShape(RoundedRectangle(cornerRadius: 10))

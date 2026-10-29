@@ -8,7 +8,7 @@ internal `UsageBoard` storage paths and the `usageboard://` link remain compatib
 A free, local macOS menu bar app for seeing how much AI usage you have left
 across accounts and Macs. Built with SwiftUI, AppKit and Python.
 
-Created by **Git**. An independent project with its own monochrome interlocking O icon and interface,
+Created by **Git**. An independent project with its own segmented capacity-ring icon and interface,
 using [CodexBar](https://github.com/steipete/CodexBar) for usage collection.
 
 ![OVRCAST preview with example accounts](docs/preview.png)
@@ -16,7 +16,8 @@ using [CodexBar](https://github.com/steipete/CodexBar) for usage collection.
 ## Features
 
 - One compact overview for Codex, Claude and Antigravity accounts.
-- Session, weekly and model allowances, with reset countdowns.
+- Session, weekly and model allowances, with next-reset countdowns and exact local times.
+- Recognizable Codex, Claude and Antigravity identification icons.
 - Saved-reset inventory and separate credit pools when a source reports them.
 - Day and Night appearance, provider tabs, machine/status filters and usage sorting.
 - A pinned floating board: drag the native title bar to move it, or unpin it
@@ -34,16 +35,18 @@ The native app runs on macOS 14 or later on Apple Silicon or Intel. Unzip the
 download, then drag OVRCAST into Applications. It does not need Python, Terminal,
 a development folder or a separate OVRCAST account.
 
-[Download OVRCAST 0.3.1 for macOS](https://github.com/gitdot5/OVRCAST/releases/tag/v0.3.1)
+[Download OVRCAST 0.3.2 for macOS](https://github.com/gitdot5/OVRCAST/releases/tag/v0.3.2)
 
-This preview uses a monochrome interlocking O icon and is Developer ID signed
-and Apple notarized. It supports Apple Silicon and Intel. Local package checks,
-a separate-Mac fresh-home setup check and the missing-CodexBar screen were
-verified. CodexBar 0.81.0 was used for compatibility testing.
+This preview uses a segmented capacity-ring icon and is Developer ID signed
+and Apple notarized. It supports Apple Silicon and Intel. Local signature, ticket, Gatekeeper and Day/Night launch checks passed
+for 0.3.2. A separate-Mac fresh-home setup and missing-CodexBar check passed for
+the preceding 0.3.1 release. CodexBar 0.81.0 was used for compatibility testing.
 An independent automated source review found one low-severity legacy SSH
 buffering issue; 0.3.1 fixes it and adds regression tests. This is not an external
 human security certification. See the [release review](docs/RELEASE_REVIEW.md).
-Older development previews and release 0.3.0 are separate builds.
+Version 0.3.2 adds next-reset times to account cards, bundles provider marks and
+updates the original app icon to show account capacity in one overview.
+Earlier releases remain available as separate builds.
 
 On first launch, the Connect screen detects the separately installed
 [CodexBar](https://github.com/steipete/CodexBar) companion and opens its download
@@ -141,7 +144,7 @@ as a new repository; the original working checkout may have private history.
 
 ## License and credits
 
-Original OVRCAST source and its monochrome interlocking O app icon are MIT licensed. CodexBar
+Original OVRCAST source and its segmented capacity-ring app icon are MIT licensed. CodexBar
 supplies the external collection CLI and inspired the provider/allowance layout.
 Its copyright and license are preserved under [LICENSES](LICENSES/CodexBar-MIT.txt).
 See [third-party notices](THIRD_PARTY_NOTICES.md) for scope and exclusions.

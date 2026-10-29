@@ -1,9 +1,14 @@
 # OVRCAST icon construction
 
-The icon is original vector artwork in `app/icon.svg`: two interlocking black
-circular ribbons on a warm ivory rounded macOS tile, with a generous central
-opening and transparent exterior. The palette is near-black `#171717` and
-warm ivory `#f5f4f0`, with a subtle native tile edge and shadow.
+The original vector artwork in `app/icon.svg` reflects the app's job: bring AI
+allowances across accounts into one clear overview. Three account tracks share
+an O-shaped ring. Each dark arc represents remaining capacity; the pale part
+completes its track. The open center keeps the mark readable at small sizes.
+These are illustrative proportions, not live readings or provider identities.
+
+The palette is near-black `#171717`, warm ivory `#f5f4f0` and a pale neutral
+`#d7d6d0`. A rounded native macOS tile has a transparent exterior, subtle edge
+and shadow. No needle, traffic-light colors, provider logos or lettering.
 
 The SVG is the editable master. `app/icon-master.png` and `app/icon_1024.png`
 are its 1024-pixel renders. `app/build_icon.sh` packages the PNG into all standard

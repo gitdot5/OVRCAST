@@ -11,6 +11,7 @@ FILES = (
     '.gitignore', 'LICENSE', 'SECURITY.md', 'THIRD_PARTY_NOTICES.md', 'README.md', 'config.json',
     'board.py', 'capacity.py', 'collect.py', 'dashboard.py', 'dashboard.css',
     'dashboard.js', 'gather.py', 'install_agent.py', 'native_snapshot.py',
+    'assets/provider-logos/codex.png', 'assets/provider-logos/claude.png', 'assets/provider-logos/antigravity.png',
     'native/Package.swift', 'app/install_app.sh', 'app/build_icon.sh',
     'app/icon.svg', 'app/icon-master.png', 'app/icon_1024.png', 'app/UsageBoard.icns',
     'script/build_and_run.sh', 'script/package_release.sh', 'script/export_source.py', 'assets/README.md', 'docs/preview.png',

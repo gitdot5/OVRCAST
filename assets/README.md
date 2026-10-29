@@ -1,24 +1,23 @@
-# Optional local identity artwork
+# Provider artwork
 
-The public source archive excludes the PNGs described below. Native views use
-macOS system-symbol fallbacks and the HTML dashboard retains text labels when
-optional images are absent. Third-party artwork is outside the project's MIT
-license. Do not redistribute extracted images merely because they exist locally.
+The public app bundles these three identification images in `provider-logos/`.
+They are loaded locally, including in the full HTML board; no image requests
+are made while viewing account data. Retrieved October 29, 2026.
 
-These PNGs are exported at 128 pixels from the installed native assets using
-macOS `sips`. They are embedded in the generated HTML as data URIs; the board
-makes no network requests for images.
-
-| File | Local source |
+| File | Source |
 | --- | --- |
-| providers/codex.png | /Applications/ChatGPT.app/Contents/Resources/app.icns |
-| providers/claude.png | /Applications/Claude.app/Contents/Resources/electron.icns |
-| providers/antigravity.png | /Applications/Antigravity.app/Contents/Resources/icon.icns |
-| devices/macbook.png | /System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macbookpro-16-2021-space-gray.icns |
-| devices/mac-mini.png | /System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macmini-2020.icns |
-| devices/mac-studio.png | /System/Library/CoreServices/CoreTypes.bundle/Contents/Resources/com.apple.macstudio.icns |
+| codex.png | https://raw.githubusercontent.com/steipete/CodexBar/5f93dc3068b3bee3f8753f3772614cc2949c335d/Sources/CodexBar/Resources/Brand-ProviderIcon-codex.png |
+| claude.png | https://claude.com/icon.png |
+| antigravity.png | https://antigravity.google/assets/image/antigravity-logo.png |
 
-Hardware images represent the machine family, not a verified generation or color.
-Provider and Apple artwork retain their original ownership. These assets document
-this private local prototype; commercial distribution rights are not established
-by their availability on this Mac.
+Codex uses the terminal/bloom product icon, rather than the ChatGPT knot.
+Claude uses its orange starburst. Antigravity uses its multicolor arch.
+Codex artwork is retained from the public CodexBar resource at commit `5f93dc3068b3bee3f8753f3772614cc2949c335d`;
+its MIT notice is in `LICENSES/CodexBar-MIT.txt`. Provider trademarks and artwork
+remain owned by their respective owners and are not relicensed by OVRCAST.
+The marks identify supported services and do not imply endorsement.
+
+Private extracted images in `providers/` and `devices/` remain excluded from
+public packages. Device views use macOS system symbols when those optional
+local images are absent. Only the three files explicitly listed in the source
+export allowlist are redistributed.

@@ -163,7 +163,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("OVRCAST").font(.title2.weight(.semibold))
                     Text("Your AI capacity, at a glance.").foregroundStyle(.secondary)
-                    Text("Created by Git · Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.3.0")")
+                    Text("Created by Git · Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.3.2")")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }

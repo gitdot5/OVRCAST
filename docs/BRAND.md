@@ -10,8 +10,10 @@ retain their original names for compatibility.
 
 ## Product identity
 
-Use **OVRCAST** as the product name and the monochrome interlocking O emblem as its
-app icon. Two black circular ribbons interlock on a warm ivory native macOS tile. Keep the same name and icon
+Use **OVRCAST** as the product name and the segmented capacity-ring emblem as its
+app icon. Three account segments share one ring on a warm ivory native macOS tile.
+Dark arcs represent remaining allowance; pale arcs complete each account track.
+The ring forms an O for OVRCAST and brings multiple allowances into one view. Keep the same name and icon
 in the menu bar app, About screen, documentation and downloadable packages.
 
 Describe the app as: “A local macOS menu bar app for tracking AI allowances,
@@ -29,8 +31,9 @@ Keep that credit visible in About and in the README. Preserve the license and
 third-party notices in source archives and app bundles.
 
 Provider names identify supported services; they do not indicate endorsement.
-Only the OVRCAST icon artwork is included in public packages. Private
-development assets extracted from other applications are excluded.
+Public packages include the original OVRCAST icon and the three provider
+identification marks documented in `assets/README.md`. Private development
+assets extracted from other applications remain excluded.
 
 ## Sharing and forks
 

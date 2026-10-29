@@ -1,17 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <title>OVRCAST capacity ring</title>
+  <desc>Three account allowances share one overview. Each dark arc shows remaining capacity, with a pale remainder.</desc>
   <defs>
     <filter id="tileShadow" x="-15%" y="-15%" width="130%" height="135%"><feDropShadow dx="0" dy="9" stdDeviation="11" flood-color="#000" flood-opacity=".13"/></filter>
-    <clipPath id="upperWeave"><rect x="180" y="180" width="664" height="332"/></clipPath>
   </defs>
   <rect x="80" y="80" width="864" height="864" rx="196" fill="#f5f4f0" filter="url(#tileShadow)"/>
   <rect x="81" y="81" width="862" height="862" rx="195" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="2"/>
-  <g transform="rotate(-36 512 512)" fill="none" stroke-width="58">
-    <circle cx="434" cy="512" r="168" stroke="#171717"/>
-    <circle cx="590" cy="512" r="168" stroke="#f5f4f0" stroke-width="92"/>
-    <circle cx="590" cy="512" r="168" stroke="#171717"/>
-    <g clip-path="url(#upperWeave)">
-      <circle cx="434" cy="512" r="168" stroke="#f5f4f0" stroke-width="92"/>
-      <circle cx="434" cy="512" r="168" stroke="#171717"/>
-    </g>
+  <g fill="none" stroke-width="76" stroke-linecap="round">
+    <path d="M 512.000 282.000 A 230 230 0 0 1 738.506 551.939" stroke="#d7d6d0"/>
+    <path d="M 512.000 282.000 A 230 230 0 0 1 742.000 512.000" stroke="#171717"/>
+    <path d="M 711.186 627.000 A 230 230 0 0 1 364.159 688.190" stroke="#d7d6d0"/>
+    <path d="M 711.186 627.000 A 230 230 0 0 1 487.958 740.740" stroke="#171717"/>
+    <path d="M 312.814 627.000 A 230 230 0 0 1 433.335 295.871" stroke="#d7d6d0"/>
+    <path d="M 312.814 627.000 A 230 230 0 0 1 287.026 464.180" stroke="#171717"/>
   </g>
 </svg>

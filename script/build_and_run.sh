@@ -23,7 +23,7 @@ import plistlib,sys
 with open(sys.argv[1], 'wb') as f:
  plistlib.dump({'CFBundleExecutable':'UsageBoardMenuBar','CFBundleIdentifier':'com.weekthink.usageboard',
  'CFBundleName':'OVRCAST','CFBundleDisplayName':'OVRCAST','CFBundlePackageType':'APPL',
- 'CFBundleShortVersionString':'0.3.1','CFBundleVersion':'4','CFBundleIconFile':'UsageBoard.icns',
+ 'CFBundleShortVersionString':'0.3.2','CFBundleVersion':'5','CFBundleIconFile':'UsageBoard.icns',
  'LSMinimumSystemVersion':'14.0','NSPrincipalClass':'NSApplication','LSUIElement':True,
  'CFBundleURLTypes':[{'CFBundleURLName':'com.weekthink.usageboard','CFBundleURLSchemes':['usageboard']}]},f)
 PY

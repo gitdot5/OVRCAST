@@ -31,7 +31,7 @@ def asset_uri(group, filename):
 
 def provider_image(tool):
     filename = PROVIDER_IMAGES.get(tool)
-    uri = asset_uri('providers', filename) if filename else None
+    uri = asset_uri('provider-logos', filename) if filename else None
     return f'<img class="provider-image" src="{uri}" width="28" height="28" alt="" aria-hidden="true">' if uri else ''
 
 
