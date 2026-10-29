@@ -17,7 +17,9 @@ Do not post sensitive reports in public issues.
 
 ## Trust boundaries
 
-OVRCAST reads local usage through a separately installed CodexBar companion.
+OVRCAST reads local usage through its bundled, OVRCAST-maintained collector,
+derived from CodexBar’s MIT-licensed source. No separate CodexBar installation
+is required.
 Optional remote reads use SSH aliases configured by the user. It does not
 install SSH keys, trust unknown hosts, run an OVRCAST server, redeem resets,
 buy credits or start model work. Provider tools have their own network and
@@ -33,4 +35,6 @@ review found one low-severity memory-exhaustion issue in optional legacy SSH
 collection. Version 0.3.1 bounds combined stdout/stderr and local snapshot reads
 to 4,000,000 bytes, preserves last-good readings on failure, and adds regression
 tests. No other reportable finding was established in the reviewed source.
-This is an automated source review, not an external human security certification.
+Those reviews predate the collector fork bundled in 0.4.0 and do not constitute
+an independent audit of that vendored code. This is an automated source review,
+not an external human security certification.

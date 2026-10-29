@@ -2,8 +2,8 @@
 """OVRCAST collector: reads this Mac's AI usage limits and saves a private snapshot.
 
 Runs every 3 minutes from a LaunchAgent in the desktop session, the only place
-Claude Code can read its own login. It runs the CodexBar CLI and also reads the
-latest limit numbers Codex writes into its session logs (used when CodexBar's
+Claude Code can read its own login. It runs the bundled OVRCAST collector and also reads the
+latest limit numbers Codex writes into its session logs (used when the collector's
 Codex reading fails). It saves only percentages, reset times, credits and
 account emails, and refuses to write anything that looks like a credential.
 
@@ -57,14 +57,14 @@ def build_snapshot(stdout: str, rc, codex_logs, now: datetime) -> dict:
         "codex_logs": codex_logs,
     }
     if find_secret(stdout):
-        snap["codexbar"]["error"] = "refused: CodexBar output looked like it held a credential"
+        snap["codexbar"]["error"] = "refused: OVRCAST collector output looked like it held a credential"
         return snap
     try:
         rows = json.loads(stdout)
         if not isinstance(rows, list):
             raise ValueError("not a list")
     except ValueError:
-        snap["codexbar"]["error"] = "CodexBar output unreadable (exit code %s)" % rc
+        snap["codexbar"]["error"] = "OVRCAST collector output unreadable (exit code %s)" % rc
         return snap
     snap["codexbar"]["rows"] = rows
     return snap
@@ -145,14 +145,14 @@ def enabled_providers(text: str) -> list:
 
 
 def merge_provider_outputs(results: dict) -> list:
-    """One CodexBar run per provider -> rows; a slow or bad provider never costs the others."""
+    """One bundled collector run per provider -> rows; a slow or bad provider never costs the others."""
     rows = []
     for provider, (stdout, rc) in results.items():
         problem = None
         if rc == "timeout":
-            problem = "CodexBar timed out after %d s" % CODEXBAR_TIMEOUT
+            problem = "OVRCAST collector timed out after %d s" % CODEXBAR_TIMEOUT
         elif find_secret(stdout or ""):
-            problem = "refused: CodexBar output looked like it held a credential"
+            problem = "refused: OVRCAST collector output looked like it held a credential"
         else:
             try:
                 got = json.loads(stdout)
@@ -160,7 +160,7 @@ def merge_provider_outputs(results: dict) -> list:
                     raise ValueError("not a list")
                 rows += [r for r in got if isinstance(r, dict)]
             except ValueError:
-                problem = "CodexBar output unreadable (exit code %s)" % rc
+                problem = "OVRCAST collector output unreadable (exit code %s)" % rc
         if problem:
             rows.append({"provider": provider, "source": "collector", "error": {"message": problem}})
     return rows
@@ -193,21 +193,34 @@ def provider_usage(exe, provider, env):
         if auth and auth.get("loggedIn") is False:
             return json.dumps([{"provider": "claude", "source": "cli", "error": {
                 "kind": "authentication", "message": "Claude usage sign-in required. Open Reconnect Claude on this Mac and sign in to the account listed on the board."}}]), 1
-    return _codexbar(exe, ["usage", "--provider", provider, "--format", "json", "--no-color"], env)
+    args = ["usage", "--provider", provider, "--format", "json", "--no-color"]
+    if provider in ("codex", "claude"):
+        args += ["--source", "cli" if provider == "codex" else "oauth"]
+    return _codexbar(exe, args, env)
+
+
+def collector_executable(env):
+    """Resolve only OVRCAST-owned helpers; never fall back to an external CLI."""
+    override = env.get("OVRCAST_COLLECTOR_PATH")
+    if override:
+        candidates = [override]
+    else:
+        candidates = ["/Applications/OVRCAST.app/Contents/Helpers/OVRCASTCollector",
+                      os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                   "dist/OVRCAST.app/Contents/Helpers/OVRCASTCollector")]
+    return next((p for p in candidates if os.path.isfile(p) and os.access(p, os.X_OK)), None)
 
 
 def run_codexbar():
+    # Keep the function and snapshot key for existing fleet/schema compatibility.
     env = dict(os.environ)
     _claude_on_path(env)
-    exe = shutil.which("codexbar", path=env.get("PATH"))
+    exe = collector_executable(env)
     if not exe:
-        return "", "codexbar-not-found"
-    providers = enabled_providers(_codexbar(exe, ["config", "providers", "--format", "json"], env)[0])
-    if not providers:
-        return _codexbar(exe, ["usage", "--format", "json", "--no-color"], env)
+        return "", "ovrcast-collector-not-found"
+    providers = ("codex", "claude", "antigravity")
     with ThreadPoolExecutor(max_workers=len(providers)) as pool:
-        futures = {p: pool.submit(provider_usage, exe, p, env)
-                   for p in providers}
+        futures = {p: pool.submit(provider_usage, exe, p, env) for p in providers}
         results = {p: f.result() for p, f in futures.items()}
     return json.dumps(merge_provider_outputs(results)), 0
 

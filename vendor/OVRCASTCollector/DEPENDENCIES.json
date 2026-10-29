@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Commander",
+    "repository": "https://github.com/steipete/Commander",
+    "revision": "bd219c4ee9032fee3e009856f81fcc6ec09a85f4",
+    "archive_sha256": "e2324a544772b6d43d8426b3782371850f0a28530bc27253a93bc02dd757ac84"
+  },
+  {
+    "name": "SweetCookieKit",
+    "repository": "https://github.com/steipete/SweetCookieKit",
+    "revision": "5b0aead7093a067c61a2b17bfd2b6560fbc71ef3",
+    "archive_sha256": "f8bfeb45f5ab1e3c3e5996096874364433588225206b99daf97de4f697562380"
+  },
+  {
+    "name": "swift-log",
+    "repository": "https://github.com/apple/swift-log",
+    "revision": "9c6fb14227f55d8f711ce3847dc2f419fb0ecacb",
+    "archive_sha256": "b958db8c56e96e8bc579be30538545fca490024d153522c2aecb6634c8f349b2"
+  }
+]

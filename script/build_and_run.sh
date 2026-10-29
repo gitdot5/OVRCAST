@@ -14,6 +14,7 @@ BUILD_DIR="$(swift build --package-path "$ROOT_DIR/native" --show-bin-path)"
 mkdir -p "$CONTENTS/MacOS" "$CONTENTS/Resources"
 cp "$BUILD_DIR/$PROCESS_NAME" "$CONTENTS/MacOS/$PROCESS_NAME"
 chmod +x "$CONTENTS/MacOS/$PROCESS_NAME"
+"$ROOT_DIR/script/build_collector.sh" "$CONTENTS"
 cp "$ROOT_DIR/app/UsageBoard.icns" "$CONTENTS/Resources/UsageBoard.icns"
 ditto "$ROOT_DIR/assets" "$CONTENTS/Resources/assets"
 cp "$ROOT_DIR/LICENSE" "$ROOT_DIR/THIRD_PARTY_NOTICES.md" "$CONTENTS/Resources/"
@@ -23,11 +24,12 @@ import plistlib,sys
 with open(sys.argv[1], 'wb') as f:
  plistlib.dump({'CFBundleExecutable':'UsageBoardMenuBar','CFBundleIdentifier':'com.weekthink.usageboard',
  'CFBundleName':'OVRCAST','CFBundleDisplayName':'OVRCAST','CFBundlePackageType':'APPL',
- 'CFBundleShortVersionString':'0.3.3','CFBundleVersion':'6','CFBundleIconFile':'UsageBoard.icns',
+ 'CFBundleShortVersionString':'0.4.0','CFBundleVersion':'7','CFBundleIconFile':'UsageBoard.icns',
  'LSMinimumSystemVersion':'14.0','NSPrincipalClass':'NSApplication','LSUIElement':True,
  'CFBundleURLTypes':[{'CFBundleURLName':'com.weekthink.usageboard','CFBundleURLSchemes':['usageboard']}]},f)
 PY
-codesign --force --deep -s - "$APP_BUNDLE"
+codesign --force -s - "$CONTENTS/Helpers/OVRCASTCollector"
+codesign --force -s - "$APP_BUNDLE"
 codesign --verify --deep --strict "$APP_BUNDLE"
 /usr/bin/python3 -I "$ROOT_DIR/gather.py" --quiet
 if [[ "$MODE" == "--build-only" ]]; then exit 0; fi

@@ -2,7 +2,7 @@
 
 ## Native app
 
-For the 0.3 app, start in Settings → Connect. It uses CodexBar directly and
+For the 0.4 app, start in Settings → Connect. It uses its own bundled collector and
 keeps preferences, seven-day history and snapshots in
 `~/Library/Application Support/UsageBoard/App/` as owner-only files.
 The app polls every three minutes while running and rereads display state every
@@ -48,7 +48,7 @@ do not authenticate or change the account used by a provider tool.
 
 ## More Macs
 
-On each additional Mac, install/configure your own CodexBar CLI, copy `collect.py`
+On each additional Mac, install OVRCAST in Applications and connect its providers. Copy `collect.py`
 to `~/Library/Application Support/UsageBoard/collect.py`, run it, and optionally
 install its collector agent. Do not copy account credentials between Macs.
 
@@ -69,7 +69,7 @@ your configured names; `MacBook`, `Mini` and `Studio` get standard ordering.
 
 ## Claude shows no reading
 
-Check the configured Claude source in CodexBar and verify Claude's own sign-in
+Verify Claude Code’s own sign-in
 status in the same desktop session and profile used by the collector. A terminal
 SSH session can differ from the logged-in GUI session. Never paste tokens into
 OVRCAST or an issue report.
@@ -78,9 +78,10 @@ If you need separation from an existing Claude worker, explicitly create and
 authenticate your own separate usage profile first. The collector installer
 supports `install_agent.py collect --isolated-claude`, which selects
 `~/.claude-usageboard` and the Claude desktop app's bundled CLI. It also points
-CodexBar at `~/Library/Application Support/UsageBoard/codexbar-config.json`;
-you must supply that configuration using CodexBar's own supported configuration
-workflow. It does not create a sign-in or copy credentials automatically.
+the bundled collector at `~/Library/Application Support/UsageBoard/collector-config.json`
+using `OVRCAST_COLLECTOR_CONFIG`. It does not create a sign-in or copy credentials
+automatically. Existing LaunchAgents must be explicitly reinstalled to adopt
+the renamed variable; existing jobs are not silently edited.
 
 Some sources omit saved resets, cloud-session credits or API balances. These
 remain unknown even when percentage allowances are available. Paid/API pools
@@ -100,3 +101,18 @@ rm -f "$HOME/Library/LaunchAgents/com.weekthink.usageboard.gather.plist"
 Quit OVRCAST and remove its app bundle if desired. Local configuration,
 snapshots and logs remain until you delete them. Provider apps, logins and SSH
 configuration belong to you and are not removed by these commands.
+
+## Collector ownership and configuration
+
+The app resolves only `Contents/Helpers/OVRCASTCollector` inside its own bundle.
+The legacy script resolves that helper in `/Applications/OVRCAST.app`, with a
+local development-bundle fallback and an explicit `OVRCAST_COLLECTOR_PATH`
+override. Neither searches for a `codexbar` executable. Install OVRCAST on each
+Mac before using the updated legacy script there.
+
+App-owned collector configuration defaults to `~/.config/ovrcast/config.json`
+(or the XDG config location). Caches, defaults and collector-owned keychain
+services use OVRCAST namespaces. Provider-owned authentication locations are
+retained. CodexBar's configuration, sessions and installation are not modified
+or required. Advanced existing token-account configurations require deliberate
+setup for this fork; the normal Connect flow uses provider software directly.

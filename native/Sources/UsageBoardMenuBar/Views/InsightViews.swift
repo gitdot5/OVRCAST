@@ -85,7 +85,7 @@ struct ConnectionHelpView: View {
     private var explanation: String {
         if account.requiresSignIn == true { return "The usage source is signed out. Complete sign-in on \(account.activeMachines.map(store.machineName).joined(separator: ", ")), then check again." }
         if account.quotas.contains(where: \.awaiting) { return "The reset time has passed. A new provider reading is needed to confirm the allowance." }
-        return "The last reading is missing or old. Make sure the listed computer is awake and the provider is connected in CodexBar. Last-known values stay visible with their age."
+        return "The last reading is missing or old. Make sure the listed computer is awake and the provider connection is ready in OVRCAST Settings. Last-known values stay visible with their age."
     }
 }
 struct FullBoardView: View {

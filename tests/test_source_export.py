@@ -1,4 +1,6 @@
 """Release checks exercise the boundary between private files and shared source."""
+import hashlib
+from unittest.mock import patch
 import importlib.util
 from pathlib import Path
 import tempfile
@@ -45,6 +47,25 @@ class SourceExportTest(unittest.TestCase):
                                  'assets/providers/', 'assets/devices/', 'DESIGN.md'):
                     self.assertFalse(any(excluded in name for name in names), excluded)
                 self.assertEqual(archive.testzip(), None)
+
+    def test_vendor_integrity_and_explicit_allowlist(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder).resolve()
+            vendor = root / 'vendor/OVRCASTCollector'
+            vendor.mkdir(parents=True)
+            public = vendor / 'LICENSE'
+            public.write_text('Public upstream license')
+            (vendor / 'private.local').write_text('unlisted private state')
+            (vendor / '.build').mkdir()
+            (vendor / '.build/artifact').write_text('generated output')
+            digest = hashlib.sha256(public.read_bytes()).hexdigest()
+            (vendor / 'FILE_MANIFEST.sha256').write_text(digest + '  LICENSE\n')
+            with patch.object(source_export, 'FILES', ()), patch.object(source_export, 'TREES', {}):
+                files = source_export.source_files(root)
+                self.assertEqual(list(files), ['vendor/OVRCASTCollector/LICENSE'])
+                public.write_text('tampered')
+                with self.assertRaisesRegex(ValueError, 'integrity mismatch'):
+                    source_export.source_files(root)
 
 
 if __name__ == '__main__':

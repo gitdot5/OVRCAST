@@ -14,7 +14,7 @@
    in the release notes and mark the initial distribution as a public preview.
 4. Create a draft GitHub Release. Attach the verified app ZIP or DMG, source ZIP,
    SHA-256 checksums and release notes. State macOS 14+, Apple Silicon/Intel,
-   the CodexBar dependency, and any known limitations.
+   the bundled collector and provider sign-in requirements, and any known limitations.
 5. Enable GitHub private vulnerability reporting and protect the maintainer
    account with a passkey or strong two-factor authentication. Publish only
    after the downloaded assets match the locally verified checksums.
@@ -48,10 +48,12 @@ notarization also does not guarantee that an app cannot be exploited.
 ## Current release gates
 
 - Developer ID signing, Apple notarization, ticket validation and local Gatekeeper
-  assessment passed for `OVRCAST-0.3.3-macOS.zip` on October 29, 2026.
+  assessment passed for `OVRCAST-0.4.0-macOS.zip` on October 29, 2026.
 - Verify the final downloaded artifact and checksums. Keep a separate-Mac
   installation test listed as unperformed until it is actually completed.
-- CodexBar 0.81.0 was used for release compatibility checks.
+- The CodexBar-derived collector source is pinned in vendor/OVRCASTCollector.
+  Build and sign the nested helper before signing the app; preserve its
+  resource bundle and all dependency notices.
 - Independent automated baseline and bounded fix reviews are complete; an
   external human security certification has not been performed.
 - Publish the clean source under gitdot5/OVRCAST with private vulnerability

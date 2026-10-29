@@ -167,7 +167,7 @@ import UniformTypeIdentifiers
         do { try process.run() } catch { refreshing = false; message = "Could not start the usage refresh. Open connection help." }
     }
     private func refreshNative() {
-        guard let helper = NativeCollector.helper else { message = "Install CodexBar, then use Check connection in Settings."; showSettings = true; return }
+        guard let helper = NativeCollector.helper else { message = "The bundled collector is missing. Reinstall OVRCAST, then check the connection."; showSettings = true; return }
         refreshing = true; lastPoll = Date(); message = "Checking selected providers…"
         let providers = preferences.providers, machine = preferences.machineName, remotes = preferences.remotes
         Task {
@@ -242,16 +242,10 @@ import UniformTypeIdentifiers
         if !account.machines.contains(localMachine) { reconnectRemote(account); return }
         let reconnect = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/UsageBoard/Reconnect Claude.command")
         if account.provider == "Claude", !nativeMode, FileManager.default.fileExists(atPath: reconnect.path) { NSWorkspace.shared.open(reconnect); return }
-        if account.provider == "Claude", nativeMode {
-            let companion = URL(fileURLWithPath: "/Applications/CodexBar.app")
-            NSWorkspace.shared.open(FileManager.default.fileExists(atPath: companion.path) ? companion : URL(string: "https://github.com/steipete/CodexBar#readme")!)
-            message = "Connect Claude in CodexBar or run claude to sign in to Claude Code, then check again."
-            return
-        }
-        let names = ["Claude": "Claude", "Codex": "Codex", "Antigravity": "Antigravity"]
-        if let name = names[account.provider], let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: ["Claude":"com.anthropic.claudefordesktop", "Codex":"com.openai.codex", "Antigravity":"com.google.antigravity"][account.provider] ?? "") {
-            NSWorkspace.shared.open(url); message = "Check \(name)'s sign-in, then refresh usage."
-        } else { NSWorkspace.shared.open(URL(string: "https://github.com/steipete/CodexBar#readme")!) }
+        connectProvider(account.provider)
+    }
+    func connectProvider(_ provider: String) {
+        message = ProviderConnection.open(provider)
     }
     private func reconnectRemote(_ account: UsageAccount) {
         guard !reconnecting else { return }

@@ -46,16 +46,15 @@ enum CommandRunner {
     }
 }
 enum NativeCollector {
-    static var helper: String? {
-        let home = FileManager.default.homeDirectoryForCurrentUser.path
-        return ["/Applications/CodexBar.app/Contents/Helpers/CodexBarCLI", home + "/Applications/CodexBar.app/Contents/Helpers/CodexBarCLI",
-                home + "/.local/bin/codexbar", "/opt/homebrew/bin/codexbar", "/usr/local/bin/codexbar"]
-            .first { FileManager.default.isExecutableFile(atPath: $0) }
+    static var helper: String? { bundledHelper(in: Bundle.main.bundleURL) }
+    static func bundledHelper(in bundleURL: URL) -> String? {
+        let candidate = bundleURL.appendingPathComponent("Contents/Helpers/OVRCASTCollector")
+        return FileManager.default.isExecutableFile(atPath: candidate.path) ? candidate.path : nil
     }
     static func failure(provider: String, machine: String, issue: String, signIn: Bool = false) -> UsageAccount {
         UsageAccount(id: provider.lowercased() + ":unknown:" + machine, provider: provider, email: "Account not connected", plan: "Plan unknown",
                      machines: [machine], severity: "unknown", status: signIn ? "Sign in required" : "Needs a reading", requiresSignIn: signIn,
-                     fresh: false, observedAt: nil, source: "CodexBar", issue: issue, quotas: [], resetDetails: [], credits: [])
+                     fresh: false, observedAt: nil, source: "OVRCAST collector", issue: issue, quotas: [], resetDetails: [], credits: [])
     }
     static func collect(provider: String, machine: String, helper: String,
                         run: (String, [String]) throws -> CommandOutput = { try CommandRunner.run($0, $1, timeout: 90) }) -> [UsageAccount] {
@@ -68,7 +67,7 @@ enum NativeCollector {
             if defaultAccountFallback(output.data, provider: provider) { output = try run(helper, base) }
             return try parse(output.data, provider: provider, machine: machine)
         } catch {
-            return [failure(provider: provider, machine: machine, issue: "The usage source could not provide a reading. Check the provider connection in CodexBar and try again.")]
+            return [failure(provider: provider, machine: machine, issue: "The usage source could not provide a reading. Check the provider connection in OVRCAST and try again.")]
         }
     }
     static func defaultAccountFallback(_ data: Data, provider: String) -> Bool {
@@ -93,7 +92,7 @@ enum NativeCollector {
                 let error = row["error"] as? [String: Any] ?? [:]
                 let message = (error["message"] as? String ?? "").lowercased()
                 let auth = error["kind"] as? String == "authentication" || ["sign in", "login", "not logged", "unauthorized", "credentials not found", "authenticate", "token expired"].contains(where: message.contains)
-                return failure(provider: provider, machine: machine, issue: auth ? "Sign in through the provider app, then check again." : "Open the provider app and check its connection in CodexBar.", signIn: auth)
+                return failure(provider: provider, machine: machine, issue: auth ? "Sign in through the provider app, then check again." : "Open the provider connection from OVRCAST Settings, then check again.", signIn: auth)
             }
             let email = (usage["accountEmail"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "Account \(index + 1)"
             let observed = usage["updatedAt"] as? String
@@ -133,7 +132,7 @@ enum NativeCollector {
             return UsageAccount(id: provider.lowercased() + ":" + (email.contains("@") ? email.lowercased() : machine + ":" + email),
                                 provider: provider, email: email, plan: usage["loginMethod"] as? String ?? "Plan unknown", machines: [machine],
                                 severity: severity, status: status, requiresSignIn: false, fresh: observed != nil && !quotas.isEmpty,
-                                observedAt: observed, source: "CodexBar · " + (row["source"] as? String ?? "CLI"), issue: "", quotas: quotas,
+                                observedAt: observed, source: "OVRCAST collector · " + (row["source"] as? String ?? "CLI"), issue: "", quotas: quotas,
                                 savedResets: count, resetDetails: [], credits: credits)
         }
     }

@@ -174,3 +174,25 @@ class WriteAtomicTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class OwnedCollectorTest(unittest.TestCase):
+    def test_explicit_helper_does_not_fall_back_when_missing(self):
+        with patch('collect.os.path.isfile', return_value=False), patch('collect.shutil.which') as which:
+            self.assertIsNone(collect.collector_executable({'OVRCAST_COLLECTOR_PATH': '/missing/helper'}))
+            which.assert_not_called()
+
+    def test_missing_bundled_helper_never_searches_codexbar(self):
+        with patch('collect.collector_executable', return_value=None), patch('collect._claude_on_path'), patch('collect.shutil.which') as which:
+            self.assertEqual(collect.run_codexbar(), ('', 'ovrcast-collector-not-found'))
+            which.assert_not_called()
+
+    def test_collection_uses_three_supported_providers(self):
+        with patch('collect.collector_executable', return_value='/owned/helper'), patch('collect._claude_on_path'), patch('collect.provider_usage', return_value=('[]', 0)) as usage:
+            collect.run_codexbar()
+            self.assertEqual({c.args[1] for c in usage.call_args_list}, {'codex', 'claude', 'antigravity'})
+            self.assertTrue(all(c.args[0] == '/owned/helper' for c in usage.call_args_list))
+
+    def test_claude_uses_supported_oauth_without_cli_fallback(self):
+        with patch('collect._codexbar', return_value=('[]', 0)) as run:
+            collect.provider_usage('/owned/helper', 'claude', {})
+            self.assertEqual(run.call_args.args[1][-2:], ['--source', 'oauth'])

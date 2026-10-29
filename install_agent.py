@@ -44,7 +44,7 @@ def main():
         label, program = "com.weekthink.usageboard.collect", os.path.join(UB, "collect.py")
         if "--isolated-claude" in sys.argv:
             env = {"CLAUDE_CONFIG_DIR": os.path.join(HOME, ".claude-usageboard"),
-                   "CODEXBAR_CONFIG": os.path.join(UB, "codexbar-config.json"),
+                   "OVRCAST_COLLECTOR_CONFIG": os.path.join(UB, "collector-config.json"),
                    "USAGEBOARD_CLAUDE_GLOB": os.path.join(
                        HOME, "Library", "Application Support", "Claude", "claude-code",
                        "*", "*", "claude.app", "Contents", "MacOS", "claude")}

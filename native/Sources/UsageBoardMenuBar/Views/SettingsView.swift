@@ -55,17 +55,17 @@ struct SettingsView: View {
     }
     private var connection: some View {
         Form {
-            Section("1 · Connect a usage source") {
-                Label(helperAvailable ? "CodexBar detected on this Mac" : "Install the free CodexBar companion", systemImage: helperAvailable ? "checkmark.circle.fill" : "arrow.down.app")
-                    .foregroundStyle(helperAvailable ? .green : .secondary)
-                Text("OVRCAST reads the accounts you connect in CodexBar. No OVRCAST account or subscription is needed.").font(.caption).foregroundStyle(.secondary)
+            Section("1 · Connect your provider accounts") {
+                Label(helperAvailable ? "Built-in collector ready" : "Collector missing — reinstall OVRCAST", systemImage: helperAvailable ? "checkmark.circle.fill" : "exclamationmark.triangle")
+                    .foregroundStyle(helperAvailable ? .green : .orange)
+                Text("OVRCAST includes its own collector. Connect the provider software on this Mac, then check your readings.").font(.caption).foregroundStyle(.secondary)
                 HStack {
-                    Button(helperAvailable ? "Open CodexBar" : "Get CodexBar") {
-                        let app = URL(fileURLWithPath: "/Applications/CodexBar.app")
-                        NSWorkspace.shared.open(FileManager.default.fileExists(atPath: app.path) ? app : URL(string: "https://github.com/steipete/CodexBar/releases/latest")!)
+                    ForEach(["Codex", "Claude", "Antigravity"], id: \.self) { provider in
+                        Button("Connect \(provider)") { store.connectProvider(provider) }.controlSize(.small)
                     }
-                    Button("Check connection") { store.refresh() }.disabled(store.refreshing)
                 }
+                Button("Check connection") { store.refresh() }.disabled(store.refreshing || !helperAvailable)
+                if !helperAvailable { Link("Download OVRCAST", destination: URL(string: "https://github.com/gitdot5/OVRCAST/releases")!) }
             }
             Section("2 · Choose what to track") {
                 HStack(spacing: 18) {
@@ -76,7 +76,7 @@ struct SettingsView: View {
                         }))
                     }
                 }
-                Text("Codex uses its CLI connection. Claude uses an existing Claude Code OAuth connection or accounts configured in CodexBar. Sign-in stays with your provider; OVRCAST never asks you to paste a token.").font(.caption).foregroundStyle(.secondary)
+                Text("Codex uses its CLI connection. Claude uses an existing Claude Code OAuth connection. Sign-in stays with your provider; OVRCAST never asks you to paste a token.").font(.caption).foregroundStyle(.secondary)
                 if !store.preferences.privacyMode { TextField("This computer", text: $store.preferences.machineName) }
                 if store.hasLegacyCollector {
                     Toggle("Use built-in collection", isOn: $store.preferences.nativeCollection)
@@ -163,12 +163,12 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("OVRCAST").font(.title2.weight(.semibold))
                     Text("Your AI capacity, at a glance.").foregroundStyle(.secondary)
-                    Text("Created by Git · Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.3.3")")
+                    Text("Created by Git · Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.4.0")")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
             Text("Free and open source · MIT licensed").font(.headline)
-            Text("An independent app. Usage collection is powered by the separately installed CodexBar CLI, which also inspired parts of the allowance display.").font(.caption)
+            Text("An independent app. Includes an OVRCAST-maintained collector derived from CodexBar’s MIT-licensed code. No separate CodexBar installation is needed.").font(.caption)
             Text("No OVRCAST server, analytics or subscription.").font(.caption).foregroundStyle(.secondary)
             Text("Quotas, saved resets and credit pools depend on what each source reports. Unknown does not mean zero.").foregroundStyle(.secondary)
             Text("History keeps seven days of local readings. Account recommendations compare reported headroom within the selected provider; they do not predict whether a task will finish.").font(.caption).foregroundStyle(.secondary)

@@ -25,8 +25,7 @@ Use “remaining” consistently. Show unavailable data as unknown, never zero.
 
 ## Attribution
 
-OVRCAST is an independent project. CodexBar provides the separately
-installed usage collection CLI and inspired parts of the allowance display.
+OVRCAST is an independent project. CodexBar provides the MIT source used by OVRCAST’s bundled, maintained collector and inspired parts of the allowance display.
 Keep that credit visible in About and in the README. Preserve the license and
 third-party notices in source archives and app bundles.
 

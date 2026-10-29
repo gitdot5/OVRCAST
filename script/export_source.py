@@ -14,6 +14,8 @@ FILES = (
     'assets/provider-logos/codex.png', 'assets/provider-logos/claude.png', 'assets/provider-logos/antigravity.png',
     'native/Package.swift', 'app/install_app.sh', 'app/build_icon.sh',
     'app/icon.svg', 'app/icon-master.png', 'app/icon_1024.png', 'app/UsageBoard.icns',
+    'script/build_collector.sh', 'script/update_vendor_manifest.py',
+    'vendor/OVRCASTCollector/FILE_MANIFEST.sha256',
     'script/build_and_run.sh', 'script/package_release.sh', 'script/export_source.py', 'assets/README.md', 'docs/preview.png',
 )
 TREES = {
@@ -66,6 +68,21 @@ def source_files(root):
         if path.suffix not in {'.png', '.icns'}:
             validate_text(name, data.decode('utf-8'))
         result[name] = data
+    # This is a frozen public upstream source fork. Public author identities and
+    # fixtures are verified by hashes rather than treated as private local data.
+    vendor = root / 'vendor/OVRCASTCollector'
+    for line in (vendor / 'FILE_MANIFEST.sha256').read_text().splitlines():
+        digest, name = line.split('  ', 1)
+        relative = Path(name)
+        if relative.is_absolute() or any(x in relative.parts for x in ('..', '.git', '.build', '.swiftpm')):
+            raise ValueError('vendor: invalid source path')
+        path = vendor / relative
+        if any(p.is_symlink() for p in (path, *path.parents) if p != root.parent):
+            raise ValueError('vendor: symlinks are excluded')
+        data = path.read_bytes()
+        if hashlib.sha256(data).hexdigest() != digest:
+            raise ValueError('vendor/' + name + ': integrity mismatch')
+        result['vendor/OVRCASTCollector/' + name] = data
     return result
 
 

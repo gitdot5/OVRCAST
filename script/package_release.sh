@@ -16,6 +16,7 @@ STAGE_DIR="$WORK_DIR/disk"
 APP_DIR="$STAGE_DIR/OVRCAST.app"
 mkdir -p "$APP_DIR/Contents/MacOS" "$APP_DIR/Contents/Resources"
 cp "$BUILD_DIR/UsageBoardMenuBar" "$APP_DIR/Contents/MacOS/UsageBoardMenuBar"
+"$SOURCE_DIR/script/build_collector.sh" "$APP_DIR/Contents"
 cp "$SOURCE_DIR/app/UsageBoard.icns" "$APP_DIR/Contents/Resources/"
 ditto "$SOURCE_DIR/assets/provider-logos" "$APP_DIR/Contents/Resources/assets/provider-logos"
 cp "$SOURCE_DIR/LICENSE" "$SOURCE_DIR/THIRD_PARTY_NOTICES.md" "$APP_DIR/Contents/Resources/"
@@ -25,17 +26,19 @@ import plistlib,sys
 with open(sys.argv[1],'wb') as f:
  plistlib.dump({'CFBundleExecutable':'UsageBoardMenuBar','CFBundleIdentifier':'com.weekthink.usageboard',
  'CFBundleName':'OVRCAST','CFBundleDisplayName':'OVRCAST','CFBundlePackageType':'APPL',
- 'CFBundleShortVersionString':'0.3.3','CFBundleVersion':'6','CFBundleIconFile':'UsageBoard.icns',
+ 'CFBundleShortVersionString':'0.4.0','CFBundleVersion':'7','CFBundleIconFile':'UsageBoard.icns',
  'LSMinimumSystemVersion':'14.0','NSPrincipalClass':'NSApplication','LSUIElement':True,
  'CFBundleURLTypes':[{'CFBundleURLName':'com.weekthink.usageboard','CFBundleURLSchemes':['usageboard']}]},f)
 PY
 if [[ -n "${DEVELOPER_ID:-}" ]]; then
+ codesign --force --options runtime --timestamp --identifier com.weekthink.ovrcast.collector --sign "$DEVELOPER_ID" "$APP_DIR/Contents/Helpers/OVRCASTCollector"
  codesign --force --options runtime --timestamp --sign "$DEVELOPER_ID" "$APP_DIR"
 else
+ codesign --force --sign - "$APP_DIR/Contents/Helpers/OVRCASTCollector"
  codesign --force --sign - "$APP_DIR"
 fi
 codesign --verify --deep --strict "$APP_DIR"
-ZIP_OUTPUT="$ROOT_DIR/dist/OVRCAST-0.3.3-preview.app.zip"
+ZIP_OUTPUT="$ROOT_DIR/dist/OVRCAST-0.4.0-preview.app.zip"
 /usr/bin/ditto -c -k --keepParent "$APP_DIR" "$ZIP_OUTPUT"
 if [[ -n "${NOTARY_PROFILE:-}" ]]; then
  xcrun notarytool submit "$ZIP_OUTPUT" --keychain-profile "$NOTARY_PROFILE" --wait
@@ -53,7 +56,7 @@ if [[ "$MODE" == "--zip-only" ]]; then
 fi
 ln -s /Applications "$STAGE_DIR/Applications"
 cp "$SOURCE_DIR/docs/QUICK_START.txt" "$STAGE_DIR/Read me first.txt"
-OUTPUT="$ROOT_DIR/dist/OVRCAST-0.3.3-preview.dmg"
+OUTPUT="$ROOT_DIR/dist/OVRCAST-0.4.0-preview.dmg"
 hdiutil create -volname 'OVRCAST' -srcfolder "$STAGE_DIR" -ov -format UDZO "$OUTPUT" >/dev/null
 if [[ -n "${NOTARY_PROFILE:-}" ]]; then
  if [[ -z "${DEVELOPER_ID:-}" ]]; then echo 'Notarization requires DEVELOPER_ID.' >&2; exit 2; fi

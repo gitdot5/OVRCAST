@@ -2,17 +2,31 @@
 
 ## CodexBar
 
-OVRCAST invokes CodexBar as an externally installed command-line tool.
+OVRCAST includes an OVRCAST-maintained source fork of CodexBar v0.81.0,
+revision `ee890b5f392e70d6e20162d3e95cf9f1be265b60`, compiled as
+`Contents/Helpers/OVRCASTCollector`. A separate CodexBar installation is not needed.
 The provider switcher and allowance presentation also take design inspiration
-from CodexBar. This distribution does not bundle its binary. It retains its public Codex
-provider identification image with the source URL recorded in `assets/README.md`.
+from CodexBar. Its public Codex identification image is credited in `assets/README.md`.
 
 CodexBar: https://github.com/steipete/CodexBar
 
 Copyright (c) 2026 Peter Steinberger. Licensed under the MIT License.
-The complete v0.81.0 license is retained in `LICENSES/CodexBar-MIT.txt`.
-If you distribute CodexBar with a derivative package, retain its notices and
-review the exact version's bundled dependencies and notices as well.
+The complete v0.81.0 license is retained in `LICENSES/CodexBar-MIT.txt` and
+`vendor/OVRCASTCollector/LICENSE`. See `vendor/OVRCASTCollector/FORK.md`,
+`UPSTREAM.json` and `DEPENDENCIES.json` for source provenance and fork changes.
+
+The collector retains these locally pinned source dependencies and licenses:
+
+- Commander: MIT, `vendor/OVRCASTCollector/Dependencies/Commander/LICENSE`.
+- SweetCookieKit: MIT, `vendor/OVRCASTCollector/Dependencies/SweetCookieKit/LICENSE`.
+- swift-log: Apache 2.0, including its runtime library exception and NOTICE,
+  under `vendor/OVRCASTCollector/Dependencies/swift-log/`.
+- QuickJS: MIT, `vendor/OVRCASTCollector/Sources/CQuickJS/LICENSE`.
+- CodexBar's retained resource acknowledgements are under its core resources.
+
+The app bundles these notices in `Contents/Resources/CollectorLicenses`.
+macOS supplies CryptoKit, JavaScriptCore, SQLite and other system libraries.
+The fork does not include CodexBar’s app, updater, widget or remote package fetches.
 
 ## Artwork and names
 

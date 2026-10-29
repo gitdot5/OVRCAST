@@ -9,7 +9,7 @@ A free, local macOS menu bar app for seeing how much AI usage you have left
 across accounts and Macs. Built with SwiftUI, AppKit and Python.
 
 Created by **Git**. An independent project with its own segmented capacity-ring icon and interface,
-using [CodexBar](https://github.com/steipete/CodexBar) for usage collection.
+with its own bundled collector derived from [CodexBar](https://github.com/steipete/CodexBar)’s MIT-licensed source.
 
 ![OVRCAST preview with example accounts](docs/preview.png)
 
@@ -35,28 +35,24 @@ The native app runs on macOS 14 or later on Apple Silicon or Intel. Unzip the
 download, then drag OVRCAST into Applications. It does not need Python, Terminal,
 a development folder or a separate OVRCAST account.
 
-[Download OVRCAST 0.3.3 for macOS](https://github.com/gitdot5/OVRCAST/releases/tag/v0.3.3)
+[Download OVRCAST 0.4.0 for macOS](https://github.com/gitdot5/OVRCAST/releases/tag/v0.4.0)
 
-This preview uses a segmented capacity-ring icon and is Developer ID signed
-and Apple notarized. It supports Apple Silicon and Intel. Local signature, ticket, Gatekeeper and Day/Night launch checks passed
-for 0.3.3. The separate-Mac signature and Gatekeeper checks passed, but its runtime
-launch remains unverified. See the release review for coverage and limits. CodexBar 0.81.0 was used for compatibility testing.
-An independent automated source review found one low-severity legacy SSH
-buffering issue; 0.3.1 fixes it and adds regression tests. This is not an external
-human security certification. See the [release review](docs/RELEASE_REVIEW.md).
-Version 0.3.3 fixes native collection when no token accounts are configured,
-uses the supported Claude OAuth source and restores refresh-link registration.
-It retains the next-reset times, provider marks and capacity-ring app icon.
-Earlier releases remain available as separate builds.
+OVRCAST 0.4.0 includes an OVRCAST-maintained collector compiled from a pinned
+CodexBar v0.81.0 source fork. **No separate CodexBar installation is required.**
+The collector, its runtime resources and license notices ship inside OVRCAST.
+Updates to this fork ship with OVRCAST releases; upstream changes are reviewed
+and imported deliberately. The app has no automatic updater; install a newer
+release manually into Applications. See the [release review](docs/RELEASE_REVIEW.md)
+for the exact validation scope and known limits.
 
-On first launch, the Connect screen detects the separately installed
-[CodexBar](https://github.com/steipete/CodexBar) companion and opens its download
-page if needed. Connect your accounts in CodexBar, choose providers, then check
-the connection. Codex uses its CLI connection; Claude uses an existing Claude
-Code OAuth connection or accounts configured in CodexBar. If Claude asks for
-sign-in, authenticate Claude Code (`claude`) or connect the account in CodexBar.
-A Claude Desktop sign-in alone may not provide that usage connection.
-OVRCAST never asks for a pasted token.
+On first launch, Settings → Connect reports whether the built-in collector is
+ready. Choose Connect Codex, Claude or Antigravity, complete the provider’s own
+sign-in, then choose Check connection. Codex and Antigravity use their official
+app/CLI connections; Claude uses Claude Code OAuth. Connect Claude opens the
+installed Claude Code login command in Terminal, or its setup documentation if
+it is missing. A Claude Desktop sign-in alone may not supply this usage connection.
+OVRCAST never asks for a pasted token. Existing provider sessions may work;
+CodexBar-specific token-account configuration is not silently imported.
 
 ## Everyday controls
 
@@ -100,7 +96,7 @@ may contact their services to obtain usage. Remote collection, when configured,
 uses your existing SSH access. Snapshots contain account emails, usage limits,
 reset dates and reported credit balances; they are private local files.
 
-The native collector invokes CodexBar. The legacy Python collector also parses
+The native and legacy collectors invoke the OVRCAST-owned bundled helper. The legacy Python collector also parses
 usage-limit events from Codex logs.
 Neither starts model turns, redeems resets or buys credits. Credential-pattern
 checks are a precaution, not a guarantee that arbitrary upstream output is safe
@@ -115,9 +111,11 @@ swift test --package-path native -j 2
 ```
 
 Tests use example account identities and fixed parser samples. They are not live
-provider checks. The optional legacy Python code uses the standard library; the Swift package
-has no external package dependencies. Building requires Xcode Command Line Tools
-with a Swift 5.9+ toolchain and Python 3.9+ for the packaging scripts.
+provider checks. The optional legacy Python code uses the standard library; the GUI Swift package has no package dependencies. The collector’s Commander,
+SweetCookieKit and swift-log source dependencies are pinned locally in `vendor/`
+with their licenses; no remote Swift packages are fetched during a build.
+Building requires a Swift 6.2+ toolchain with the macOS SDK and Python 3.9+
+for packaging scripts. The built app requires neither Python nor a compiler.
 
 `./script/build_and_run.sh` builds and opens the local app; `./app/install_app.sh`
 backs up an existing local app and installs the new one.
@@ -141,15 +139,17 @@ a download. Keep testing claims specific to the exact artifact and environment.
 ```
 
 This produces `dist/OVRCAST-source.zip` from an explicit file allowlist and
-scans it for private identities, home paths, private hosts and credential-shaped
-content. It excludes local config, state, build products, extracted third-party
+scans first-party files for private identities, home paths, private hosts and
+credential-shaped content. Vendored public upstream files use a frozen SHA-256
+allowlist, preserving public author identities and notices without including local files. It excludes local config, state, build products, extracted third-party
 artwork, historical private notes and all Git history. Publish the clean export
 as a new repository; the original working checkout may have private history.
 
 ## License and credits
 
 Original OVRCAST source and its segmented capacity-ring app icon are MIT licensed. CodexBar
-supplies the external collection CLI and inspired the provider/allowance layout.
+supplies the MIT-licensed source used by our maintained collector fork and inspired
+the provider/allowance layout.
 Its copyright and license are preserved under [LICENSES](LICENSES/CodexBar-MIT.txt).
 See [third-party notices](THIRD_PARTY_NOTICES.md) for scope and exclusions.
 The [brand guide](docs/BRAND.md) describes the product identity and attribution.
