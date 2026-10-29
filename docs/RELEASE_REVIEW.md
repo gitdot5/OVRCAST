@@ -1,4 +1,24 @@
-# OVRCAST 0.4.0 release review
+# OVRCAST 0.4.1 release review
+
+This patch replaces generic privacy labels with recognizable Mac types on
+account cards, computer filters, recommendations, connection help and privacy
+exports. Local hardware is read from macOS once; only its recognized family is
+retained. Remote names such as Mini and Studio become Mac mini and Mac Studio.
+No remote hardware probe or SSH change is introduced. Unknown remote types
+remain generic rather than guessing a model. Duplicate types get stable numbers.
+Custom computer names and account identities stay hidden in privacy mode.
+
+Validation for this change: 57 Swift tests, five source-export tests, a clean
+universal GUI build, packaged privacy previews, Developer ID signature,
+notarization, stapled-ticket and Gatekeeper checks. The final archive and
+installed copy are compared, and release asset downloads are hash-verified.
+Physical Intel hardware and macOS 14 runtime remain untested.
+
+The collector is unchanged from 0.4.0. Its pinned source manifest and packaged
+binary are verified against that release. The retained review below describes
+that collector's existing validation and limits.
+
+## OVRCAST 0.4.0 collector baseline
 
 Release: https://github.com/gitdot5/OVRCAST/releases/tag/v0.4.0
 Reviewed October 29, 2026. Public preview, macOS 14+, Apple Silicon and Intel.

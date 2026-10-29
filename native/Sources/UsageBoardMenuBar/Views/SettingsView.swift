@@ -91,6 +91,7 @@ struct SettingsView: View {
                 Text("System").tag("system"); Text("Day").tag("day"); Text("Night").tag("night")
             }.pickerStyle(.segmented)
             Toggle("Privacy mode", isOn: $store.preferences.privacyMode)
+            Text("Hides account identities, balances and custom computer names. Mac types stay visible.").font(.caption).foregroundStyle(.secondary)
             Text("Hide account identities, aliases, computer names and balances throughout the board.").font(.caption).foregroundStyle(.secondary)
             Toggle("Show or hide with ⌘⇧U", isOn: $store.preferences.shortcutEnabled)
             Text(store.shortcutStatus).font(.caption).foregroundStyle(.secondary)
@@ -163,7 +164,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("OVRCAST").font(.title2.weight(.semibold))
                     Text("Your AI capacity, at a glance.").foregroundStyle(.secondary)
-                    Text("Created by Git · Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.4.0")")
+                    Text("Created by Git · Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.4.1")")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }

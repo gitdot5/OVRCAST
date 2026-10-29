@@ -9,7 +9,7 @@ struct Logo: View {
             if let image = artwork(name, device: device) {
                 Image(nsImage: image).resizable().scaledToFit()
             } else if device {
-                Image(systemName: ["MacBook": "laptopcomputer", "Mini": "macmini", "Studio": "macstudio"][name] ?? "desktopcomputer").foregroundStyle(.secondary)
+                Image(systemName: MachineLabels.symbol(name)).foregroundStyle(.secondary)
             } else {
                 Text(["Codex": "Cx", "Claude": "Cl", "Antigravity": "Ag"][name] ?? String(name.prefix(2)))
                     .font(.system(size: size * 0.4, weight: .semibold)).frame(width: size, height: size)
@@ -60,7 +60,7 @@ struct AccountRow: View {
                     HStack(spacing: 5) {
                         Text(account.provider).font(.system(size: 11, weight: .semibold))
                         ForEach(account.activeMachines, id: \.self) { machine in
-                            Logo(name: machine, device: true, size: expanded ? 19 : 13)
+                            Logo(name: store.machineName(machine), device: true, size: expanded ? 19 : 13)
                             Text(store.machineName(machine)).font(.system(size: 9)).foregroundStyle(.secondary)
                         }
                         Spacer(minLength: 3)

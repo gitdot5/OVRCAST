@@ -73,7 +73,9 @@ import UniformTypeIdentifiers
         return alias.isEmpty ? account.email : alias
     }
     func machineName(_ machine: String) -> String {
-        preferences.privacyMode ? "Mac \((machineOptions.sorted().firstIndex(of: machine) ?? 0) + 1)" : machine
+        let local = isDemo ? nil : (nativeMode ? preferences.machineName : legacyLocalMachine)
+        return MachineLabels.label(machine, machines: machineOptions, privacy: preferences.privacyMode,
+                                   localMachine: local, localFamily: local == nil ? nil : MachineLabels.localFamily)
     }
     func resetFilters() { machineFilter = ""; statusFilter = .all; accountOrder = .attention; firstMachine = "MacBook" }
     init(defaults: UserDefaults = .standard, root: URL? = nil, dataDirectory: URL? = nil, demo: Bool = CommandLine.arguments.contains("--demo")) {

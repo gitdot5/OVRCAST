@@ -133,6 +133,6 @@ final class ReleaseFeaturesTests: XCTestCase {
         store.preferences.aliases[account.id] = "Private alias"
         store.preferences.privacyMode = true
         XCTAssertEqual(store.accountName(account), "Account 1")
-        XCTAssertEqual(store.machineName("MacBook"), "Mac 1")
+        XCTAssertEqual(store.machineName("MacBook"), "MacBook")
     }
 }

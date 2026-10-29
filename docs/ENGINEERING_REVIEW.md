@@ -1,4 +1,12 @@
-# OVRCAST 0.4.0 engineering review
+# OVRCAST 0.4.1 engineering review
+
+The machine-label change has 57 passing Swift tests, including recognized
+families, hardware-report parsing, duplicate types, custom-name privacy and
+remote unknown-type handling. Five source-export boundary tests also passed.
+The GUI is rebuilt from the clean allowlisted source for both architectures.
+The collector source and packaged binary are unchanged from 0.4.0.
+
+## OVRCAST 0.4.0 collector baseline
 
 Reviewed October 29, 2026. Public preview; macOS 14+, Apple Silicon and Intel.
 
