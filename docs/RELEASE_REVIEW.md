@@ -14,8 +14,8 @@ notarization, stapled-ticket and Gatekeeper checks. The final archive and
 installed copy are compared, and release asset downloads are hash-verified.
 Physical Intel hardware and macOS 14 runtime remain untested.
 
-The collector is unchanged from 0.4.0. Its pinned source manifest and packaged
-binary are verified against that release. The retained review below describes
+The collector is unchanged from 0.4.0. Its pinned source manifest and both executable code-directory hashes are verified against
+that release; notarization refreshes signing timestamps. The retained review below describes
 that collector's existing validation and limits.
 
 ## OVRCAST 0.4.0 collector baseline
