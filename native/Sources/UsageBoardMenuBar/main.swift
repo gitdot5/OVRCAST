@@ -37,8 +37,8 @@ import UserNotifications
     private let shortcut = BoardShortcut()
     private var shortcutEnabled: Bool?
     private var floatingEnabled: Bool {
-        get { UserDefaults.standard.bool(forKey: "floatingBoard") }
-        set { UserDefaults.standard.set(newValue, forKey: "floatingBoard") }
+        get { store.floatingBoard }
+        set { store.floatingBoard = newValue }
     }
     private var globalMonitor: Any?
     private var localMonitor: Any?
@@ -175,7 +175,7 @@ import UserNotifications
                 MenuView(store: store, openBoard: { [weak self] in self?.openBoard() }, maxHeight: menuHeight,
                          floating: true, toggleFloating: { [weak self] in self?.setFloating(false) }))
             panel.center()
-            panel.setFrameAutosaveName("UsageBoardFloatingPanel")
+            if !store.isDemo { panel.setFrameAutosaveName("UsageBoardFloatingPanel") }
             // Bring a restored panel back onto a connected display after a monitor is removed.
             if !NSScreen.screens.contains(where: { $0.visibleFrame.intersection(panel.frame).width >= 100 && $0.visibleFrame.intersection(panel.frame).height >= 50 }) {
                 panel.center()

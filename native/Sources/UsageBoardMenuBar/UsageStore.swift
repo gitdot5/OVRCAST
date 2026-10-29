@@ -42,6 +42,10 @@ import UniformTypeIdentifiers
               let machines = config["machines"] as? [String: [String: Any]] else { return "MacBook" }
         return machines.first { $0.value["local_path"] != nil }?.key ?? "MacBook"
     }
+    var floatingBoard: Bool {
+        get { defaults.bool(forKey: "floatingBoard") }
+        set { defaults.set(newValue, forKey: "floatingBoard") }
+    }
     var nativeMode: Bool { preferences.nativeCollection || !hasLegacyCollector }
     var scheme: ColorScheme? { theme == "system" ? nil : theme == "night" ? .dark : .light }
     var available: Int { accounts.filter(\.available).count }
@@ -238,6 +242,12 @@ import UniformTypeIdentifiers
         if !account.machines.contains(localMachine) { reconnectRemote(account); return }
         let reconnect = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/UsageBoard/Reconnect Claude.command")
         if account.provider == "Claude", !nativeMode, FileManager.default.fileExists(atPath: reconnect.path) { NSWorkspace.shared.open(reconnect); return }
+        if account.provider == "Claude", nativeMode {
+            let companion = URL(fileURLWithPath: "/Applications/CodexBar.app")
+            NSWorkspace.shared.open(FileManager.default.fileExists(atPath: companion.path) ? companion : URL(string: "https://github.com/steipete/CodexBar#readme")!)
+            message = "Connect Claude in CodexBar or run claude to sign in to Claude Code, then check again."
+            return
+        }
         let names = ["Claude": "Claude", "Codex": "Codex", "Antigravity": "Antigravity"]
         if let name = names[account.provider], let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: ["Claude":"com.anthropic.claudefordesktop", "Codex":"com.openai.codex", "Antigravity":"com.google.antigravity"][account.provider] ?? "") {
             NSWorkspace.shared.open(url); message = "Check \(name)'s sign-in, then refresh usage."

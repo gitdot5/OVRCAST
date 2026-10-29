@@ -57,13 +57,26 @@ enum NativeCollector {
                      machines: [machine], severity: "unknown", status: signIn ? "Sign in required" : "Needs a reading", requiresSignIn: signIn,
                      fresh: false, observedAt: nil, source: "CodexBar", issue: issue, quotas: [], resetDetails: [], credits: [])
     }
-    static func collect(provider: String, machine: String, helper: String) -> [UsageAccount] {
-        let source = provider == "Antigravity" ? [] : ["--source", "cli"]
+    static func collect(provider: String, machine: String, helper: String,
+                        run: (String, [String]) throws -> CommandOutput = { try CommandRunner.run($0, $1, timeout: 90) }) -> [UsageAccount] {
+        let source = provider == "Codex" ? ["--source", "cli"] : provider == "Claude" ? ["--source", "oauth"] : []
+        let base = ["usage", "--provider", provider.lowercased(), "--format", "json", "--no-color"] + source
         do {
-            let output = try CommandRunner.run(helper, ["usage", "--provider", provider.lowercased(), "--all-accounts", "--format", "json", "--no-color"] + source, timeout: 90)
+            var output = try run(helper, base + ["--all-accounts"])
+            // CodexBar's account flag means configured token accounts for these providers.
+            // A default local connection can still exist when no token accounts are configured.
+            if defaultAccountFallback(output.data, provider: provider) { output = try run(helper, base) }
             return try parse(output.data, provider: provider, machine: machine)
         } catch {
-            return [failure(provider: provider, machine: machine, issue: "The usage source could not provide a reading. Check the provider app and try again.")]
+            return [failure(provider: provider, machine: machine, issue: "The usage source could not provide a reading. Check the provider connection in CodexBar and try again.")]
+        }
+    }
+    static func defaultAccountFallback(_ data: Data, provider: String) -> Bool {
+        guard safePayload(data), let rows = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]], !rows.isEmpty else { return false }
+        return rows.allSatisfy { row in
+            guard row["usage"] == nil, let error = row["error"] as? [String: Any] else { return false }
+            return error["kind"] as? String == "provider" &&
+                error["message"] as? String == "No token accounts configured for \(provider.lowercased())."
         }
     }
     static func safePayload(_ data: Data) -> Bool {
@@ -79,7 +92,7 @@ enum NativeCollector {
             guard let usage = row["usage"] as? [String: Any] else {
                 let error = row["error"] as? [String: Any] ?? [:]
                 let message = (error["message"] as? String ?? "").lowercased()
-                let auth = error["kind"] as? String == "authentication" || ["sign in", "login", "not logged", "unauthorized"].contains(where: message.contains)
+                let auth = error["kind"] as? String == "authentication" || ["sign in", "login", "not logged", "unauthorized", "credentials not found", "authenticate", "token expired"].contains(where: message.contains)
                 return failure(provider: provider, machine: machine, issue: auth ? "Sign in through the provider app, then check again." : "Open the provider app and check its connection in CodexBar.", signIn: auth)
             }
             let email = (usage["accountEmail"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "Account \(index + 1)"

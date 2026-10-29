@@ -76,7 +76,7 @@ struct SettingsView: View {
                         }))
                     }
                 }
-                Text("Codex and Claude use CLI sources. Sign-in stays with your provider; OVRCAST never asks you to paste a token.").font(.caption).foregroundStyle(.secondary)
+                Text("Codex uses its CLI connection. Claude uses an existing Claude Code OAuth connection or accounts configured in CodexBar. Sign-in stays with your provider; OVRCAST never asks you to paste a token.").font(.caption).foregroundStyle(.secondary)
                 if !store.preferences.privacyMode { TextField("This computer", text: $store.preferences.machineName) }
                 if store.hasLegacyCollector {
                     Toggle("Use built-in collection", isOn: $store.preferences.nativeCollection)
@@ -163,7 +163,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("OVRCAST").font(.title2.weight(.semibold))
                     Text("Your AI capacity, at a glance.").foregroundStyle(.secondary)
-                    Text("Created by Git · Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.3.2")")
+                    Text("Created by Git · Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.3.3")")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }

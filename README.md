@@ -35,24 +35,28 @@ The native app runs on macOS 14 or later on Apple Silicon or Intel. Unzip the
 download, then drag OVRCAST into Applications. It does not need Python, Terminal,
 a development folder or a separate OVRCAST account.
 
-[Download OVRCAST 0.3.2 for macOS](https://github.com/gitdot5/OVRCAST/releases/tag/v0.3.2)
+[Download OVRCAST 0.3.3 for macOS](https://github.com/gitdot5/OVRCAST/releases/tag/v0.3.3)
 
 This preview uses a segmented capacity-ring icon and is Developer ID signed
 and Apple notarized. It supports Apple Silicon and Intel. Local signature, ticket, Gatekeeper and Day/Night launch checks passed
-for 0.3.2. A separate-Mac fresh-home setup and missing-CodexBar check passed for
-the preceding 0.3.1 release. CodexBar 0.81.0 was used for compatibility testing.
+for 0.3.3. The separate-Mac signature and Gatekeeper checks passed, but its runtime
+launch remains unverified. See the release review for coverage and limits. CodexBar 0.81.0 was used for compatibility testing.
 An independent automated source review found one low-severity legacy SSH
 buffering issue; 0.3.1 fixes it and adds regression tests. This is not an external
 human security certification. See the [release review](docs/RELEASE_REVIEW.md).
-Version 0.3.2 adds next-reset times to account cards, bundles provider marks and
-updates the original app icon to show account capacity in one overview.
+Version 0.3.3 fixes native collection when no token accounts are configured,
+uses the supported Claude OAuth source and restores refresh-link registration.
+It retains the next-reset times, provider marks and capacity-ring app icon.
 Earlier releases remain available as separate builds.
 
 On first launch, the Connect screen detects the separately installed
 [CodexBar](https://github.com/steipete/CodexBar) companion and opens its download
 page if needed. Connect your accounts in CodexBar, choose providers, then check
-the connection. Codex and Claude use CLI sources. Sign-in remains with your
-provider; OVRCAST never asks for a pasted token.
+the connection. Codex uses its CLI connection; Claude uses an existing Claude
+Code OAuth connection or accounts configured in CodexBar. If Claude asks for
+sign-in, authenticate Claude Code (`claude`) or connect the account in CodexBar.
+A Claude Desktop sign-in alone may not provide that usage connection.
+OVRCAST never asks for a pasted token.
 
 ## Everyday controls
 

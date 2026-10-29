@@ -1,6 +1,6 @@
-# OVRCAST 0.3.2 release review
+# OVRCAST 0.3.3 release review
 
-Release: https://github.com/gitdot5/OVRCAST/releases/tag/v0.3.2
+Release: https://github.com/gitdot5/OVRCAST/releases/tag/v0.3.3
 Reviewed October 29, 2026. Public preview, macOS 14+, Apple Silicon and Intel.
 
 ## Verified release artifact
@@ -14,18 +14,18 @@ Reviewed October 29, 2026. Public preview, macOS 14+, Apple Silicon and Intel.
   Each scheduled reset shows its window, countdown, local date/time and time zone.
   Passed, stale and unknown timestamps do not claim a confirmed refill.
 - The universal executable includes arm64 and x86_64 architectures. Runtime
-  checks were performed on Apple Silicon; Intel runtime was not exercised.
-- The preceding 0.3.1 release passed signature, ticket, quarantine/Gatekeeper
-  and launch checks on a separate Apple Silicon Mac running macOS 26.6.2.
-  With a fresh application-data home and no discoverable CodexBar helper, setup
-  displayed Get CodexBar and disabled Open my board. Existing provider sessions
-  were untouched. A separate-Mac check has not been repeated for 0.3.2.
+  checks passed on Apple Silicon and with the Intel slice under Rosetta.
+  Physical Intel hardware was not exercised.
+- The exact ZIP passed signature, ticket and Gatekeeper assessment on a
+  separate Apple Silicon Mac running macOS 26.6.2. GUI and diagnostic launches
+  timed out without a snapshot/diagnostic file or recent crash report. Separate-
+  Mac runtime remains unverified and requires console inspection.
 - The release source is an allowlisted export with example configuration,
   original artwork, license notices and integrity manifests. Private local
   configuration/state, private provider/device images and original private Git
   history are excluded.
-- 89 Python and 44 Swift tests passed for 0.3.2, including seven reset-schedule
-  cases and export checks requiring the three public provider images. CodexBar 0.81.0 was used for
+- 89 Python and 50 Swift tests passed for 0.3.3, including provider fallback,
+  supported Claude source, auth-state and window-preference regressions. CodexBar 0.81.0 was used for
   compatibility review and remains a separately installed dependency.
 
 ## Independent automated security review
@@ -55,3 +55,6 @@ SSH access or copy credentials. Privacy mode hides identities, computer names
 and credit balances; percentage quotas and saved-reset counts remain visible.
 
 Verify the final download with the SHA-256 manifest attached to the release.
+
+See [the engineering sweep](ENGINEERING_REVIEW.md) for fixed findings, live
+provider results, UI coverage and the remaining setup/validation gaps.

@@ -40,7 +40,7 @@ enum Insights {
         let rows = accounts.map { ["provider": knownProviders.contains($0.provider) ? $0.provider : "Other",
                                   "status": $0.requiresSignIn == true ? "Sign in required" : $0.current ? "Reading available" : "Needs a reading",
                                   "fresh": String($0.current), "quotaCount": String($0.quotas.count)] }
-        let payload: [String: Any] = ["app": "OVRCAST", "version": "0.3.2",
+        let payload: [String: Any] = ["app": "OVRCAST", "version": "0.3.3",
             "collection": native ? "native" : "existing collector", "helperAvailable": helperAvailable, "accounts": rows]
         guard let data = try? JSONSerialization.data(withJSONObject: payload, options: [.prettyPrinted, .sortedKeys]) else { return "Report unavailable" }
         return String(decoding: data, as: UTF8.self)
