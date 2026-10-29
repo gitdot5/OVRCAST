@@ -8,3 +8,5 @@ backups/
 config.local.json
 .DS_Store
 *.log
+vendor/OVRCASTCollector/.build/
+vendor/OVRCASTCollector/.swiftpm/
