@@ -1,4 +1,29 @@
-# OVRCAST 0.4.1 release review
+# OVRCAST 0.4.2 release review
+
+Reviewed November 3, 2026. Release:
+https://github.com/gitdot5/OVRCAST/releases/tag/v0.4.2
+
+The reliability changes, fault cases and remaining launch gates are recorded in
+[RELIABILITY.md](RELIABILITY.md). Local validation passed 68 Swift and 94 Python
+tests. Hosted tests pass on Intel/macOS 15 and Apple Silicon/macOS 26, with a
+separate universal-package contract check. Exact results are linked from the
+release notes.
+
+The signed app passed Day/Night, offline, fresh-user setup and corrupted-settings
+recovery previews. Recovery keeps privacy mode on. The final ZIP passed strict
+Developer ID signature, Apple notarization, stapled-ticket, Gatekeeper and
+bundled-collector resource checks. Live Codex and Antigravity checks returned
+current usage and reset timestamps on November 3; Claude did not return a usable
+reading. Both executables contain arm64 and x86_64
+slices with macOS 14 minimum deployment metadata. Source exports and final
+release downloads are verified with SHA-256 manifests.
+
+The app remains a preview. These checks do not replace the oldest-supported-OS,
+physical Mac installation/upgrade/sleep/wake/notification tests or live Claude
+OAuth validation listed in the reliability review. No independent audit of the
+vendored collector was added. Earlier release evidence is retained below.
+
+## OVRCAST 0.4.1 baseline
 
 This patch replaces generic privacy labels with recognizable Mac types on
 account cards, computer filters, recommendations, connection help and privacy

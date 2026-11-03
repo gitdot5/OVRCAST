@@ -38,9 +38,9 @@ The native app runs on macOS 14 or later on Apple Silicon or Intel. Unzip the
 download, then drag OVRCAST into Applications. It does not need Python, Terminal,
 a development folder or a separate OVRCAST account.
 
-[Download OVRCAST 0.4.1 for macOS](https://github.com/gitdot5/OVRCAST/releases/tag/v0.4.1)
+[Download OVRCAST for macOS](https://github.com/gitdot5/OVRCAST/releases)
 
-OVRCAST 0.4.1 includes an OVRCAST-maintained collector compiled from a pinned
+OVRCAST 0.4.2 includes an OVRCAST-maintained collector compiled from a pinned
 CodexBar v0.81.0 source fork. **No separate CodexBar installation is required.**
 The collector, its runtime resources and license notices ship inside OVRCAST.
 Updates to this fork ship with OVRCAST releases; upstream changes are reviewed
