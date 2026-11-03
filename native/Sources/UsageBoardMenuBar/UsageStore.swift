@@ -16,7 +16,7 @@ import UniformTypeIdentifiers
     @Published var shortcutStatus = "⌘⇧U to show or hide the board"
     @Published var history: [HistoryPoint] = []
     @Published var preferences: BoardPreferences { didSet {
-        if !isDemo { try? PrivateFiles.write(preferences, to: dataDirectory.appendingPathComponent("preferences.json")) }
+        if !isDemo { save(preferences, as: "preferences.json") }
         onPreferencesChanged?()
     } }
     @Published var machineFilter: String { didSet { defaults.set(machineFilter, forKey: "machineFilter"); selectedAccount = nil } }
@@ -29,6 +29,9 @@ import UniformTypeIdentifiers
     let isDemo: Bool
     let hasLegacyCollector: Bool
     private let defaults: UserDefaults
+    @Published private var failedSaves: Set<String> = []
+    private var recoveryBlocked = false
+    var storageIssue: String? { failedSaves.isEmpty ? nil : "Could not save changes. Check free disk space and access to OVRCAST’s data folder, then try again." }
     private var lastPoll = Date.distantPast
     private var notified: [String: Date] = [:]
     private var remoteCache: [String: [UsageAccount]] = [:]
@@ -85,7 +88,9 @@ import UniformTypeIdentifiers
         self.root = root ?? home.appendingPathComponent("usage_board")
         self.dataDirectory = dataDirectory ?? home.appendingPathComponent("Library/Application Support/UsageBoard/App")
         hasLegacyCollector = !demo && FileManager.default.fileExists(atPath: self.root.appendingPathComponent("config.local.json").path)
-        var initialPreferences = demo ? BoardPreferences() : PrivateFiles.read(BoardPreferences.self, from: self.dataDirectory.appendingPathComponent("preferences.json")) ?? BoardPreferences()
+        let preferencesURL = self.dataDirectory.appendingPathComponent("preferences.json")
+        let savedPreferences = demo ? nil : PrivateFiles.read(BoardPreferences.self, from: preferencesURL)
+        var initialPreferences = savedPreferences ?? BoardPreferences()
         if hasLegacyCollector { initialPreferences.setupComplete = true }
         preferences = initialPreferences
         machineFilter = self.defaults.string(forKey: "machineFilter") ?? ""
@@ -93,10 +98,26 @@ import UniformTypeIdentifiers
         accountOrder = AccountOrder(rawValue: self.defaults.string(forKey: "accountOrder") ?? "") ?? .attention
         firstMachine = self.defaults.string(forKey: "firstMachine") ?? "MacBook"
         theme = self.defaults.string(forKey: "appearance") ?? "system"
+        if !demo && savedPreferences == nil && FileManager.default.fileExists(atPath: preferencesURL.path) {
+            // Preserve damaged bytes before any default setting can overwrite them.
+            let backup = self.dataDirectory.appendingPathComponent("preferences-recovery-" + UUID().uuidString + ".json")
+            do {
+                try FileManager.default.copyItem(at: preferencesURL, to: backup)
+                try FileManager.default.setAttributes([.posixPermissions: 0o600], ofItemAtPath: backup.path)
+                message = "Saved settings could not be read. A private recovery copy was kept; review your connections in Settings."
+            } catch { recoveryBlocked = true; failedSaves.insert("preferences.json"); message = "Saved settings could not be read or backed up. Fix free space or folder access, then restart OVRCAST before changing settings." }
+        }
         if !demo {
             history = PrivateFiles.read([HistoryPoint].self, from: self.dataDirectory.appendingPathComponent("history.json")) ?? []
             notified = PrivateFiles.read([String: Date].self, from: self.dataDirectory.appendingPathComponent("alerts.json")) ?? [:]
         }
+    }
+    @discardableResult private func save<T: Encodable>(_ value: T, as name: String, in folder: URL? = nil) -> Bool {
+        if name == "preferences.json" && recoveryBlocked { return false }
+        do {
+            try PrivateFiles.write(value, to: (folder ?? dataDirectory).appendingPathComponent(name))
+            failedSaves.remove(name); return true
+        } catch { failedSaves.insert(name); message = storageIssue; return false }
     }
     func start() {
         load()
@@ -111,15 +132,16 @@ import UniformTypeIdentifiers
         if nativeMode && preferences.setupComplete && !isDemo { refresh() }
     }
     func load() {
-        if isDemo { if accounts.isEmpty { apply(DemoData.snapshot()) }; return }
+        if isDemo { if accounts.isEmpty { apply(DemoData.snapshot(stale: CommandLine.arguments.contains("--demo-offline"))) }; return }
         let url = nativeMode ? dataDirectory.appendingPathComponent("overview.json") : root.appendingPathComponent("state/overview.json")
         if let data = try? Data(contentsOf: url), let snapshot = try? SnapshotValidation.decode(data) { apply(snapshot) }
         else if preferences.setupComplete { message = "No saved reading yet. Check the connection to collect usage." }
         onChange?()
     }
-    private func apply(_ snapshot: UsageSnapshot) {
+    func apply(_ snapshot: UsageSnapshot) {
         let previous = accounts
         accounts = snapshot.accounts; generatedAt = snapshot.generatedAt
+        if !providers.contains(selectedProvider) { selectedProvider = "Overview"; selectedAccount = nil }
         for remote in preferences.remotes where remoteCache[remote.id] == nil {
             remoteCache[remote.id] = accounts.filter { $0.machines.contains(remote.name) }
         }
@@ -129,7 +151,7 @@ import UniformTypeIdentifiers
         }
         history = Insights.history(history, accounts: accounts)
         if !isDemo {
-            try? PrivateFiles.write(history, to: dataDirectory.appendingPathComponent("history.json"))
+            save(history, as: "history.json")
             // Publish only readings owned by this Mac, avoiding remote snapshot loops.
             if !nativeMode {
                 var local = snapshot
@@ -146,7 +168,7 @@ import UniformTypeIdentifiers
                 notified[alert.id] = now
                 if preferences.notifications && !quiet && (preferences.snoozeUntil ?? .distantPast) <= now { Notifications.deliver(alert) }
             }
-            try? PrivateFiles.write(notified, to: dataDirectory.appendingPathComponent("alerts.json"))
+            save(notified, as: "alerts.json")
         }
         onChange?()
     }
@@ -168,15 +190,24 @@ import UniformTypeIdentifiers
         }
         do { try process.run() } catch { refreshing = false; message = "Could not start the usage refresh. Open connection help." }
     }
-    private func refreshNative() {
-        guard let helper = NativeCollector.helper else { message = "The bundled collector is missing. Reinstall OVRCAST, then check the connection."; showSettings = true; return }
+    func refreshNative(helper suppliedHelper: String? = nil,
+                       collect: @escaping @Sendable (String, String, String) -> [UsageAccount] = { NativeCollector.collect(provider: $0, machine: $1, helper: $2) },
+                       remote: @escaping @Sendable (RemoteMachine) throws -> [UsageAccount] = { try NativeCollector.remote($0) }) {
+        guard let helper = suppliedHelper ?? NativeCollector.helper else { message = "The bundled collector is missing. Reinstall OVRCAST, then check the connection."; showSettings = true; return }
+        guard !preferences.providers.isEmpty else { message = "Choose at least one provider in Settings → Connect."; showSettings = true; return }
         refreshing = true; lastPoll = Date(); message = "Checking selected providers…"
         let providers = preferences.providers, machine = preferences.machineName, remotes = preferences.remotes
+        func selectionStillMatches() -> Bool {
+            nativeMode && preferences.providers == providers && preferences.machineName == machine &&
+                preferences.remotes.map { [$0.id, $0.name, $0.sshAlias] } == remotes.map { [$0.id, $0.name, $0.sshAlias] }
+        }
+        func discardChangedSelection() { refreshing = false; message = "Connections changed while checking. Choose Check connection to refresh the current selection." }
         Task {
             let local = await withTaskGroup(of: [UsageAccount].self) { group in
-                for provider in providers { group.addTask { NativeCollector.collect(provider: provider, machine: machine, helper: helper) } }
+                for provider in providers { group.addTask { collect(provider, machine, helper) } }
                 var rows: [UsageAccount] = []; for await row in group { rows += row }; return rows
             }
+            guard selectionStillMatches() else { discardChangedSelection(); return }
             var combined: [UsageAccount] = []
             for provider in providers {
                 let readings = local.filter { $0.provider == provider }
@@ -188,9 +219,11 @@ import UniformTypeIdentifiers
                 } else { combined += readings }
             }
             let localSnapshot = UsageSnapshot(version: 1, generatedAt: ISO8601DateFormatter().string(from: Date()), accounts: combined)
-            try? PrivateFiles.write(localSnapshot, to: dataDirectory.deletingLastPathComponent().appendingPathComponent("native-overview.json"))
-            for remote in remotes {
-                let result = await Task.detached(priority: .utility) { try? NativeCollector.remote(remote) }.value
+
+            for machine in remotes {
+                let result = await Task.detached(priority: .utility) { try? remote(machine) }.value
+                guard selectionStillMatches() else { discardChangedSelection(); return }
+                let remote = machine
                 if let result { remoteCache[remote.id] = result; combined += result }
                 else { combined += (remoteCache[remote.id] ?? []).map { old in var copy = old; copy.fresh = false; copy.issue = "Computer unavailable. Check its connection in Settings."; return copy } }
                 if let index = preferences.remotes.firstIndex(where: { $0.id == remote.id }) {
@@ -199,9 +232,12 @@ import UniformTypeIdentifiers
                 }
             }
             let snapshot = UsageSnapshot(version: 1, generatedAt: ISO8601DateFormatter().string(from: Date()), accounts: NativeCollector.merge(combined))
-            try? PrivateFiles.write(snapshot, to: dataDirectory.appendingPathComponent("overview.json"))
+            let saved = save(snapshot, as: "overview.json")
+            let published = save(localSnapshot, as: "native-overview.json", in: dataDirectory.deletingLastPathComponent())
             apply(snapshot); refreshing = false
-            message = snapshot.accounts.contains { !$0.current } ? "Some accounts need attention. Open an account for connection help." : "Usage is up to date."
+            if !saved || !published || storageIssue != nil { message = "Readings updated, but could not be saved. Check free space and access to OVRCAST’s data folder." }
+            else if snapshot.accounts.isEmpty { message = "No usage readings yet. Connect a provider in Settings, then check again." }
+            else { message = snapshot.accounts.contains { !$0.current } ? "Some accounts need attention. Open an account for connection help." : "Usage is up to date." }
         }
     }
     func enableNotifications(_ enabled: Bool) {

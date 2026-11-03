@@ -22,19 +22,20 @@ struct Logo: View {
 struct QuotaBar: View {
     let quota: Quota
     var compact = false
+    var current = true
     var body: some View {
         VStack(alignment: .leading, spacing: compact ? 3 : 5) {
             HStack {
                 Text(quota.label).lineLimit(1)
                 Spacer(minLength: 3)
-                Text(quota.awaiting ? "Pending" : "\(Int(quota.remaining.rounded()))% left")
-                    .fontWeight(.medium).monospacedDigit()
+                Text(quota.awaiting ? "Pending" : current ? "\(Int(quota.remaining.rounded()))% left" : "\(Int(quota.remaining.rounded()))% last known")
+                    .fontWeight(.medium).monospacedDigit().foregroundStyle(current ? Color.primary : Color.secondary)
             }.font(.system(size: compact ? 9 : 11))
             if !quota.awaiting {
                 GeometryReader { proxy in
                     ZStack(alignment: .leading) {
                         Capsule().fill(Color.primary.opacity(0.08))
-                        Capsule().fill(quota.remaining < 15 ? Color.red : quota.remaining <= 40 ? Color.orange : Color.green)
+                        Capsule().fill(!current ? Color.secondary : quota.remaining < 15 ? Color.red : quota.remaining <= 40 ? Color.orange : Color.green)
                             .frame(width: proxy.size.width * max(0, min(100, quota.remaining)) / 100)
                     }
                 }.frame(height: compact ? 3 : 5)
@@ -74,7 +75,7 @@ struct AccountRow: View {
                 }
             }
             if expanded {
-                ForEach(Array(account.quotas.enumerated()), id: \.offset) { _, quota in QuotaBar(quota: quota) }
+                ForEach(Array(account.quotas.enumerated()), id: \.offset) { _, quota in QuotaBar(quota: quota, current: account.current) }
                 HStack {
                     Text(store.preferences.privacyMode ? "Plan hidden" : account.plan).lineLimit(1)
                     Spacer()
@@ -83,7 +84,7 @@ struct AccountRow: View {
             } else {
                 HStack(alignment: .top, spacing: 12) {
                     ForEach(Array(account.quotas.prefix(3).enumerated()), id: \.offset) { _, quota in
-                        QuotaBar(quota: quota, compact: true).frame(maxWidth: .infinity)
+                        QuotaBar(quota: quota, compact: true, current: account.current).frame(maxWidth: .infinity)
                     }
                     if account.quotas.isEmpty { Text("No quota reading").font(.system(size: 10)).foregroundStyle(.secondary) }
                 }

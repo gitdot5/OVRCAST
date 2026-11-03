@@ -38,6 +38,7 @@ struct SettingsView: View {
                 default: connection
                 }
             }.frame(maxWidth: .infinity, maxHeight: .infinity)
+            if let issue = store.storageIssue { Label(issue, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(.orange).lineLimit(2) }
             if let message = store.message { Text(message).font(.caption).foregroundStyle(.secondary).lineLimit(2) }
             HStack {
                 Button("Copy support report") { store.copySupportReport() }.controlSize(.small)
@@ -64,7 +65,7 @@ struct SettingsView: View {
                         Button("Connect \(provider)") { store.connectProvider(provider) }.controlSize(.small)
                     }
                 }
-                Button("Check connection") { store.refresh() }.disabled(store.refreshing || !helperAvailable)
+                Button("Check connection") { store.refresh() }.disabled(store.refreshing || !helperAvailable || store.preferences.providers.isEmpty)
                 if !helperAvailable { Link("Download OVRCAST", destination: URL(string: "https://github.com/gitdot5/OVRCAST/releases")!) }
             }
             Section("2 · Choose what to track") {
@@ -92,7 +93,6 @@ struct SettingsView: View {
             }.pickerStyle(.segmented)
             Toggle("Privacy mode", isOn: $store.preferences.privacyMode)
             Text("Hides account identities, balances and custom computer names. Mac types stay visible.").font(.caption).foregroundStyle(.secondary)
-            Text("Hide account identities, aliases, computer names and balances throughout the board.").font(.caption).foregroundStyle(.secondary)
             Toggle("Show or hide with ⌘⇧U", isOn: $store.preferences.shortcutEnabled)
             Text(store.shortcutStatus).font(.caption).foregroundStyle(.secondary)
             Section("Friendly account names") {
@@ -164,7 +164,7 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("OVRCAST").font(.title2.weight(.semibold))
                     Text("Your AI capacity, at a glance.").foregroundStyle(.secondary)
-                    Text("Created by Git · Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.4.1")")
+                    Text("Created by Git · Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Development")")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }

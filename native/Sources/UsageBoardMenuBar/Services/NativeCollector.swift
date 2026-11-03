@@ -67,7 +67,8 @@ enum NativeCollector {
             if defaultAccountFallback(output.data, provider: provider) { output = try run(helper, base) }
             return try parse(output.data, provider: provider, machine: machine)
         } catch {
-            return [failure(provider: provider, machine: machine, issue: "The usage source could not provide a reading. Check the provider connection in OVRCAST and try again.")]
+            let timeout = (error as NSError).domain == "UsageBoard" && (error as NSError).code == 1
+            return [failure(provider: provider, machine: machine, issue: timeout ? "The provider did not respond in time. Check your connection, then try again. Any previous reading is marked as last known." : "The usage source returned an unreadable reading. Try refreshing, then check the provider connection in OVRCAST Settings.")]
         }
     }
     static func defaultAccountFallback(_ data: Data, provider: String) -> Bool {
@@ -92,7 +93,9 @@ enum NativeCollector {
                 let error = row["error"] as? [String: Any] ?? [:]
                 let message = (error["message"] as? String ?? "").lowercased()
                 let auth = error["kind"] as? String == "authentication" || ["sign in", "login", "not logged", "unauthorized", "credentials not found", "authenticate", "token expired"].contains(where: message.contains)
-                return failure(provider: provider, machine: machine, issue: auth ? "Sign in through the provider app, then check again." : "Open the provider connection from OVRCAST Settings, then check again.", signIn: auth)
+                let missingTool = ["not found in path", "cli not found", "could not find codex", "could not find claude"].contains(where: message.contains)
+                let issue = auth ? "Sign in through the provider app, then check again." : missingTool ? "The provider software needed for this connection is missing. Use Connect \(provider) in OVRCAST Settings, complete its setup, then check again." : "Open the provider connection from OVRCAST Settings, then check again."
+                return failure(provider: provider, machine: machine, issue: issue, signIn: auth)
             }
             let email = (usage["accountEmail"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "Account \(index + 1)"
             let observed = usage["updatedAt"] as? String

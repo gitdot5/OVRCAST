@@ -24,7 +24,9 @@ with its own bundled collector derived from [CodexBar](https://github.com/steipe
 - A pinned floating board: drag the native title bar to move it, or unpin it
   to return to the menu bar dropdown. Position and preferences persist.
 - Detailed account views and a full local HTML dashboard.
-- Explicit stale, missing and signed-out states; unknown balances stay unknown.
+- Explicit stale, missing and signed-out states; cached quotas are marked last known.
+- Recoverable settings, visible save failures and regression checks on Intel and Apple Silicon.
+  See the [reliability review](docs/RELIABILITY.md) for scope and remaining validation.
 
 OVRCAST is free software under the [MIT license](LICENSE). There is no
 OVRCAST subscription. Provider accounts and their usage remain subject to

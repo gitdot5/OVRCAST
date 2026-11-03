@@ -6,6 +6,17 @@ struct RemoteMachine: Codable, Identifiable, Equatable {
     var sshAlias: String
     var status = "Not checked"
     var checkedAt: String?
+    private enum CodingKeys: String, CodingKey { case id, name, sshAlias, status, checkedAt }
+    init(id: String = UUID().uuidString, name: String, sshAlias: String, status: String = "Not checked", checkedAt: String? = nil) {
+        self.id = id; self.name = name; self.sshAlias = sshAlias; self.status = status; self.checkedAt = checkedAt
+    }
+    init(from decoder: Decoder) throws {
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        self.init(id: try values.decodeIfPresent(String.self, forKey: .id) ?? UUID().uuidString,
+                  name: try values.decode(String.self, forKey: .name), sshAlias: try values.decode(String.self, forKey: .sshAlias),
+                  status: try values.decodeIfPresent(String.self, forKey: .status) ?? "Not checked",
+                  checkedAt: try values.decodeIfPresent(String.self, forKey: .checkedAt))
+    }
     var valid: Bool {
         !name.trimmingCharacters(in: .whitespaces).isEmpty &&
         sshAlias.range(of: "^[A-Za-z0-9][A-Za-z0-9._-]{0,100}$", options: .regularExpression) != nil
@@ -27,6 +38,35 @@ struct BoardPreferences: Codable {
     var remotes: [RemoteMachine] = []
     var recommendationProvider = "Codex"
     var recommendationWindow = "All limits"
+
+    init() {}
+    private enum CodingKeys: String, CodingKey {
+        case setupComplete, nativeCollection, providers, machineName, aliases, privacyMode, shortcutEnabled, notifications, lowThreshold, quietStart, quietEnd, snoozeUntil, remotes, recommendationProvider, recommendationWindow
+    }
+    init(from decoder: Decoder) throws {
+        self.init()
+        let values = try decoder.container(keyedBy: CodingKeys.self)
+        setupComplete = try values.decodeIfPresent(Bool.self, forKey: .setupComplete) ?? setupComplete
+        nativeCollection = try values.decodeIfPresent(Bool.self, forKey: .nativeCollection) ?? nativeCollection
+        providers = try values.decodeIfPresent([String].self, forKey: .providers) ?? providers
+        machineName = try values.decodeIfPresent(String.self, forKey: .machineName) ?? machineName
+        aliases = try values.decodeIfPresent([String: String].self, forKey: .aliases) ?? aliases
+        privacyMode = try values.decodeIfPresent(Bool.self, forKey: .privacyMode) ?? privacyMode
+        shortcutEnabled = try values.decodeIfPresent(Bool.self, forKey: .shortcutEnabled) ?? shortcutEnabled
+        notifications = try values.decodeIfPresent(Bool.self, forKey: .notifications) ?? notifications
+        lowThreshold = try values.decodeIfPresent(Double.self, forKey: .lowThreshold) ?? lowThreshold
+        quietStart = try values.decodeIfPresent(Int.self, forKey: .quietStart) ?? quietStart
+        quietEnd = try values.decodeIfPresent(Int.self, forKey: .quietEnd) ?? quietEnd
+        snoozeUntil = try values.decodeIfPresent(Date.self, forKey: .snoozeUntil)
+        remotes = try values.decodeIfPresent([RemoteMachine].self, forKey: .remotes) ?? remotes
+        recommendationProvider = try values.decodeIfPresent(String.self, forKey: .recommendationProvider) ?? recommendationProvider
+        recommendationWindow = try values.decodeIfPresent(String.self, forKey: .recommendationWindow) ?? recommendationWindow
+        var seen: Set<String> = []
+        providers = providers.filter { ["Codex", "Claude", "Antigravity"].contains($0) && seen.insert($0).inserted }
+        if machineName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { machineName = "This Mac" }
+        lowThreshold = lowThreshold.isFinite ? min(100, max(0, lowThreshold)) : 15
+        quietStart = min(23, max(0, quietStart)); quietEnd = min(23, max(0, quietEnd))
+    }
 }
 struct HistoryPoint: Codable, Identifiable {
     var accountID: String
