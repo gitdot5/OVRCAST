@@ -8,7 +8,8 @@ establish that every provider account or Mac configuration will always work.
 - Missing fields in older preferences use defaults while retaining saved privacy,
   aliases and remote connections. Provider lists and numeric settings are normalized.
 - Unreadable preferences are preserved in an owner-only recovery copy before
-  defaults can replace them. If recovery cannot be saved, preference writes stay
+  defaults can replace them. Privacy mode stays on during recovery so cached
+  identities are not exposed. If recovery cannot be saved, preference writes stay
   blocked until the storage problem is fixed and OVRCAST is restarted.
 - Failed settings/history/snapshot writes appear in Settings. A refresh does not
   report that readings were saved when persistence failed.

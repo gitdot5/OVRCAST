@@ -28,7 +28,7 @@ struct QuotaBar: View {
             HStack {
                 Text(quota.label).lineLimit(1)
                 Spacer(minLength: 3)
-                Text(quota.awaiting ? "Pending" : current ? "\(Int(quota.remaining.rounded()))% left" : "\(Int(quota.remaining.rounded()))% last known")
+                Text(!current ? "\(Int(quota.remaining.rounded()))% last known" : quota.awaiting ? "Pending" : "\(Int(quota.remaining.rounded()))% left")
                     .fontWeight(.medium).monospacedDigit().foregroundStyle(current ? Color.primary : Color.secondary)
             }.font(.system(size: compact ? 9 : 11))
             if !quota.awaiting {

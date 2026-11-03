@@ -23,6 +23,9 @@ final class ReliabilityTests: XCTestCase {
         try original.write(to: folder.appendingPathComponent("preferences.json"))
         let store = UsageStore(root: folder.appendingPathComponent("no-source"), dataDirectory: folder, demo: false)
         XCTAssertTrue(store.message?.contains("recovery copy") == true)
+        XCTAssertTrue(store.preferences.privacyMode)
+        store.accounts = DemoData.snapshot().accounts
+        XCTAssertFalse(store.accountName(store.accounts[0]).contains("@"))
         let backups = try FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil).filter { $0.lastPathComponent.hasPrefix("preferences-recovery-") }
         XCTAssertEqual(backups.count, 1); XCTAssertEqual(try Data(contentsOf: backups[0]), original)
         XCTAssertEqual(try FileManager.default.attributesOfItem(atPath: backups[0].path)[.posixPermissions] as? Int, 0o600)

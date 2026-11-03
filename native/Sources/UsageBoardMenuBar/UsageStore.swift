@@ -90,7 +90,9 @@ import UniformTypeIdentifiers
         hasLegacyCollector = !demo && FileManager.default.fileExists(atPath: self.root.appendingPathComponent("config.local.json").path)
         let preferencesURL = self.dataDirectory.appendingPathComponent("preferences.json")
         let savedPreferences = demo ? nil : PrivateFiles.read(BoardPreferences.self, from: preferencesURL)
+        let recoveringPreferences = !demo && savedPreferences == nil && FileManager.default.fileExists(atPath: preferencesURL.path)
         var initialPreferences = savedPreferences ?? BoardPreferences()
+        if recoveringPreferences { initialPreferences.privacyMode = true }
         if hasLegacyCollector { initialPreferences.setupComplete = true }
         preferences = initialPreferences
         machineFilter = self.defaults.string(forKey: "machineFilter") ?? ""
@@ -98,7 +100,7 @@ import UniformTypeIdentifiers
         accountOrder = AccountOrder(rawValue: self.defaults.string(forKey: "accountOrder") ?? "") ?? .attention
         firstMachine = self.defaults.string(forKey: "firstMachine") ?? "MacBook"
         theme = self.defaults.string(forKey: "appearance") ?? "system"
-        if !demo && savedPreferences == nil && FileManager.default.fileExists(atPath: preferencesURL.path) {
+        if recoveringPreferences {
             // Preserve damaged bytes before any default setting can overwrite them.
             let backup = self.dataDirectory.appendingPathComponent("preferences-recovery-" + UUID().uuidString + ".json")
             do {
