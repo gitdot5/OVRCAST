@@ -16,6 +16,12 @@ Connection help opens the provider app or the existing isolated-profile
 reconnect helper on the affected local Mac. A remote sign-in must be completed
 on that computer. Opening a provider app is not proof of a successful sign-in.
 
+If saved settings cannot be read, OVRCAST keeps a private `preferences-recovery-…json`
+copy in its App data folder and asks you to review connections. A storage warning
+means changes may not survive a restart; fix free space or folder access first.
+If a refresh says connections changed, run Check connection again for the current
+selection. Cached percentages marked last known are not current availability.
+
 The sections below describe optional legacy scripted collection.
 
 ## Legacy collection

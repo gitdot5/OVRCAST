@@ -8,7 +8,7 @@ APP_BUNDLE="$ROOT_DIR/dist/$APP_NAME.app"
 CONTENTS="$APP_BUNDLE/Contents"
 
 case "$MODE" in run|--install|--verify|--build-only|--preview-day|--preview-night) ;; *) echo "Usage: $0 [--install|--verify|--build-only|--preview-day|--preview-night]" >&2; exit 2;; esac
-pkill -x "$PROCESS_NAME" >/dev/null 2>&1 || true
+if [[ "$MODE" != "--build-only" ]]; then pkill -x "$PROCESS_NAME" >/dev/null 2>&1 || true; fi
 swift build --package-path "$ROOT_DIR/native" -j 2
 BUILD_DIR="$(swift build --package-path "$ROOT_DIR/native" --show-bin-path)"
 mkdir -p "$CONTENTS/MacOS" "$CONTENTS/Resources"
@@ -19,20 +19,21 @@ cp "$ROOT_DIR/app/UsageBoard.icns" "$CONTENTS/Resources/UsageBoard.icns"
 ditto "$ROOT_DIR/assets" "$CONTENTS/Resources/assets"
 cp "$ROOT_DIR/LICENSE" "$ROOT_DIR/THIRD_PARTY_NOTICES.md" "$CONTENTS/Resources/"
 ditto "$ROOT_DIR/LICENSES" "$CONTENTS/Resources/LICENSES"
-/usr/bin/python3 - "$CONTENTS/Info.plist" <<'PY'
-import plistlib,sys
+/usr/bin/python3 - "$CONTENTS/Info.plist" "$ROOT_DIR/app/version.json" <<'PY'
+import json,plistlib,sys
+version=json.load(open(sys.argv[2]))
 with open(sys.argv[1], 'wb') as f:
  plistlib.dump({'CFBundleExecutable':'UsageBoardMenuBar','CFBundleIdentifier':'com.weekthink.usageboard',
  'CFBundleName':'OVRCAST','CFBundleDisplayName':'OVRCAST','CFBundlePackageType':'APPL',
- 'CFBundleShortVersionString':'0.4.1','CFBundleVersion':'8','CFBundleIconFile':'UsageBoard.icns',
+ 'CFBundleShortVersionString':version['version'],'CFBundleVersion':version['build'],'CFBundleIconFile':'UsageBoard.icns',
  'LSMinimumSystemVersion':'14.0','NSPrincipalClass':'NSApplication','LSUIElement':True,
  'CFBundleURLTypes':[{'CFBundleURLName':'com.weekthink.usageboard','CFBundleURLSchemes':['usageboard']}]},f)
 PY
 codesign --force -s - "$CONTENTS/Helpers/OVRCASTCollector"
 codesign --force -s - "$APP_BUNDLE"
 codesign --verify --deep --strict "$APP_BUNDLE"
-/usr/bin/python3 -I "$ROOT_DIR/gather.py" --quiet
 if [[ "$MODE" == "--build-only" ]]; then exit 0; fi
+/usr/bin/python3 -I "$ROOT_DIR/gather.py" --quiet
 if [[ "$MODE" == "--install" ]]; then
  # Keep the existing bundle identifier and data paths so renamed installs retain settings.
  if [[ -d "/Applications/Usage Board.app" ]]; then

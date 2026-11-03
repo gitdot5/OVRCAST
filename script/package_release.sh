@@ -5,6 +5,7 @@ MODE="${1:-dmg}"
 case "$MODE" in dmg|--zip-only) ;; *) echo 'Usage: package_release.sh [--zip-only]' >&2; exit 2;; esac
 if [[ -n "${NOTARY_PROFILE:-}" && -z "${DEVELOPER_ID:-}" ]]; then echo 'Notarization requires DEVELOPER_ID.' >&2; exit 2; fi
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+VERSION="$(/usr/bin/python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["version"])' "$ROOT_DIR/app/version.json")"
 WORK_DIR="$(mktemp -d)"
 trap 'rm -rf "$WORK_DIR"' EXIT
 /usr/bin/python3 "$ROOT_DIR/script/export_source.py"
@@ -21,12 +22,13 @@ cp "$SOURCE_DIR/app/UsageBoard.icns" "$APP_DIR/Contents/Resources/"
 ditto "$SOURCE_DIR/assets/provider-logos" "$APP_DIR/Contents/Resources/assets/provider-logos"
 cp "$SOURCE_DIR/LICENSE" "$SOURCE_DIR/THIRD_PARTY_NOTICES.md" "$APP_DIR/Contents/Resources/"
 ditto "$SOURCE_DIR/LICENSES" "$APP_DIR/Contents/Resources/LICENSES"
-/usr/bin/python3 - "$APP_DIR/Contents/Info.plist" <<'PY'
-import plistlib,sys
+/usr/bin/python3 - "$APP_DIR/Contents/Info.plist" "$SOURCE_DIR/app/version.json" <<'PY'
+import json,plistlib,sys
+version=json.load(open(sys.argv[2]))
 with open(sys.argv[1],'wb') as f:
  plistlib.dump({'CFBundleExecutable':'UsageBoardMenuBar','CFBundleIdentifier':'com.weekthink.usageboard',
  'CFBundleName':'OVRCAST','CFBundleDisplayName':'OVRCAST','CFBundlePackageType':'APPL',
- 'CFBundleShortVersionString':'0.4.1','CFBundleVersion':'8','CFBundleIconFile':'UsageBoard.icns',
+ 'CFBundleShortVersionString':version['version'],'CFBundleVersion':version['build'],'CFBundleIconFile':'UsageBoard.icns',
  'LSMinimumSystemVersion':'14.0','NSPrincipalClass':'NSApplication','LSUIElement':True,
  'CFBundleURLTypes':[{'CFBundleURLName':'com.weekthink.usageboard','CFBundleURLSchemes':['usageboard']}]},f)
 PY
@@ -38,7 +40,7 @@ else
  codesign --force --sign - "$APP_DIR"
 fi
 codesign --verify --deep --strict "$APP_DIR"
-ZIP_OUTPUT="$ROOT_DIR/dist/OVRCAST-0.4.1-preview.app.zip"
+ZIP_OUTPUT="$ROOT_DIR/dist/OVRCAST-$VERSION-preview.app.zip"
 /usr/bin/ditto -c -k --keepParent "$APP_DIR" "$ZIP_OUTPUT"
 if [[ -n "${NOTARY_PROFILE:-}" ]]; then
  xcrun notarytool submit "$ZIP_OUTPUT" --keychain-profile "$NOTARY_PROFILE" --wait
@@ -56,7 +58,7 @@ if [[ "$MODE" == "--zip-only" ]]; then
 fi
 ln -s /Applications "$STAGE_DIR/Applications"
 cp "$SOURCE_DIR/docs/QUICK_START.txt" "$STAGE_DIR/Read me first.txt"
-OUTPUT="$ROOT_DIR/dist/OVRCAST-0.4.1-preview.dmg"
+OUTPUT="$ROOT_DIR/dist/OVRCAST-$VERSION-preview.dmg"
 hdiutil create -volname 'OVRCAST' -srcfolder "$STAGE_DIR" -ov -format UDZO "$OUTPUT" >/dev/null
 if [[ -n "${NOTARY_PROFILE:-}" ]]; then
  if [[ -z "${DEVELOPER_ID:-}" ]]; then echo 'Notarization requires DEVELOPER_ID.' >&2; exit 2; fi
