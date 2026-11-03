@@ -40,7 +40,7 @@ a development folder or a separate OVRCAST account.
 
 [Download OVRCAST for macOS](https://github.com/gitdot5/OVRCAST/releases)
 
-OVRCAST 0.4.2 includes an OVRCAST-maintained collector compiled from a pinned
+OVRCAST 0.4.3 includes an OVRCAST-maintained collector compiled from a pinned
 CodexBar v0.81.0 source fork. **No separate CodexBar installation is required.**
 The collector, its runtime resources and license notices ship inside OVRCAST.
 Updates to this fork ship with OVRCAST releases; upstream changes are reviewed
@@ -93,6 +93,10 @@ See [configuration and troubleshooting](docs/SETUP.md) for the legacy collector,
 SSH requirements and optional isolated Claude profiles.
 
 ## Data and privacy
+
+The [distribution privacy review](docs/DISTRIBUTION_PRIVACY_REVIEW.md) records
+checks of public downloads and source history. Provider credentials and private
+usage snapshots are not distributed. Each user connects their own accounts.
 
 There is no OVRCAST backend, telemetry or listening server. Provider tools
 may contact their services to obtain usage. Remote collection, when configured,

@@ -5,11 +5,26 @@ import json
 import os
 from pathlib import Path
 import plistlib
+import re
 import subprocess
 import tempfile
 import zipfile
 
 ROOT = Path(__file__).resolve().parent.parent
+
+PRIVATE_PATH = re.compile(rb'/Users/[^/\x00\r\n]{1,80}/')
+CREDENTIAL_MATERIAL = re.compile(rb'-----BEGIN (?:RSA |EC |OPENSSH |ENCRYPTED )?PRIVATE KEY-----|\bsk-(?:ant-)?[A-Za-z0-9_-]{20,}|\b(?:AKIA|ASIA)[A-Z0-9]{16}\b|\bgh[pousr]_[A-Za-z0-9]{25,}')
+PRIVATE_FILE = re.compile(r'(?i)(?:^|/)(?:config\.local\.json|\.env(?:\.[^/]*)?|\.ssh|\.aws|\.codex|\.claude|keychains?|cookies|login data|snapshot\.json|preferences\.json|auth\.json)(?:/|$)|\.(?:p12|pfx|key|kdbx)$')
+
+
+def reject_private_payload(name, data):
+    """Fail with the file/category only; never echo a potential private value."""
+    if PRIVATE_FILE.search(name):
+        raise ValueError(name + ': private file is not distributable')
+    if PRIVATE_PATH.search(data):
+        raise ValueError(name + ': developer home path in distributed payload')
+    if CREDENTIAL_MATERIAL.search(data):
+        raise ValueError(name + ': credential-shaped material in distributed payload')
 
 
 def run(command, env=None):
@@ -34,6 +49,8 @@ def verify(archive, notarized=False):
             executable = app / name
             assert {'arm64', 'x86_64'} <= set(run(['lipo', '-archs', str(executable)]).stdout.split())
             assert run(['xcrun', 'vtool', '-show-build', str(executable)]).stdout.count('minos 14.0') == 2
+        for path in app.rglob('*'):
+            if path.is_file(): reject_private_payload(path.relative_to(app).as_posix(), path.read_bytes())
         resources = app / 'Contents/Resources'
         assert (resources / 'UsageBoard.icns').read_bytes() == (ROOT / 'app/UsageBoard.icns').read_bytes()
         for name in ['codex', 'claude', 'antigravity']:

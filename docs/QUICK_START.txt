@@ -1,4 +1,4 @@
-OVRCAST 0.4.2 — Public preview
+OVRCAST 0.4.3 — Public preview
 
 Your AI capacity, at a glance.
 Created by Git. Free and open source under the MIT license.
@@ -21,14 +21,14 @@ To add another Mac, install OVRCAST there and use an existing trusted SSH
 alias in Computers. OVRCAST does not configure Remote Login or SSH keys.
 Both apps must be running to keep their snapshots fresh.
 
-Download OVRCAST-0.4.2-macOS.zip from the official GitHub release. It is signed under
+Download OVRCAST-0.4.3-macOS.zip from the official GitHub release. It is signed under
 Du Nguyen Tran's Developer ID and notarized by Apple. Older preview artifacts
 are separate builds. Do not disable macOS security to install software.
 
 OVRCAST is free and MIT licensed. Original source and license notices are
 included in the source distribution. Provider services may have their own fees.
 
-Official download: https://github.com/gitdot5/OVRCAST/releases/tag/v0.4.2
+Official download: https://github.com/gitdot5/OVRCAST/releases/tag/v0.4.3
 Test scope and limitations: docs/RELEASE_REVIEW.md in the source distribution.
 
 Account cards show the next provider-reported usage reset, including the window,
@@ -51,3 +51,7 @@ When offline, cached quotas say last known and do not count as available.
 A storage warning means changes may not survive restart. Fix free space or
 folder access before relying on saved settings. Unreadable settings get a
 private recovery copy; privacy stays on while you review the recovered setup.
+
+The download includes no publisher account sign-in, API token or SSH credential.
+Connect your own provider accounts. Publisher identity in the signing certificate
+is public verification metadata and does not grant access to an account.

@@ -1,4 +1,22 @@
-# OVRCAST 0.4.2 release review
+# OVRCAST 0.4.3 distribution privacy update
+
+Reviewed November 3, 2026. The app's Swift behavior and collector source are
+unchanged from the validated 0.4.2 release. The GUI is rebuilt from a clean
+non-home temporary source directory to remove developer home-path metadata.
+
+The release verifier now rejects private state filenames, credential-shaped
+material and developer home paths in distributed binaries/resources. All 98
+Python tests passed, including four new privacy-boundary regressions. The final
+ZIP passes strict signature, notarization, stapled-ticket, Gatekeeper, universal
+architecture, resource and privacy-payload checks. The 68-test Swift/hosted-CI
+baseline remains applicable to the unchanged runtime logic.
+
+See [the distribution privacy review](DISTRIBUTION_PRIVACY_REVIEW.md) for the
+historical release/source check and public-attribution limits. This is a focused
+disclosure review; it does not replace the remaining physical-device/provider
+validation in [the reliability review](RELIABILITY.md).
+
+## OVRCAST 0.4.2 baseline
 
 Reviewed November 3, 2026. Release:
 https://github.com/gitdot5/OVRCAST/releases/tag/v0.4.2
