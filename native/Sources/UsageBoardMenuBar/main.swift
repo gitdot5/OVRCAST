@@ -144,7 +144,7 @@ import UserNotifications
         if let supportWindow { supportWindow.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true); return }
         let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 500), styleMask: [.titled, .closable, .resizable], backing: .buffered, defer: false)
         window.title = "OVRCAST Support Report"; window.isReleasedWhenClosed = false; window.delegate = self
-        window.contentViewController = NSHostingController(rootView: SupportReportView(text: text, copy: { [weak self] in self?.store.copyReviewedSupportReport(text) }))
+        window.contentViewController = NSHostingController(rootView: SupportReportView(text: text, scheme: store.scheme, copy: { [weak self] in self?.store.copyReviewedSupportReport(text) }))
         window.center(); supportWindow = window; window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
     }
     private func updateStatus() {
@@ -247,7 +247,7 @@ import UserNotifications
         let setup = CommandLine.arguments.contains("--setup")
         let support = CommandLine.arguments.contains("--support-preview")
         let height: CGFloat = setup ? 574 : menuHeight
-        let content = support ? AnyView(SupportReportView(text: store.supportReport, copy: {})) : setup ? AnyView(SettingsView(store: store)) : AnyView(MenuView(store: store, openBoard: { [weak self] in self?.openBoard() }, maxHeight: height,
+        let content = support ? AnyView(SupportReportView(text: store.supportReport, scheme: store.scheme, copy: {})) : setup ? AnyView(SettingsView(store: store)) : AnyView(MenuView(store: store, openBoard: { [weak self] in self?.openBoard() }, maxHeight: height,
             toggleFloating: { [weak self] in self?.setFloating(true) }))
         let host = NSHostingView(rootView: content)
         host.frame = NSRect(x: 0, y: 0, width: support ? 600 : setup ? 584 : 430, height: height)
