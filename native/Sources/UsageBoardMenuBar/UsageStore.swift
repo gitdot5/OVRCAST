@@ -9,6 +9,10 @@ import UniformTypeIdentifiers
     @Published var message: String?
     @Published var refreshing = false
     @Published var reconnecting = false
+    @Published var health: [String: ConnectionHealth] = [:]
+    var sleeping = false
+    private var recoveryPending = false
+    private var lastRecovery = Date.distantPast
     @Published var selectedProvider = "Overview"
     @Published var selectedAccount: String?
     @Published var showSettings = false { didSet { onSettingsChanged?(showSettings) } }
@@ -32,12 +36,12 @@ import UniformTypeIdentifiers
     @Published private var failedSaves: Set<String> = []
     private var recoveryBlocked = false
     var storageIssue: String? { failedSaves.isEmpty ? nil : "Could not save changes. Check free disk space and access to OVRCAST’s data folder, then try again." }
-    private var lastPoll = Date.distantPast
     private var notified: [String: Date] = [:]
-    private var remoteCache: [String: [UsageAccount]] = [:]
+    private var sourceCache: [String: [UsageAccount]] = [:]
     var timer: Timer?
     var onChange: (() -> Void)?
     var onPreferencesChanged: (() -> Void)?
+    var onSupportReport: ((String) -> Void)?
     var onSettingsChanged: ((Bool) -> Void)?
     var legacyLocalMachine: String {
         guard let data = try? Data(contentsOf: root.appendingPathComponent("config.local.json")),
@@ -111,6 +115,9 @@ import UniformTypeIdentifiers
         }
         if !demo {
             history = PrivateFiles.read([HistoryPoint].self, from: self.dataDirectory.appendingPathComponent("history.json")) ?? []
+            sourceCache = PrivateFiles.read([String: [UsageAccount]].self, from: self.dataDirectory.appendingPathComponent("connection-readings.json")) ?? [:]
+            health = PrivateFiles.read([String: ConnectionHealth].self, from: self.dataDirectory.appendingPathComponent("connection-health.json")) ?? [:]
+            for key in health.keys where health[key]?.state == .checking { health[key]?.state = .notChecked }
             notified = PrivateFiles.read([String: Date].self, from: self.dataDirectory.appendingPathComponent("alerts.json")) ?? [:]
         }
     }
@@ -128,7 +135,7 @@ import UniformTypeIdentifiers
             Task { @MainActor in
                 guard let self else { return }
                 self.load()
-                if self.nativeMode && self.preferences.setupComplete && Date().timeIntervalSince(self.lastPoll) > 180 { self.refresh() }
+                if self.nativeMode && self.preferences.setupComplete && !self.sleeping { self.refresh(force: false) }
             }
         }
         if nativeMode && preferences.setupComplete && !isDemo { refresh() }
@@ -136,7 +143,9 @@ import UniformTypeIdentifiers
     func load() {
         if isDemo { if accounts.isEmpty { apply(DemoData.snapshot(stale: CommandLine.arguments.contains("--demo-offline"))) }; return }
         let url = nativeMode ? dataDirectory.appendingPathComponent("overview.json") : root.appendingPathComponent("state/overview.json")
-        if let data = try? Data(contentsOf: url), let snapshot = try? SnapshotValidation.decode(data) { apply(snapshot) }
+        if let data = try? Data(contentsOf: url), let snapshot = try? SnapshotValidation.decode(data) {
+            if snapshot.generatedAt != generatedAt { apply(snapshot) }
+        }
         else if preferences.setupComplete { message = "No saved reading yet. Check the connection to collect usage." }
         onChange?()
     }
@@ -144,9 +153,6 @@ import UniformTypeIdentifiers
         let previous = accounts
         accounts = snapshot.accounts; generatedAt = snapshot.generatedAt
         if !providers.contains(selectedProvider) { selectedProvider = "Overview"; selectedAccount = nil }
-        for remote in preferences.remotes where remoteCache[remote.id] == nil {
-            remoteCache[remote.id] = accounts.filter { $0.machines.contains(remote.name) }
-        }
         if !accounts.isEmpty {
             if !machineFilter.isEmpty && !machineOptions.contains(machineFilter) { machineFilter = "" }
             if !machineOptions.contains(firstMachine) { firstMachine = machineOptions.first ?? "MacBook" }
@@ -174,10 +180,10 @@ import UniformTypeIdentifiers
         }
         onChange?()
     }
-    func refresh(collect: Bool = true) {
+    func refresh(collect: Bool = true, force: Bool = true, provider: String? = nil) {
         guard !refreshing else { return }
         if isDemo { message = "Demo data — no accounts connected"; return }
-        if nativeMode { refreshNative(); return }
+        if nativeMode { refreshNative(force: force, requestedProvider: provider); return }
         refreshing = true; message = "Refreshing usage…"
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/python3")
@@ -192,54 +198,111 @@ import UniformTypeIdentifiers
         }
         do { try process.run() } catch { refreshing = false; message = "Could not start the usage refresh. Open connection help." }
     }
-    func refreshNative(helper suppliedHelper: String? = nil,
+    var verifiedProviders: [String] {
+        preferences.providers.filter { provider in
+            accounts.contains { $0.provider == provider && $0.machines.contains(preferences.machineName) &&
+                $0.current && !$0.quotas.isEmpty && $0.requiresSignIn != true && $0.issue.isEmpty }
+        }
+    }
+    var canFinishSetup: Bool { !verifiedProviders.isEmpty }
+    func finishSetup() {
+        guard canFinishSetup else { message = "Check a provider and receive a current usage reading first."; return }
+        preferences.nativeCollection = true; preferences.setupComplete = true; showSettings = false
+    }
+    func recoverConnection(now: Date = Date()) {
+        guard !isDemo, nativeMode, preferences.setupComplete, !sleeping, now.timeIntervalSince(lastRecovery) >= 10 else { return }
+        lastRecovery = now
+        if refreshing { recoveryPending = true } else { refresh() }
+    }
+    var compactStatus: String {
+        let provider = preferences.recommendationProvider
+        guard let best = Insights.recommend(accounts, provider: provider) else { return provider + " · —" }
+        return provider + " " + String(Int(best.remaining)) + "%"
+    }
+    var statusTooltip: String {
+        let provider = preferences.recommendationProvider
+        guard let best = Insights.recommend(accounts, provider: provider) else { return "OVRCAST · No current usable \(provider) reading" }
+        let reset = best.account.quotas.first { $0.label == best.limitingWindow }?.resetsAt
+        return "OVRCAST · \(provider) · \(best.limitingWindow) · \(resetLabel(reset)) · Open the board for account options"
+    }
+    func refreshNative(helper suppliedHelper: String? = nil, force: Bool = true, requestedProvider: String? = nil,
                        collect: @escaping @Sendable (String, String, String) -> [UsageAccount] = { NativeCollector.collect(provider: $0, machine: $1, helper: $2) },
                        remote: @escaping @Sendable (RemoteMachine) throws -> [UsageAccount] = { try NativeCollector.remote($0) }) {
+        guard !refreshing else { return }
         guard let helper = suppliedHelper ?? NativeCollector.helper else { message = "The bundled collector is missing. Reinstall OVRCAST, then check the connection."; showSettings = true; return }
         guard !preferences.providers.isEmpty else { message = "Choose at least one provider in Settings → Connect."; showSettings = true; return }
-        refreshing = true; lastPoll = Date(); message = "Checking selected providers…"
         let providers = preferences.providers, machine = preferences.machineName, remotes = preferences.remotes
+        let dueProviders = providers.filter { (requestedProvider == nil || requestedProvider == $0) && (force || (health[$0] ?? ConnectionHealth()).due()) }
+        let dueRemotes = remotes.filter { requestedProvider == nil && (force || (health["remote:" + $0.id] ?? ConnectionHealth()).due()) }
+        guard !dueProviders.isEmpty || !dueRemotes.isEmpty else { return }
+        refreshing = true; message = "Checking connections…"
+        let previousHealth = health
+        for key in dueProviders + dueRemotes.map({ "remote:" + $0.id }) {
+            var value = health[key] ?? ConnectionHealth(); value.state = .checking; health[key] = value
+        }
         func selectionStillMatches() -> Bool {
             nativeMode && preferences.providers == providers && preferences.machineName == machine &&
                 preferences.remotes.map { [$0.id, $0.name, $0.sshAlias] } == remotes.map { [$0.id, $0.name, $0.sshAlias] }
         }
-        func discardChangedSelection() { refreshing = false; message = "Connections changed while checking. Choose Check connection to refresh the current selection." }
+        // Keep each source separate until merging, so a failed remote never replaces a local reading.
+        var sources: [String: [UsageAccount]] = [:]
+        let localSaved = PrivateFiles.read(UsageSnapshot.self, from: dataDirectory.deletingLastPathComponent().appendingPathComponent("native-overview.json"))?.accounts
+        for provider in providers {
+            sources[provider] = (sourceCache[provider] ?? localSaved ?? accounts.filter { $0.machines == [machine] }).filter { $0.provider == provider && $0.machines.contains(machine) }.map { old in
+                var copy = old; copy.machines = [machine]; return copy
+            }
+        }
+        for remote in remotes {
+            sources["remote:" + remote.id] = sourceCache["remote:" + remote.id] ?? accounts.filter { $0.machines == [remote.name] }.map { old in
+                var copy = old; copy.machines = [remote.name]; return copy
+            }
+        }
         Task {
-            let local = await withTaskGroup(of: [UsageAccount].self) { group in
-                for provider in providers { group.addTask { collect(provider, machine, helper) } }
-                var rows: [UsageAccount] = []; for await row in group { rows += row }; return rows
-            }
-            guard selectionStillMatches() else { discardChangedSelection(); return }
-            var combined: [UsageAccount] = []
-            for provider in providers {
-                let readings = local.filter { $0.provider == provider }
-                if readings.allSatisfy({ !$0.fresh }), !readings.isEmpty {
-                    let retained = accounts.filter { $0.provider == provider && $0.machines.contains(machine) }
-                    combined += retained.isEmpty ? readings : retained.map { old in
-                        var copy = old; copy.fresh = false; copy.issue = readings[0].issue; copy.requiresSignIn = readings[0].requiresSignIn; return copy
+            var changed = false
+            await withTaskGroup(of: (String, [UsageAccount]?).self) { group in
+                for provider in dueProviders { group.addTask { (provider, collect(provider, machine, helper)) } }
+                for item in dueRemotes { group.addTask { ("remote:" + item.id, try? remote(item)) } }
+                for await (key, result) in group {
+                    guard selectionStillMatches() else { changed = true; continue }
+                    var state = previousHealth[key] ?? ConnectionHealth()
+                    state.finish(result ?? []); health[key] = state
+                    let rows = result ?? []
+                    if rows.isEmpty || rows.allSatisfy({ !$0.current }) {
+                        let prior = sources[key] ?? []
+                        sources[key] = prior.isEmpty ? rows : prior.map { old in
+                            var copy = old; copy.fresh = false
+                            copy.issue = rows.first?.issue ?? "Computer unavailable. Check its connection in Settings."
+                            copy.requiresSignIn = rows.first?.requiresSignIn; return copy
+                        }
+                    } else { sources[key] = rows }
+                    if let item = remotes.first(where: { "remote:" + $0.id == key }) {
+                        if let index = preferences.remotes.firstIndex(where: { $0.id == item.id }) {
+                            preferences.remotes[index].status = state.state.title
+                            preferences.remotes[index].checkedAt = ISO8601DateFormatter().string(from: Date())
+                        }
                     }
-                } else { combined += readings }
-            }
-            let localSnapshot = UsageSnapshot(version: 1, generatedAt: ISO8601DateFormatter().string(from: Date()), accounts: combined)
-
-            for machine in remotes {
-                let result = await Task.detached(priority: .utility) { try? remote(machine) }.value
-                guard selectionStillMatches() else { discardChangedSelection(); return }
-                let remote = machine
-                if let result { remoteCache[remote.id] = result; combined += result }
-                else { combined += (remoteCache[remote.id] ?? []).map { old in var copy = old; copy.fresh = false; copy.issue = "Computer unavailable. Check its connection in Settings."; return copy } }
-                if let index = preferences.remotes.firstIndex(where: { $0.id == remote.id }) {
-                    preferences.remotes[index].status = result == nil ? "Unavailable" : "Connected"
-                    preferences.remotes[index].checkedAt = ISO8601DateFormatter().string(from: Date())
+                    let now = ISO8601DateFormatter().string(from: Date())
+                    let local = UsageSnapshot(version: 1, generatedAt: now, accounts: providers.flatMap { sources[$0] ?? [] })
+                    // Publish each finished source immediately, even if another provider or Mac is slow.
+                    let snapshot = UsageSnapshot(version: 1, generatedAt: now, accounts: NativeCollector.merge(sources.keys.sorted().flatMap { sources[$0] ?? [] }))
+                    save(snapshot, as: "overview.json")
+                    save(local, as: "native-overview.json", in: dataDirectory.deletingLastPathComponent())
+                    sourceCache = sources
+                    save(sourceCache, as: "connection-readings.json")
+                    save(health, as: "connection-health.json")
+                    apply(snapshot)
                 }
             }
-            let snapshot = UsageSnapshot(version: 1, generatedAt: ISO8601DateFormatter().string(from: Date()), accounts: NativeCollector.merge(combined))
-            let saved = save(snapshot, as: "overview.json")
-            let published = save(localSnapshot, as: "native-overview.json", in: dataDirectory.deletingLastPathComponent())
-            apply(snapshot); refreshing = false
-            if !saved || !published || storageIssue != nil { message = "Readings updated, but could not be saved. Check free space and access to OVRCAST’s data folder." }
-            else if snapshot.accounts.isEmpty { message = "No usage readings yet. Connect a provider in Settings, then check again." }
-            else { message = snapshot.accounts.contains { !$0.current } ? "Some accounts need attention. Open an account for connection help." : "Usage is up to date." }
+            refreshing = false
+            if changed {
+                // A changed selection must not remain stuck at “checking”.
+                for key in health.keys where health[key]?.state == .checking { health[key] = previousHealth[key] ?? ConnectionHealth() }
+                message = "Connections changed while checking. Choose Check connection to refresh the current selection."
+            } else if storageIssue != nil { message = "Readings updated, but could not be saved. Check free space and access to OVRCAST’s data folder." }
+            else if accounts.isEmpty { message = "No usage readings yet. Connect a provider in Settings, then check again." }
+            else { message = accounts.contains { !$0.current } ? "Some accounts need attention. Open an account for connection help." : "Usage is up to date." }
+            onChange?()
+            if recoveryPending { recoveryPending = false; refresh() }
         }
     }
     func enableNotifications(_ enabled: Bool) {
@@ -272,10 +335,15 @@ import UniformTypeIdentifiers
             catch { self.message = "Could not save the snapshot." }
         }
     }
-    func copySupportReport() {
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(Insights.supportReport(accounts, native: nativeMode, helperAvailable: NativeCollector.helper != nil), forType: .string)
-        message = "Support report copied. Account identities, balances and machine details are excluded."
+    var supportReport: String {
+        SupportReport.text(accounts: accounts, providers: preferences.providers, health: health,
+            remoteCount: preferences.remotes.count, native: nativeMode, helperAvailable: NativeCollector.helper != nil,
+            storageProblem: storageIssue != nil)
+    }
+    func copySupportReport() { onSupportReport?(supportReport) }
+    func copyReviewedSupportReport(_ text: String) {
+        NSPasteboard.general.clearContents(); NSPasteboard.general.setString(text, forType: .string)
+        message = "Reviewed support report copied. Nothing was sent automatically."
     }
     func reconnect(_ account: UsageAccount) {
         let localMachine = nativeMode ? preferences.machineName : legacyLocalMachine

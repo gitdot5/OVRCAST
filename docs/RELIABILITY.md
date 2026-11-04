@@ -1,3 +1,8 @@
+## Next release candidate
+
+The unpublished 0.5.0 changes and acceptance gates are tracked in
+[NEXT_RELEASE.md](NEXT_RELEASE.md). The evidence below describes published 0.4.2.
+
 # Reliability work for 0.4.2
 
 Reviewed November 3, 2026. This remains a public preview. Automated checks cannot

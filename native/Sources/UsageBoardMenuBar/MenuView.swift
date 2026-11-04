@@ -107,6 +107,16 @@ struct AccountDetail: View {
             if !account.current || account.requiresSignIn == true || account.quotas.contains(where: \.awaiting) {
                 ConnectionHelpView(account: account, store: store)
             }
+            if store.preferences.showForecasts {
+                ForEach(Array(account.quotas.enumerated()), id: \.offset) { _, quota in
+                    if let forecast = CapacityForecast.estimate(account: account, quota: quota, history: store.history) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(quota.label + " · " + forecast.label).font(.caption)
+                            Text("Based on recent local readings. Your pace can change.").font(.caption2).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
             AccountHistoryView(points: store.history.filter { $0.accountID == account.id })
             VStack(alignment: .leading, spacing: 8) {
                 Text("Saved resets").font(.system(size: 12, weight: .semibold))
@@ -133,6 +143,7 @@ struct AccountDetail: View {
 }
 struct MenuView: View {
     @ObservedObject var store: UsageStore
+    @ObservedObject private var updates = AppUpdates.shared
     let openBoard: () -> Void
     var maxHeight: CGFloat = 710
     var floating = false
@@ -160,8 +171,9 @@ struct MenuView: View {
                 Button { store.refresh() } label: { Image(systemName: "arrow.clockwise") }
                     .buttonStyle(.plain).help("Refresh usage").accessibilityLabel("Refresh usage")
                 Menu {
+                    Button("Check for Updates…") { updates.check() }.disabled(!updates.ready)
                     Button("Settings…") { store.showSettings = true }
-                    Button("Copy support report") { store.copySupportReport() }
+                    Button("Review support report…") { store.copySupportReport() }
                     Button("Export snapshot…") { store.exportSnapshot() }
                     Divider()
                     Button("Open full board", action: openBoard)

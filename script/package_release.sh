@@ -22,23 +22,8 @@ cp "$SOURCE_DIR/app/UsageBoard.icns" "$APP_DIR/Contents/Resources/"
 ditto "$SOURCE_DIR/assets/provider-logos" "$APP_DIR/Contents/Resources/assets/provider-logos"
 cp "$SOURCE_DIR/LICENSE" "$SOURCE_DIR/THIRD_PARTY_NOTICES.md" "$APP_DIR/Contents/Resources/"
 ditto "$SOURCE_DIR/LICENSES" "$APP_DIR/Contents/Resources/LICENSES"
-/usr/bin/python3 - "$APP_DIR/Contents/Info.plist" "$SOURCE_DIR/app/version.json" <<'PY'
-import json,plistlib,sys
-version=json.load(open(sys.argv[2]))
-with open(sys.argv[1],'wb') as f:
- plistlib.dump({'CFBundleExecutable':'UsageBoardMenuBar','CFBundleIdentifier':'com.weekthink.usageboard',
- 'CFBundleName':'OVRCAST','CFBundleDisplayName':'OVRCAST','CFBundlePackageType':'APPL',
- 'CFBundleShortVersionString':version['version'],'CFBundleVersion':version['build'],'CFBundleIconFile':'UsageBoard.icns',
- 'LSMinimumSystemVersion':'14.0','NSPrincipalClass':'NSApplication','LSUIElement':True,
- 'CFBundleURLTypes':[{'CFBundleURLName':'com.weekthink.usageboard','CFBundleURLSchemes':['usageboard']}]},f)
-PY
-if [[ -n "${DEVELOPER_ID:-}" ]]; then
- codesign --force --options runtime --timestamp --identifier com.weekthink.ovrcast.collector --sign "$DEVELOPER_ID" "$APP_DIR/Contents/Helpers/OVRCASTCollector"
- codesign --force --options runtime --timestamp --sign "$DEVELOPER_ID" "$APP_DIR"
-else
- codesign --force --sign - "$APP_DIR/Contents/Helpers/OVRCASTCollector"
- codesign --force --sign - "$APP_DIR"
-fi
+/usr/bin/python3 "$SOURCE_DIR/script/prepare_bundle.py" "$APP_DIR" "$SOURCE_DIR"
+/usr/bin/python3 "$SOURCE_DIR/script/sign_bundle.py" "$APP_DIR"
 codesign --verify --deep --strict "$APP_DIR"
 ZIP_OUTPUT="$ROOT_DIR/dist/OVRCAST-$VERSION-preview.app.zip"
 /usr/bin/ditto -c -k --keepParent "$APP_DIR" "$ZIP_OUTPUT"

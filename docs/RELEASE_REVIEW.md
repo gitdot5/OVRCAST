@@ -1,3 +1,8 @@
+## Unpublished 0.5.0 candidate
+
+See [NEXT_RELEASE.md](NEXT_RELEASE.md) for current candidate scope and checks.
+Version 0.4.3 remains the published release described below.
+
 # OVRCAST 0.4.3 distribution privacy update
 
 Reviewed November 3, 2026. The app's Swift behavior and collector source are

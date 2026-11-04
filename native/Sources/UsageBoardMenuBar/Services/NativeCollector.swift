@@ -148,7 +148,10 @@ enum NativeCollector {
         var result: [String: UsageAccount] = [:]
         for account in accounts {
             if let old = result[account.id] {
-                var winner = (parsedDate(account.observedAt) ?? .distantPast) > (parsedDate(old.observedAt) ?? .distantPast) ? account : old
+                // Prefer a usable local/remote reading over a newer failed cache entry.
+                var winner: UsageAccount
+                if account.current != old.current { winner = account.current ? account : old }
+                else { winner = (parsedDate(account.observedAt) ?? .distantPast) > (parsedDate(old.observedAt) ?? .distantPast) ? account : old }
                 winner.machines = Array(Set(old.machines + account.machines)).sorted()
                 result[account.id] = winner
             } else { result[account.id] = account }
