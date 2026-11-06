@@ -26,7 +26,8 @@ class ReleaseReadinessTests(unittest.TestCase):
     def test_pending_or_unsubstantiated_gate_cannot_pass(self):
         with tempfile.TemporaryDirectory() as folder:
             archive = Path(folder) / 'candidate.zip'; archive.write_bytes(b'fixture archive')
-            for state, evidence in [('pending', ''), ('pass', ''), ('failed', 'Reviewed failure')]:
+            for state, evidence in [('pending', ''), ('pass', ''), ('pass', None),
+                                    ('pass', True), ('pass', {}), ('failed', 'Reviewed failure')]:
                 record = self.record(archive.read_bytes())
                 record['checks']['live_providers'] = {'status': state, 'evidence': evidence}
                 self.assertTrue(readiness.blockers(record, {'version': '1.0', 'build': '5'}, archive))

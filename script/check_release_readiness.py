@@ -22,7 +22,8 @@ def blockers(record, version, artifact):
     checks = record.get('checks', {})
     for name in sorted(REQUIRED):
         check = checks.get(name, {})
-        if check.get('status') != 'pass' or not str(check.get('evidence', '')).strip():
+        evidence = check.get('evidence')
+        if check.get('status') != 'pass' or not isinstance(evidence, str) or not evidence.strip():
             result.append(name + ': reviewed passing evidence is required')
     if not artifact.is_file():
         result.append('Candidate archive is missing')

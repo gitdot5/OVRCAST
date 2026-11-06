@@ -48,10 +48,10 @@ https://github.com/gitdot5/OVRCAST/actions/runs/41937588751
 
 - [x] Build 12 local source tests: 92 Swift and 102 Python checks.
 - [ ] Fresh build 12 hosted tests and universal package contract.
-- [ ] Final build 12 signing, notarization, payload and packaged-preview checks.
-- [ ] Live Claude reading after human sign-in; official Claude Code status was
-  signed out during the November 6 check. No automatic sign-in was attempted.
-- [ ] Notification delivery after the user's macOS permission step.
+- [x] Final build 12 signing, notarization, payload and packaged-preview checks.
+- [ ] Live provider acceptance with consenting testers using their own connections.
+  Detailed account and connection results remain private.
+- [ ] Notification delivery with the required macOS permissions.
 - [ ] Standard updater dialogs and interactive keyboard/VoiceOver checks. The
   computer-use tool stalled and was interrupted; no successful UI action is claimed.
 - [ ] Physical Intel/macOS 14 and actual sleep/wake/network endurance.
@@ -87,3 +87,38 @@ Silicon launches, tamper rejection, disposable programmatic updater installation
 and manual upgrade/rollback. Those tests do not validate changed build 12 code.
 The collector source remains unchanged; its code hashes matched installed 0.4.3
 in both architectures. The published app remains 0.4.3; 0.5.0 remains held.
+
+## Build 12 package results
+
+The exact build 12 ZIP passes Developer ID signature, Apple notarization,
+Gatekeeper, universal-binary, resource and private-payload checks. Day/Night,
+offline, every settings tab, support and fresh/recovered-setup previews pass.
+The Intel GUI slice renders successfully through `open --arch x86_64` under
+Rosetta. Manual 0.4.3 → build12 → 0.4.3 fixture launch/rollback preserves preferences.
+Signed feed/archive checks accept this package and reject altered copies.
+
+SHA-256: `0de5a21b05f39fda61ab3a274a241de5735375c17c10203633cbb3fd49c5cc13`.
+
+Current-source test jobs passed on Intel/macOS 15 and Apple Silicon/macOS 26;
+the full clean universal package job is still running as of this review:
+https://github.com/gitdot5/OVRCAST/actions/runs/42304960992
+Runtime commit: `97fe9138fafaf8a4247c49f4b5f4d7ac8b14890a`.
+Later documentation/readiness updates do not change the tested runtime.
+
+The resource gate remains pending for battery/endurance observations despite the
+short CPU/RSS profile. The beta plan is ready but is not an enrolled or completed
+beta. Provider acceptance, notification delivery, physical Intel/macOS 14,
+actual sleep/network endurance, VoiceOver/keyboard interaction and standard
+updater-dialog acceptance still require evidence. No release or feed is published.
+
+Build 12 also launches on both existing remote Apple Silicon Macs using private
+demo data, with signature, Gatekeeper and packaged-resource checks. This is a
+fresh launch check, not physical Intel/macOS 14 or sleep/wake/endurance evidence.
+Per-account provider and permission results are retained only in private evidence.
+Do not publish personal connection status, quota readings or account diagnostics.
+Beta participants and their hardware must be resolved before enrollment.
+
+The acceptance-record validator was additionally tested with null, boolean and
+object evidence values: these cannot count as reviewed evidence. This Python-only
+hardening was locally regression-tested after the runtime CI commit; it does not
+change the signed GUI or collector.
