@@ -92,10 +92,18 @@ enum NativeCollector {
             guard let usage = row["usage"] as? [String: Any] else {
                 let error = row["error"] as? [String: Any] ?? [:]
                 let message = (error["message"] as? String ?? "").lowercased()
-                let auth = error["kind"] as? String == "authentication" || ["sign in", "login", "not logged", "unauthorized", "credentials not found", "authenticate", "token expired"].contains(where: message.contains)
+                let auth = error["kind"] as? String == "authentication" || ["sign in", "sign-in", "login", "not logged", "unauthorized", "credentials not found", "credentials missing", "credentials are invalid", "access token missing", "authenticate", "token expired"].contains(where: message.contains)
                 let missingTool = ["not found in path", "cli not found", "could not find codex", "could not find claude"].contains(where: message.contains)
-                let issue = auth ? "Sign in through the provider app, then check again." : missingTool ? "The provider software needed for this connection is missing. Use Connect \(provider) in OVRCAST Settings, complete its setup, then check again." : "Open the provider connection from OVRCAST Settings, then check again."
-                return failure(provider: provider, machine: machine, issue: issue, signIn: auth)
+                let keychainDenied = message.contains("keychain") && ["denied", "revoked", "interaction not allowed"].contains(where: message.contains)
+                let rateLimited = ["rate limit", "rate-limit", "too many requests", "http 429"].contains(where: message.contains)
+                let issue: String
+                if keychainDenied { issue = "Local credential access needs attention. Open the provider connection and retry; review any macOS Keychain prompt yourself. Your saved credentials have not been changed." }
+                else if rateLimited { issue = "The provider temporarily limited usage checks. Wait for the automatic retry, or try again later. Last-known readings remain visible." }
+                else if message.contains("credentials are invalid") { issue = "The saved provider connection could not be read. Use Connect \(provider) to check the provider software and reconnect, then retry. OVRCAST has not deleted or replaced your credentials." }
+                else if auth { issue = "Sign in through the provider app, then check again." }
+                else if missingTool { issue = "The provider software needed for this connection is missing. Use Connect \(provider) in OVRCAST Settings, complete its setup, then check again." }
+                else { issue = "Open the provider connection from OVRCAST Settings, then check again." }
+                return failure(provider: provider, machine: machine, issue: issue, signIn: auth && !keychainDenied && !rateLimited)
             }
             let email = (usage["accountEmail"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "Account \(index + 1)"
             let observed = usage["updatedAt"] as? String

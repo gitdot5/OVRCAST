@@ -1,7 +1,7 @@
 import Foundation
 
 enum ConnectionState: String, Codable {
-    case notChecked, checking, connected, partial, signInRequired, softwareMissing, unavailable, stale, resetPending
+    case notChecked, checking, connected, partial, signInRequired, softwareMissing, unavailable, rateLimited, credentialAccessRequired, stale, resetPending
     var title: String {
         switch self {
         case .notChecked: return "Not checked"
@@ -11,6 +11,8 @@ enum ConnectionState: String, Codable {
         case .signInRequired: return "Sign-in needed"
         case .softwareMissing: return "Provider software missing"
         case .unavailable: return "Connection unavailable"
+        case .rateLimited: return "Usage checks temporarily limited"
+        case .credentialAccessRequired: return "Local credential access needed"
         case .stale: return "Reading is old"
         case .resetPending: return "Waiting for reset confirmation"
         }
@@ -24,6 +26,8 @@ enum ConnectionState: String, Codable {
         case .signInRequired: return "Complete sign-in in the provider software, then retry."
         case .softwareMissing: return "Install the provider software using Connect, then retry."
         case .unavailable: return "Check the network and provider software. Automatic retries slow down after failures."
+        case .rateLimited: return "Wait for the next automatic retry. Repeated manual checks can prolong a provider limit."
+        case .credentialAccessRequired: return "Open the provider connection and retry. Review any macOS credential-access prompt yourself; OVRCAST does not change your saved sign-in."
         case .stale: return "Last-known readings remain visible. Retry to confirm current capacity."
         case .resetPending: return "A fresh reading must confirm restored allowance."
         }
@@ -45,6 +49,8 @@ struct ConnectionHealth: Codable {
             if rows.contains(where: { !$0.current || $0.requiresSignIn == true || !$0.issue.isEmpty }) { return .partial }
             return rows.contains(where: { $0.current && $0.quotas.contains(where: \.awaiting) }) ? .resetPending : .connected
         }
+        if rows.contains(where: { $0.issue.hasPrefix("Local credential access needs attention.") }) { return .credentialAccessRequired }
+        if rows.contains(where: { $0.issue.hasPrefix("The provider temporarily limited usage checks.") }) { return .rateLimited }
         if rows.contains(where: { $0.requiresSignIn == true }) { return .signInRequired }
         if rows.contains(where: { $0.issue.contains("software needed for this connection is missing") }) { return .softwareMissing }
         return .unavailable

@@ -1,0 +1,14 @@
+[
+  {"name":"codex-usage","provider":"Codex","response":[{"source":"cli","usage":{"accountEmail":"codex@example.invalid","updatedAt":"NOW","primary":{"usedPercent":23,"resetsAt":"FUTURE"},"secondary":{"usedPercent":40,"resetsAt":"FUTURE"}}}],"remaining":[77,60],"state":"connected","signIn":false},
+  {"name":"claude-usage","provider":"Claude","response":[{"source":"oauth","usage":{"accountEmail":"claude@example.invalid","updatedAt":"NOW","primary":{"usedPercent":12,"resetsAt":"FUTURE"},"secondary":{"usedPercent":81,"resetsAt":"FUTURE"}}}],"remaining":[88,19],"state":"connected","signIn":false},
+  {"name":"antigravity-models","provider":"Antigravity","response":[{"usage":{"accountEmail":"models@example.invalid","updatedAt":"NOW","primary":{"usedPercent":10,"resetsAt":"FUTURE"},"extraRateWindows":[{"title":"Model A only","window":{"usedPercent":75,"resetsAt":"FUTURE"}}]}}],"remaining":[90,25],"state":"connected","signIn":false},
+  {"name":"claude-unreadable-connection","provider":"Claude","response":[{"error":{"kind":"provider","message":"Claude OAuth credentials are invalid."}}],"remaining":[],"state":"signInRequired","signIn":true},
+  {"name":"claude-expired","provider":"Claude","response":[{"error":{"kind":"authentication","message":"Claude OAuth token expired. Run claude login, then retry."}}],"remaining":[],"state":"signInRequired","signIn":true},
+  {"name":"claude-keychain-denied","provider":"Claude","response":[{"error":{"kind":"provider","message":"Claude Keychain access was denied."}}],"remaining":[],"state":"credentialAccessRequired","signIn":false},
+  {"name":"claude-rate-limited","provider":"Claude","response":[{"error":{"kind":"provider","message":"HTTP 429: too many requests."}}],"remaining":[],"state":"rateLimited","signIn":false},
+  {"name":"codex-missing-cli","provider":"Codex","response":[{"error":{"kind":"provider","message":"Codex CLI not found in PATH."}}],"remaining":[],"state":"softwareMissing","signIn":false},
+  {"name":"antigravity-unavailable","provider":"Antigravity","response":[{"error":{"kind":"provider","message":"Provider could not be reached."}}],"remaining":[],"state":"unavailable","signIn":false},
+  {"name":"schema-changed-percent","provider":"Codex","response":[{"usage":{"updatedAt":"NOW","primary":{"usedPercent":"23","resetsAt":"FUTURE"}}}],"remaining":[],"state":"unavailable","signIn":false},
+  {"name":"invalid-percent","provider":"Claude","response":[{"usage":{"updatedAt":"NOW","primary":{"usedPercent":-1,"resetsAt":"FUTURE"}}}],"remaining":[],"state":"unavailable","signIn":false},
+  {"name":"boolean-percent","provider":"Antigravity","response":[{"usage":{"updatedAt":"NOW","primary":{"usedPercent":true,"resetsAt":"FUTURE"}}}],"remaining":[],"state":"unavailable","signIn":false}
+]

@@ -124,11 +124,7 @@ enum AccountList {
     }
 }
 func parsedDate(_ text: String?) -> Date? {
-    guard let text else { return nil }
-    let formatter = ISO8601DateFormatter()
-    if let date = formatter.date(from: text) { return date }
-    formatter.formatOptions.insert(.withFractionalSeconds)
-    return formatter.date(from: text)
+    UsageDateParser.shared.parse(text)
 }
 func age(_ text: String?) -> String {
     guard let date = parsedDate(text) else { return "No reading" }

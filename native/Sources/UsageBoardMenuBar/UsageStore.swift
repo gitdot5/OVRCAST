@@ -11,8 +11,10 @@ import UniformTypeIdentifiers
     @Published var reconnecting = false
     @Published var health: [String: ConnectionHealth] = [:]
     var sleeping = false
-    private var recoveryPending = false
-    private var lastRecovery = Date.distantPast
+    private lazy var recovery = RecoveryCoordinator(eligible: { [weak self] in
+        guard let self else { return false }
+        return !self.isDemo && self.nativeMode && self.preferences.setupComplete && !self.sleeping
+    }, busy: { [weak self] in self?.refreshing ?? false }, refresh: { [weak self] in self?.refresh() })
     @Published var selectedProvider = "Overview"
     @Published var selectedAccount: String?
     @Published var showSettings = false { didSet { onSettingsChanged?(showSettings) } }
@@ -209,11 +211,8 @@ import UniformTypeIdentifiers
         guard canFinishSetup else { message = "Check a provider and receive a current usage reading first."; return }
         preferences.nativeCollection = true; preferences.setupComplete = true; showSettings = false
     }
-    func recoverConnection(now: Date = Date()) {
-        guard !isDemo, nativeMode, preferences.setupComplete, !sleeping, now.timeIntervalSince(lastRecovery) >= 10 else { return }
-        lastRecovery = now
-        if refreshing { recoveryPending = true } else { refresh() }
-    }
+    func recoverConnection() { recovery.request() }
+    func stop() { timer?.invalidate(); timer = nil; recovery.stop() }
     var compactStatus: String {
         let provider = preferences.recommendationProvider
         guard let best = Insights.recommend(accounts, provider: provider) else { return provider + " · —" }
@@ -302,7 +301,7 @@ import UniformTypeIdentifiers
             else if accounts.isEmpty { message = "No usage readings yet. Connect a provider in Settings, then check again." }
             else { message = accounts.contains { !$0.current } ? "Some accounts need attention. Open an account for connection help." : "Usage is up to date." }
             onChange?()
-            if recoveryPending { recoveryPending = false; refresh() }
+            recovery.finished()
         }
     }
     func enableNotifications(_ enabled: Bool) {

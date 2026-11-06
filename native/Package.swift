@@ -9,6 +9,6 @@ let package = Package(
     targets: [
         .executableTarget(name: "UsageBoardMenuBar", dependencies: [.product(name: "Sparkle", package: "Sparkle")],
                           linkerSettings: [.unsafeFlags(["-Xlinker", "-rpath", "-Xlinker", "@executable_path/../Frameworks"])]),
-        .testTarget(name: "UsageBoardMenuBarTests", dependencies: ["UsageBoardMenuBar"])
+        .testTarget(name: "UsageBoardMenuBarTests", dependencies: ["UsageBoardMenuBar"], resources: [.copy("Fixtures")])
     ]
 )

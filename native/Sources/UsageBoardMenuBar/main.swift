@@ -78,7 +78,7 @@ import UserNotifications
         popover.contentViewController = controller
         popover.contentSize = NSSize(width: 430, height: menuHeight)
         popover.behavior = .transient
-        popover.animates = true
+        popover.animates = !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         store.onChange = { [weak self] in self?.updateStatus() }
         store.onSupportReport = { [weak self] text in self?.presentSupportReport(text) }
         store.onSettingsChanged = { [weak self] visible in self?.presentSettings(visible) }
@@ -150,6 +150,7 @@ import UserNotifications
     private func updateStatus() {
         statusItem?.button?.title = store.preferences.compactMenuBar ? " " + store.compactStatus : store.accounts.isEmpty ? "" : " \(store.available)/\(store.accounts.count)"
         statusItem?.button?.toolTip = store.preferences.compactMenuBar ? store.statusTooltip : "OVRCAST · \(store.available) of \(store.accounts.count) accounts available"
+        statusItem?.button?.setAccessibilityValue(statusItem?.button?.toolTip)
         writeDiagnostics()
     }
     @objc private func togglePopover() {
@@ -158,6 +159,7 @@ import UserNotifications
         guard let button = statusItem.button else { return }
         store.load()
         NSApp.activate(ignoringOtherApps: true)
+        popover.animates = !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         popoverEverShown = popoverEverShown || popover.isShown
         popover.contentViewController?.view.window?.makeKey()
@@ -215,7 +217,7 @@ import UserNotifications
     }
     func applicationWillTerminate(_ notification: Notification) {
         lifecycle.stop()
-        store.timer?.invalidate()
+        store.stop()
         shortcut.unregister()
         if let globalMonitor { NSEvent.removeMonitor(globalMonitor) }
         if let localMonitor { NSEvent.removeMonitor(localMonitor) }

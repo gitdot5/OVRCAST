@@ -31,7 +31,11 @@ Do not export private keys into the repository, build environment or download ho
 4. Test an update of a separate disposable installation. Check process restart,
    version, signatures and preserved settings. Never use a developer feed in the
    shipping app. Complete the other candidate acceptance checks before publication.
-5. Publish the exact verified archive, compare anonymous download hashes, then
+5. Run `python3 script/check_release_readiness.py FINAL_ARCHIVE`. Every gate in
+   `app/release-readiness.json` must have reviewed passing evidence for this build,
+   and its SHA-256 must match the final archive. A pending gate blocks publication;
+   the record does not substitute for the underlying tests.
+6. Publish the exact verified archive, compare anonymous download hashes, then
    publish its generated signed `appcast.xml` unchanged. Never hand-edit a signed
    feed. Retain the previous signed release for manual recovery.
 

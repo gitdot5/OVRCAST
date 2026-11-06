@@ -23,6 +23,7 @@ struct SettingsView: View {
                 }
                 Spacer()
                 Button { store.showSettings = false } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary) }.buttonStyle(.plain)
+                    .accessibilityLabel("Close settings").keyboardShortcut(.cancelAction)
             }
             HStack(spacing: 3) {
                 ForEach(["connect", "health", "appearance", "alerts", "computers", "about"], id: \.self) { tab in
@@ -51,7 +52,7 @@ struct SettingsView: View {
                 Spacer()
                 if !store.preferences.setupComplete {
                     Button("Open my board") { store.finishSetup() }
-                        .buttonStyle(.borderedProminent).disabled(!store.canFinishSetup)
+                        .buttonStyle(.borderedProminent).disabled(!store.canFinishSetup).keyboardShortcut(.defaultAction)
                 } else { Button("Done") { store.showSettings = false }.keyboardShortcut(.defaultAction) }
             }
         }.padding(22).frame(width: 540, height: 530).background(.background).preferredColorScheme(store.scheme)
