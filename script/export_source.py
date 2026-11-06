@@ -12,7 +12,9 @@ FILES = (
     'board.py', 'capacity.py', 'collect.py', 'dashboard.py', 'dashboard.css',
     'dashboard.js', 'gather.py', 'install_agent.py', 'native_snapshot.py',
     'assets/provider-logos/codex.png', 'assets/provider-logos/claude.png', 'assets/provider-logos/antigravity.png',
-    'native/Package.swift', 'app/install_app.sh', 'app/build_icon.sh', 'app/version.json',
+    'native/Package.swift', 'native/Package.resolved', 'app/updates.json',
+    'app/release-readiness.json', 'script/check_release_readiness.py',
+    'script/prepare_bundle.py', 'script/sign_bundle.py', 'script/generate_update_feed.sh', 'app/install_app.sh', 'app/build_icon.sh', 'app/version.json',
     '.github/workflows/reliability.yml', 'script/verify_release.py',
     'app/icon.svg', 'app/icon-master.png', 'app/icon_1024.png', 'app/UsageBoard.icns',
     'script/build_collector.sh', 'script/update_vendor_manifest.py',
@@ -22,7 +24,7 @@ FILES = (
 TREES = {
     'tests': {'.py', '.json', '.jsonl'},
     'native/Sources': {'.swift'},
-    'native/Tests': {'.swift'},
+    'native/Tests': {'.swift', '.json'},
     'docs': {'.md', '.txt'},
     'LICENSES': {'.txt'},
 }
@@ -43,6 +45,8 @@ DUMMY_CREDENTIALS = (
 
 def validate_text(name, text):
     """Fail closed with a filename and category, never echo the sensitive value."""
+    if name == 'LICENSES/Sparkle.txt' and hashlib.sha256(text.encode()).hexdigest() == '389a4e4e9a32f059775b13a06e25a591445ba229d2838d26dd3e7c0c45127cfe':
+        return  # Pinned public third-party copyright, not a private account.
     if any(m.group(1).lower() not in EXAMPLE_DOMAINS for m in EMAIL.finditer(text)):
         raise ValueError(name + ': non-example account identity')
     if PRIVATE_PATH.search(text) or PRIVATE_HOST.search(text):

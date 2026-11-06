@@ -23,6 +23,8 @@ struct RemoteMachine: Codable, Identifiable, Equatable {
     }
 }
 struct BoardPreferences: Codable {
+    var compactMenuBar = false
+    var showForecasts = false
     var setupComplete = false
     var nativeCollection = false
     var providers = ["Codex", "Claude"]
@@ -41,11 +43,13 @@ struct BoardPreferences: Codable {
 
     init() {}
     private enum CodingKeys: String, CodingKey {
-        case setupComplete, nativeCollection, providers, machineName, aliases, privacyMode, shortcutEnabled, notifications, lowThreshold, quietStart, quietEnd, snoozeUntil, remotes, recommendationProvider, recommendationWindow
+        case compactMenuBar, showForecasts, setupComplete, nativeCollection, providers, machineName, aliases, privacyMode, shortcutEnabled, notifications, lowThreshold, quietStart, quietEnd, snoozeUntil, remotes, recommendationProvider, recommendationWindow
     }
     init(from decoder: Decoder) throws {
         self.init()
         let values = try decoder.container(keyedBy: CodingKeys.self)
+        compactMenuBar = try values.decodeIfPresent(Bool.self, forKey: .compactMenuBar) ?? compactMenuBar
+        showForecasts = try values.decodeIfPresent(Bool.self, forKey: .showForecasts) ?? showForecasts
         setupComplete = try values.decodeIfPresent(Bool.self, forKey: .setupComplete) ?? setupComplete
         nativeCollection = try values.decodeIfPresent(Bool.self, forKey: .nativeCollection) ?? nativeCollection
         providers = try values.decodeIfPresent([String].self, forKey: .providers) ?? providers
@@ -78,6 +82,9 @@ struct HistoryPoint: Codable, Identifiable {
 }
 enum PrivateFiles {
     static func write<T: Encodable>(_ value: T, to url: URL) throws {
+        try writeData(JSONEncoder().encode(value), to: url)
+    }
+    static func writeData(_ data: Data, to url: URL) throws {
         let fm = FileManager.default
         try fm.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true,
                                attributes: [.posixPermissions: 0o700])
@@ -88,7 +95,7 @@ enum PrivateFiles {
         }
         defer { try? fm.removeItem(at: temp) }
         let handle = try FileHandle(forWritingTo: temp)
-        try handle.write(contentsOf: JSONEncoder().encode(value))
+        try handle.write(contentsOf: data)
         try handle.close()
         if fm.fileExists(atPath: url.path) { _ = try fm.replaceItemAt(url, withItemAt: temp) }
         else { try fm.moveItem(at: temp, to: url) }

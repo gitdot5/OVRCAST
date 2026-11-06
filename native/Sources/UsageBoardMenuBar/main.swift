@@ -34,6 +34,8 @@ import UserNotifications
     private var previewWindow: NSWindow?
     private var floatingPanel: NSPanel?
     private var settingsWindow: NSWindow?
+    private var supportWindow: NSWindow?
+    private let lifecycle = RefreshLifecycle()
     private let shortcut = BoardShortcut()
     private var shortcutEnabled: Bool?
     private var floatingEnabled: Bool {
@@ -76,8 +78,9 @@ import UserNotifications
         popover.contentViewController = controller
         popover.contentSize = NSSize(width: 430, height: menuHeight)
         popover.behavior = .transient
-        popover.animates = true
+        popover.animates = !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         store.onChange = { [weak self] in self?.updateStatus() }
+        store.onSupportReport = { [weak self] text in self?.presentSupportReport(text) }
         store.onSettingsChanged = { [weak self] visible in self?.presentSettings(visible) }
         store.onPreferencesChanged = { [weak self] in self?.updatePreferences() }
         shortcut.action = { [weak self] in
@@ -87,6 +90,8 @@ import UserNotifications
         }
         updatePreferences()
         store.start()
+        AppUpdates.shared.start(demo: store.isDemo)
+        if !store.isDemo { lifecycle.start(store: store) }
         globalMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
             Task { @MainActor in self?.popover.performClose(nil) }
         }
@@ -101,6 +106,7 @@ import UserNotifications
         }
         if args.contains("--board") { openBoard() }
         if args.contains("--setup"), previewPath == nil { store.showSettings = true }
+        if args.contains("--test-notification") { Task { store.message = await Notifications.test(); writeDiagnostics() } }
         writeDiagnostics()
     }
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
@@ -134,9 +140,17 @@ import UserNotifications
         settingsWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
+    private func presentSupportReport(_ text: String) {
+        if let supportWindow { supportWindow.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true); return }
+        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 500), styleMask: [.titled, .closable, .resizable], backing: .buffered, defer: false)
+        window.title = "OVRCAST Support Report"; window.isReleasedWhenClosed = false; window.delegate = self
+        window.contentViewController = NSHostingController(rootView: SupportReportView(text: text, scheme: store.scheme, copy: { [weak self] in self?.store.copyReviewedSupportReport(text) }))
+        window.center(); supportWindow = window; window.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
+    }
     private func updateStatus() {
-        statusItem?.button?.title = store.accounts.isEmpty ? "" : " \(store.available)/\(store.accounts.count)"
-        statusItem?.button?.toolTip = "OVRCAST · \(store.available) of \(store.accounts.count) accounts available"
+        statusItem?.button?.title = store.preferences.compactMenuBar ? " " + store.compactStatus : store.accounts.isEmpty ? "" : " \(store.available)/\(store.accounts.count)"
+        statusItem?.button?.toolTip = store.preferences.compactMenuBar ? store.statusTooltip : "OVRCAST · \(store.available) of \(store.accounts.count) accounts available"
+        statusItem?.button?.setAccessibilityValue(statusItem?.button?.toolTip)
         writeDiagnostics()
     }
     @objc private func togglePopover() {
@@ -145,6 +159,7 @@ import UserNotifications
         guard let button = statusItem.button else { return }
         store.load()
         NSApp.activate(ignoringOtherApps: true)
+        popover.animates = !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         popoverEverShown = popoverEverShown || popover.isShown
         popover.contentViewController?.view.window?.makeKey()
@@ -187,6 +202,7 @@ import UserNotifications
         writeDiagnostics()
     }
     func windowWillClose(_ notification: Notification) {
+        if (notification.object as? NSWindow) === supportWindow { supportWindow = nil }
         if (notification.object as? NSWindow) === settingsWindow { store.showSettings = false }
         // Closing hides the board; the menu bar icon brings it back in the same place.
         DispatchQueue.main.async { [weak self] in self?.writeDiagnostics() }
@@ -200,6 +216,8 @@ import UserNotifications
         return true
     }
     func applicationWillTerminate(_ notification: Notification) {
+        lifecycle.stop()
+        store.stop()
         shortcut.unregister()
         if let globalMonitor { NSEvent.removeMonitor(globalMonitor) }
         if let localMonitor { NSEvent.removeMonitor(localMonitor) }
@@ -220,6 +238,8 @@ import UserNotifications
                                    "theme": store.theme, "nativeCollection": store.nativeMode,
                                    "settingsVisible": settingsWindow?.isVisible == true,
                                    "privacyMode": store.preferences.privacyMode, "historySamples": store.history.count,
+                                   "setupVerified": store.canFinishSetup, "updateReady": AppUpdates.shared.ready,
+                                   "updateStatus": AppUpdates.shared.status, "message": store.message ?? "",
                                    "shortcut": store.shortcutStatus]
         if let data = try? JSONSerialization.data(withJSONObject: result, options: [.sortedKeys]) {
             try? data.write(to: URL(fileURLWithPath: diagnosticsPath), options: .atomic)
@@ -227,11 +247,12 @@ import UserNotifications
     }
     private func showPreview() {
         let setup = CommandLine.arguments.contains("--setup")
+        let support = CommandLine.arguments.contains("--support-preview")
         let height: CGFloat = setup ? 574 : menuHeight
-        let content = setup ? AnyView(SettingsView(store: store)) : AnyView(MenuView(store: store, openBoard: { [weak self] in self?.openBoard() }, maxHeight: height,
+        let content = support ? AnyView(SupportReportView(text: store.supportReport, scheme: store.scheme, copy: {})) : setup ? AnyView(SettingsView(store: store)) : AnyView(MenuView(store: store, openBoard: { [weak self] in self?.openBoard() }, maxHeight: height,
             toggleFloating: { [weak self] in self?.setFloating(true) }))
         let host = NSHostingView(rootView: content)
-        host.frame = NSRect(x: 0, y: 0, width: setup ? 584 : 430, height: height)
+        host.frame = NSRect(x: 0, y: 0, width: support ? 600 : setup ? 584 : 430, height: height)
         let window = NSWindow(contentRect: host.frame, styleMask: [.titled, .closable], backing: .buffered, defer: false)
         window.title = "OVRCAST · Menu preview"
         window.isReleasedWhenClosed = false

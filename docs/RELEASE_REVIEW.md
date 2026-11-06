@@ -1,3 +1,8 @@
+## Unpublished 0.5.0 candidate
+
+See [NEXT_RELEASE.md](NEXT_RELEASE.md) for current candidate scope and checks.
+Version 0.4.3 remains the published release described below.
+
 # OVRCAST 0.4.3 distribution privacy update
 
 Reviewed November 3, 2026. The app's Swift behavior and collector source are
@@ -30,9 +35,8 @@ release notes.
 The signed app passed Day/Night, offline, fresh-user setup and corrupted-settings
 recovery previews. Recovery keeps privacy mode on. The final ZIP passed strict
 Developer ID signature, Apple notarization, stapled-ticket, Gatekeeper and
-bundled-collector resource checks. Live Codex and Antigravity checks returned
-current usage and reset timestamps on November 3; Claude did not return a usable
-reading. Both executables contain arm64 and x86_64
+bundled-collector resource checks. Detailed provider-connection results are retained in private test evidence;
+provider acceptance remains separate from automated package checks. Both executables contain arm64 and x86_64
 slices with macOS 14 minimum deployment metadata. Source exports and final
 release downloads are verified with SHA-256 manifests.
 
@@ -88,9 +92,8 @@ The source archive uses explicit file allowlists and integrity manifests.
   navigation passed. The Connect screen reports Built-in collector ready and
   provides all three provider connection controls; privacy checks passed.
 - The GUI and collector resource runtime passed under Rosetta as x86_64.
-- Live Codex and Antigravity reads returned current quota windows and reset
-  timestamps through the bundled helper. Claude correctly reported sign-in
-  required; live Claude usage remains unverified.
+- Live provider acceptance is tracked separately in private evidence. No account
+  sign-in state or quota reading is included in this public review.
 
 Final asset downloads are compared with the release's SHA-256 manifest before
 publication. The maintainer retains the artifact checks and counts-only evidence.
@@ -106,9 +109,8 @@ Native collection runs while the app is open. Optional remote computers must
 have OVRCAST 0.4.0 installed and their own provider connections. Existing trusted
 SSH aliases remain required. Existing remote collectors are not silently upgraded.
 
-This update does not establish successful runtime operation on the separate Mac
-whose 0.3.3 launch timed out. Physical Intel hardware and macOS 14 runtime remain
-untested. Local Intel-slice execution under Rosetta is a different check.
+Additional physical-device installation and runtime coverage is required.
+Physical Intel hardware and macOS 14 runtime remain untested. Local Intel-slice execution under Rosetta is a different check.
 Actual notification delivery and interactive authentication are not automated.
 Updates remain manual: replace the app in Applications with a newer release.
 

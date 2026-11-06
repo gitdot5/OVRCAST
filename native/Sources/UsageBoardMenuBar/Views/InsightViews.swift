@@ -100,8 +100,8 @@ struct FullBoardView: View {
                     Text("\(store.available) available · \(store.nextReset)").foregroundStyle(.secondary)
                 }
                 Spacer()
-                Button { store.preferences.privacyMode.toggle() } label: { Image(systemName: store.preferences.privacyMode ? "eye.slash.fill" : "eye") }.help("Privacy mode")
-                Button("Refresh") { store.refresh() }.disabled(store.refreshing)
+                Button { store.preferences.privacyMode.toggle() } label: { Image(systemName: store.preferences.privacyMode ? "eye.slash.fill" : "eye") }.help("Privacy mode").accessibilityLabel("Privacy mode").accessibilityValue(store.preferences.privacyMode ? "On" : "Off")
+                Button("Refresh") { store.refresh() }.disabled(store.refreshing).keyboardShortcut("r", modifiers: .command)
                 Button("Settings") { store.showSettings = true }
             }
             if let id = store.selectedAccount, let account = store.accounts.first(where: { $0.id == id }) {

@@ -94,6 +94,7 @@ struct AccountRow: View {
         .background(.background.opacity(0.7), in: RoundedRectangle(cornerRadius: 10))
         .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.primary.opacity(0.06)))
         .contentShape(RoundedRectangle(cornerRadius: 10))
+        .accessibilityElement(children: .combine)
     }
 }
 struct AccountDetail: View {
@@ -106,6 +107,16 @@ struct AccountDetail: View {
             AccountRow(account: account, store: store, expanded: true)
             if !account.current || account.requiresSignIn == true || account.quotas.contains(where: \.awaiting) {
                 ConnectionHelpView(account: account, store: store)
+            }
+            if store.preferences.showForecasts {
+                ForEach(Array(account.quotas.enumerated()), id: \.offset) { _, quota in
+                    if let forecast = CapacityForecast.estimate(account: account, quota: quota, history: store.history) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(quota.label + " · " + forecast.label).font(.caption)
+                            Text("Based on recent local readings. Your pace can change.").font(.caption2).foregroundStyle(.secondary)
+                        }
+                    }
+                }
             }
             AccountHistoryView(points: store.history.filter { $0.accountID == account.id })
             VStack(alignment: .leading, spacing: 8) {
@@ -133,6 +144,7 @@ struct AccountDetail: View {
 }
 struct MenuView: View {
     @ObservedObject var store: UsageStore
+    @ObservedObject private var updates = AppUpdates.shared
     let openBoard: () -> Void
     var maxHeight: CGFloat = 710
     var floating = false
@@ -156,19 +168,22 @@ struct MenuView: View {
                 }
                 Button { store.preferences.privacyMode.toggle() } label: { Image(systemName: store.preferences.privacyMode ? "eye.slash.fill" : "eye") }
                     .buttonStyle(.plain).help("Hide account identities and balances").accessibilityLabel("Privacy mode")
+                    .accessibilityValue(store.preferences.privacyMode ? "On" : "Off")
                 if store.refreshing { ProgressView().controlSize(.small) }
                 Button { store.refresh() } label: { Image(systemName: "arrow.clockwise") }
                     .buttonStyle(.plain).help("Refresh usage").accessibilityLabel("Refresh usage")
+                    .disabled(store.refreshing).keyboardShortcut("r", modifiers: .command)
                 Menu {
+                    Button("Check for Updates…") { updates.check() }.disabled(!updates.ready)
                     Button("Settings…") { store.showSettings = true }
-                    Button("Copy support report") { store.copySupportReport() }
+                    Button("Review support report…") { store.copySupportReport() }
                     Button("Export snapshot…") { store.exportSnapshot() }
                     Divider()
                     Button("Open full board", action: openBoard)
                     Button("Refresh readings") { store.refresh() }
                     Divider()
                     Button("Quit OVRCAST") { NSApp.terminate(nil) }
-                } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).fixedSize()
+                } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).fixedSize().accessibilityLabel("More actions")
             }.padding(.horizontal, 17).padding(.top, 16).padding(.bottom, 12)
             HStack(spacing: 3) {
                 ForEach(store.providers, id: \.self) { provider in
@@ -181,7 +196,7 @@ struct MenuView: View {
                             Text(provider).font(.system(size: 10, weight: store.selectedProvider == provider ? .semibold : .regular))
                         }.padding(.vertical, 7).frame(maxWidth: .infinity)
                         .background(store.selectedProvider == provider ? Color.primary.opacity(0.08) : .clear, in: RoundedRectangle(cornerRadius: 7))
-                    }.buttonStyle(.plain)
+                    }.buttonStyle(.plain).accessibilityValue(store.selectedProvider == provider ? "Selected" : "Not selected")
                 }
             }.padding(.horizontal, 12).padding(.bottom, 11)
             if selected == nil {
