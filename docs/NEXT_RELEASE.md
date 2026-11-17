@@ -68,9 +68,9 @@ build 13 runtime needs fresh acceptance; none of the old package passes are
 silently carried forward.
 
 - [x] Build 13 local source tests: 109 Swift and 102 Python checks.
-- [ ] Fresh build 13 hosted tests and universal package contract.
+- [x] Fresh build 13 hosted tests and universal package contract.
 - [ ] Final build 13 signing, notarization, payload and packaged-preview checks.
-- [ ] Agent interface and token activity on the final packaged build, including
+- [x] Agent interface and token activity on the signed candidate, including
   permission revocation, numeric-only projections and unavailable/partial states.
 - [ ] Live provider acceptance with consenting testers using their own connections.
   Detailed account and connection results remain private.
@@ -146,3 +146,34 @@ The acceptance-record validator was additionally tested with null, boolean and
 object evidence values: these cannot count as reviewed evidence. This Python-only
 hardening was locally regression-tested after the runtime CI commit; it does not
 change the signed GUI or collector.
+
+## Build 13 package results
+
+The signed, unpublished candidate passes universal GUI/helper and minimum-target
+checks, strict code signing, packaged-resource checks and the private-payload scan.
+Apple notarization is pending; it is not a distribution-ready release.
+
+Candidate SHA-256: `8bd8d42e27c9b602b664411f8f247d0ebbd4ead403bb8a4ca47181ae180c6ec1`. This hash pins the current signed preflight
+ZIP. A notarized export will need its own final archive hash and verification.
+
+Packaged token fixtures run with network and real-home access denied. Codex and
+Claude counters match the synthetic events, duplicate Claude deliveries are
+counted once, valid JSON spacing is accepted, and another backed-up Claude profile
+is excluded. Counter output is limited to numeric/date/coverage fields and parser
+caches are owner-only. Agent status, recommendation and token commands return
+redacted JSON, decline stale routing, respect revocation and leave their saved
+inputs unchanged. No account status or personal readings are published here.
+
+Interactive fictional-data checks cover Today/Last 7 days, partial and unavailable
+counts, privacy hiding, history opt-out and distinct Studio labels. Full VoiceOver
+and standard updater-dialog acceptance remain pending. Disposable 0.4.3 → build 13
+→ 0.4.3 launch/rollback preserves fixture preferences and privacy. Signed update
+feed/archive checks accept the candidate and reject altered copies.
+
+Runtime source: `dd1dd75e7aca5693c9c47035c549df7a69fcd233`. Both hosted source-test
+jobs and the clean universal package contract passed:
+https://github.com/gitdot5/OVRCAST/actions/runs/44196832177
+
+All remaining gates in `app/release-readiness.json` still require reviewed passing
+evidence. No release, production update feed or installation replacement has been
+published by this work.
