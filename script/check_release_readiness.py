@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parent.parent
 REQUIRED = {'local_tests', 'hosted_build', 'package_integrity', 'live_providers',
             'notification_delivery', 'updater_dialogs', 'upgrade_recovery',
             'physical_intel', 'minimum_macos', 'sleep_network_endurance',
-            'accessibility', 'resource_use', 'opt_in_beta'}
+            'accessibility', 'resource_use', 'opt_in_beta', 'agent_interface', 'token_activity'}
 
 
 def blockers(record, version, artifact):

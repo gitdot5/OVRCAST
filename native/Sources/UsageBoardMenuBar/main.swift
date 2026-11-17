@@ -35,6 +35,7 @@ import UserNotifications
     private var floatingPanel: NSPanel?
     private var settingsWindow: NSWindow?
     private var supportWindow: NSWindow?
+    private var tokenWindow: NSWindow?
     private let lifecycle = RefreshLifecycle()
     private let shortcut = BoardShortcut()
     private var shortcutEnabled: Bool?
@@ -82,6 +83,7 @@ import UserNotifications
         store.onChange = { [weak self] in self?.updateStatus() }
         store.onSupportReport = { [weak self] text in self?.presentSupportReport(text) }
         store.onSettingsChanged = { [weak self] visible in self?.presentSettings(visible) }
+        store.onTokenActivityChanged = { [weak self] visible in self?.presentTokenActivity(visible) }
         store.onPreferencesChanged = { [weak self] in self?.updatePreferences() }
         shortcut.action = { [weak self] in
             guard let self else { return }
@@ -106,12 +108,26 @@ import UserNotifications
         }
         if args.contains("--board") { openBoard() }
         if args.contains("--setup"), previewPath == nil { store.showSettings = true }
+        if args.contains("--token-preview"), store.isDemo {
+            store.preferences.tokenHistory = true; store.showTokenActivity = true
+        }
         if args.contains("--test-notification") { Task { store.message = await Notifications.test(); writeDiagnostics() } }
         writeDiagnostics()
     }
     nonisolated func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification,
                                            withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         completionHandler([.banner])
+    }
+    private func presentTokenActivity(_ visible: Bool) {
+        guard visible else { tokenWindow?.orderOut(nil); return }
+        if tokenWindow == nil {
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 760, height: 550),
+                styleMask: [.titled, .closable, .resizable], backing: .buffered, defer: false)
+            window.title = "OVRCAST Token Activity"; window.isReleasedWhenClosed = false; window.delegate = self
+            window.contentViewController = NSHostingController(rootView: TokenActivityView(store: store))
+            window.minSize = NSSize(width: 660, height: 420); window.center(); tokenWindow = window
+        }
+        tokenWindow?.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
     }
     private func updatePreferences() {
         if shortcutEnabled != store.preferences.shortcutEnabled {
@@ -123,6 +139,7 @@ import UserNotifications
         let appearance = store.theme == "system" ? nil : NSAppearance(named: store.theme == "night" ? .darkAqua : .aqua)
         floatingPanel?.appearance = appearance
         settingsWindow?.appearance = appearance
+        tokenWindow?.appearance = appearance
         updateStatus()
     }
     private func presentSettings(_ visible: Bool) {
@@ -204,6 +221,7 @@ import UserNotifications
     func windowWillClose(_ notification: Notification) {
         if (notification.object as? NSWindow) === supportWindow { supportWindow = nil }
         if (notification.object as? NSWindow) === settingsWindow { store.showSettings = false }
+        if (notification.object as? NSWindow) === tokenWindow { store.showTokenActivity = false }
         // Closing hides the board; the menu bar icon brings it back in the same place.
         DispatchQueue.main.async { [weak self] in self?.writeDiagnostics() }
     }
@@ -272,6 +290,12 @@ import UserNotifications
             if CommandLine.arguments.contains("--exit-after-snapshot") { NSApp.terminate(nil) }
         }
     }
+}
+
+if CommandLine.arguments.dropFirst().first == "--agent" {
+    let result = AgentCLI.run(Array(CommandLine.arguments.dropFirst(2)))
+    FileHandle.standardOutput.write(result.data)
+    exit(result.code)
 }
 
 MainActor.assumeIsolated {

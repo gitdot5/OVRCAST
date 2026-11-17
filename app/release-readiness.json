@@ -1,7 +1,7 @@
 {
   "version": "0.5.0",
-  "build": "12",
-  "sha256": "0de5a21b05f39fda61ab3a274a241de5735375c17c10203633cbb3fd49c5cc13",
+  "build": "13",
+  "sha256": "",
   "checks": {
     "local_tests": {
       "status": "pass",
@@ -12,8 +12,8 @@
       "evidence": ""
     },
     "package_integrity": {
-      "status": "pass",
-      "evidence": "docs/NEXT_RELEASE.md#build-12-package-results"
+      "status": "pending",
+      "evidence": ""
     },
     "live_providers": {
       "status": "pending",
@@ -28,8 +28,8 @@
       "evidence": ""
     },
     "upgrade_recovery": {
-      "status": "pass",
-      "evidence": "docs/NEXT_RELEASE.md#build-12-package-results"
+      "status": "pending",
+      "evidence": ""
     },
     "physical_intel": {
       "status": "pending",
@@ -49,9 +49,17 @@
     },
     "resource_use": {
       "status": "pending",
-      "evidence": "docs/NEXT_RELEASE.md#resource-use"
+      "evidence": ""
     },
     "opt_in_beta": {
+      "status": "pending",
+      "evidence": ""
+    },
+    "agent_interface": {
+      "status": "pending",
+      "evidence": ""
+    },
+    "token_activity": {
       "status": "pending",
       "evidence": ""
     }

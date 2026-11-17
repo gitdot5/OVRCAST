@@ -176,6 +176,7 @@ struct MenuView: View {
                 Menu {
                     Button("Check for Updates…") { updates.check() }.disabled(!updates.ready)
                     Button("Settings…") { store.showSettings = true }
+                    Button("Token activity…") { store.showTokenActivity = true }
                     Button("Review support report…") { store.copySupportReport() }
                     Button("Export snapshot…") { store.exportSnapshot() }
                     Divider()

@@ -103,6 +103,7 @@ struct FullBoardView: View {
                 Button { store.preferences.privacyMode.toggle() } label: { Image(systemName: store.preferences.privacyMode ? "eye.slash.fill" : "eye") }.help("Privacy mode").accessibilityLabel("Privacy mode").accessibilityValue(store.preferences.privacyMode ? "On" : "Off")
                 Button("Refresh") { store.refresh() }.disabled(store.refreshing).keyboardShortcut("r", modifiers: .command)
                 Button("Settings") { store.showSettings = true }
+                Button("Tokens") { store.showTokenActivity = true }
             }
             if let id = store.selectedAccount, let account = store.accounts.first(where: { $0.id == id }) {
                 ScrollView { AccountDetail(account: account, store: store).frame(maxWidth: 600) }.frame(maxWidth: .infinity)

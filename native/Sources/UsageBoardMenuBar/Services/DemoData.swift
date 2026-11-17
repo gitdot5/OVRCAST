@@ -4,8 +4,8 @@ enum DemoData {
     static func snapshot(stale: Bool = false) -> UsageSnapshot {
         let now = Date(), stamp = ISO8601DateFormatter()
         let specs: [(String, String, String, Double)] = [
-            ("Codex", "Personal", "MacBook", 82), ("Codex", "Work", "Studio", 43), ("Codex", "Lab", "Mini", 94),
-            ("Claude", "Personal", "MacBook", 31), ("Claude", "Work", "Studio", 76), ("Claude", "Lab", "Mini", 12),
+            ("Codex", "Personal", "MacBook", 82), ("Codex", "Work", "Mac Studio 1", 43), ("Codex", "Lab", "Mac Studio 2", 94),
+            ("Claude", "Personal", "MacBook", 31), ("Claude", "Work", "Mac Studio 1", 76), ("Claude", "Lab", "Mac Studio 2", 12),
             ("Antigravity", "Personal", "MacBook", 100)]
         let rows = specs.enumerated().map { index, spec in
             UsageAccount(id: "demo-\(index)", provider: spec.0, email: spec.1 + "@example.com", plan: "Example plan", machines: [spec.2],
@@ -16,5 +16,21 @@ enum DemoData {
                          savedResets: spec.0 == "Codex" ? 1 : nil, resetDetails: [], credits: [CreditPool(name: "Cloud credits", value: "Unknown", detail: "Example data")])
         }
         return UsageSnapshot(version: 1, generatedAt: stamp.string(from: now), accounts: rows)
+    }
+    static func tokenActivity() -> TokenActivityLedger {
+        let now = Date(), stamp = ISO8601DateFormatter().string(from: Date())
+        let formatter = DateFormatter(); formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.timeZone = .current; formatter.dateFormat = "yyyy-MM-dd"
+        let rows = ["MacBook", "Mac Studio 1", "Mac Studio 2"].enumerated().map { index, machine in
+            TokenMachine(machine: machine, harnesses: TokenActivityCollector.providers.enumerated().map { offset, provider in
+                TokenHarness(schemaVersion: 1, provider: provider, generatedAt: stamp, timeZone: TimeZone.current.identifier,
+                    historyComplete: offset != 2, days: (0..<7).map { day in
+                        let input = (index + 1) * (offset + 1) * (day + 1) * 1000
+                        return TokenDay(date: formatter.string(from: Calendar.current.date(byAdding: .day, value: -day, to: now)!),
+                                        input: input, output: input / 4, cacheRead: input / 2, cacheWrite: nil, total: input + input / 4 + input / 2)
+                    })
+            })
+        }
+        return TokenActivityLedger(generatedAt: stamp, machines: rows)
     }
 }

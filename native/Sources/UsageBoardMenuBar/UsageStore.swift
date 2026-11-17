@@ -10,6 +10,11 @@ import UniformTypeIdentifiers
     @Published var refreshing = false
     @Published var reconnecting = false
     @Published var health: [String: ConnectionHealth] = [:]
+    @Published var tokenActivity: TokenActivityLedger?
+    @Published var checkingTokens = false
+    @Published var showTokenActivity = false { didSet { onTokenActivityChanged?(showTokenActivity) } }
+    private var tokenTask: Task<Void, Never>?
+    private var lastTokenAttempt = Date.distantPast
     var sleeping = false
     private lazy var recovery = RecoveryCoordinator(eligible: { [weak self] in
         guard let self else { return false }
@@ -45,6 +50,7 @@ import UniformTypeIdentifiers
     var onPreferencesChanged: (() -> Void)?
     var onSupportReport: ((String) -> Void)?
     var onSettingsChanged: ((Bool) -> Void)?
+    var onTokenActivityChanged: ((Bool) -> Void)?
     var legacyLocalMachine: String {
         guard let data = try? Data(contentsOf: root.appendingPathComponent("config.local.json")),
               let config = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
@@ -83,7 +89,8 @@ import UniformTypeIdentifiers
     }
     func machineName(_ machine: String) -> String {
         let local = isDemo ? nil : (nativeMode ? preferences.machineName : legacyLocalMachine)
-        return MachineLabels.label(machine, machines: machineOptions, privacy: preferences.privacyMode,
+        let machines = Array(Set(machineOptions + (tokenActivity?.machines.map(\.machine) ?? [])))
+        return MachineLabels.label(machine, machines: machines, privacy: preferences.privacyMode,
                                    localMachine: local, localFamily: local == nil ? nil : MachineLabels.localFamily)
     }
     func resetFilters() { machineFilter = ""; statusFilter = .all; accountOrder = .attention; firstMachine = "MacBook" }
@@ -101,6 +108,7 @@ import UniformTypeIdentifiers
         if recoveringPreferences { initialPreferences.privacyMode = true }
         if hasLegacyCollector { initialPreferences.setupComplete = true }
         preferences = initialPreferences
+        if demo { tokenActivity = DemoData.tokenActivity() }
         machineFilter = self.defaults.string(forKey: "machineFilter") ?? ""
         statusFilter = AccountFilter(rawValue: self.defaults.string(forKey: "statusFilter") ?? "") ?? .all
         accountOrder = AccountOrder(rawValue: self.defaults.string(forKey: "accountOrder") ?? "") ?? .attention
@@ -116,6 +124,10 @@ import UniformTypeIdentifiers
             } catch { recoveryBlocked = true; failedSaves.insert("preferences.json"); message = "Saved settings could not be read or backed up. Fix free space or folder access, then restart OVRCAST before changing settings." }
         }
         if !demo {
+            if preferences.tokenHistory,
+               let data = try? AgentCLI.read(self.dataDirectory.appendingPathComponent("token-activity.json")) {
+                tokenActivity = try? TokenActivityLedger.decode(data)
+            }
             history = PrivateFiles.read([HistoryPoint].self, from: self.dataDirectory.appendingPathComponent("history.json")) ?? []
             sourceCache = PrivateFiles.read([String: [UsageAccount]].self, from: self.dataDirectory.appendingPathComponent("connection-readings.json")) ?? [:]
             health = PrivateFiles.read([String: ConnectionHealth].self, from: self.dataDirectory.appendingPathComponent("connection-health.json")) ?? [:]
@@ -137,10 +149,12 @@ import UniformTypeIdentifiers
             Task { @MainActor in
                 guard let self else { return }
                 self.load()
+                self.refreshTokenActivity(force: false)
                 if self.nativeMode && self.preferences.setupComplete && !self.sleeping { self.refresh(force: false) }
             }
         }
         if nativeMode && preferences.setupComplete && !isDemo { refresh() }
+        else { refreshTokenActivity(force: false) }
     }
     func load() {
         if isDemo { if accounts.isEmpty { apply(DemoData.snapshot(stale: CommandLine.arguments.contains("--demo-offline"))) }; return }
@@ -185,6 +199,7 @@ import UniformTypeIdentifiers
     func refresh(collect: Bool = true, force: Bool = true, provider: String? = nil) {
         guard !refreshing else { return }
         if isDemo { message = "Demo data — no accounts connected"; return }
+        refreshTokenActivity(force: force)
         if nativeMode { refreshNative(force: force, requestedProvider: provider); return }
         refreshing = true; message = "Refreshing usage…"
         let process = Process()
@@ -212,7 +227,7 @@ import UniformTypeIdentifiers
         preferences.nativeCollection = true; preferences.setupComplete = true; showSettings = false
     }
     func recoverConnection() { recovery.request() }
-    func stop() { timer?.invalidate(); timer = nil; recovery.stop() }
+    func stop() { timer?.invalidate(); timer = nil; recovery.stop(); tokenTask?.cancel() }
     var compactStatus: String {
         let provider = preferences.recommendationProvider
         guard let best = Insights.recommend(accounts, provider: provider) else { return provider + " · —" }
@@ -302,6 +317,60 @@ import UniformTypeIdentifiers
             else { message = accounts.contains { !$0.current } ? "Some accounts need attention. Open an account for connection help." : "Usage is up to date." }
             onChange?()
             recovery.finished()
+        }
+    }
+    func setTokenHistory(_ enabled: Bool) {
+        lastTokenAttempt = .distantPast
+        preferences.tokenHistory = enabled
+        if enabled { refreshTokenActivity(force: true) }
+        else {
+            tokenTask?.cancel(); tokenActivity = nil
+            if !isDemo {
+                let published = dataDirectory.deletingLastPathComponent().appendingPathComponent("token-activity.json")
+                do { if FileManager.default.fileExists(atPath: published.path) { try FileManager.default.removeItem(at: published) } }
+                catch { message = "Token history is off, but its saved local counters could not be removed. Check access to OVRCAST’s data folder." }
+            }
+        }
+    }
+    func refreshTokenActivity(force: Bool) {
+        guard !isDemo, preferences.tokenHistory, preferences.setupComplete, !sleeping, !checkingTokens,
+              force || Date().timeIntervalSince(lastTokenAttempt) >= 300, let helper = NativeCollector.helper else { return }
+        lastTokenAttempt = Date(); checkingTokens = true
+        let machine = nativeMode ? preferences.machineName : legacyLocalMachine
+        var remotes = preferences.remotes.map { ($0.name, RemoteReconnect.connectionOptions + [$0.sshAlias]) }
+        if !nativeMode, let data = try? Data(contentsOf: root.appendingPathComponent("config.local.json")),
+           let config = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+           let computers = config["machines"] as? [String: [String: Any]] {
+            remotes = computers.keys.sorted().compactMap { name in
+                guard let ssh = computers[name]?["ssh"] as? [String] else { return nil }
+                return (name, ssh)
+            }
+        }
+        let configuration = remotes
+        let selectedNativeMode = nativeMode, selectedName = preferences.machineName, selectedRemotes = preferences.remotes
+        let legacyConfiguration = try? Data(contentsOf: root.appendingPathComponent("config.local.json"))
+        tokenTask = Task {
+            defer { checkingTokens = false; tokenTask = nil }
+            var machines: [TokenMachine] = []
+            await withTaskGroup(of: TokenMachine.self) { group in
+                group.addTask { TokenActivityCollector.local(helper: helper, machine: machine) }
+                for (name, ssh) in configuration { group.addTask { TokenActivityCollector.remote(name: name, ssh: ssh) } }
+                for await result in group {
+                    guard !Task.isCancelled, preferences.tokenHistory else { continue }
+                    guard nativeMode == selectedNativeMode, preferences.machineName == selectedName,
+                          preferences.remotes == selectedRemotes,
+                          selectedNativeMode || (try? Data(contentsOf: root.appendingPathComponent("config.local.json"))) == legacyConfiguration else {
+                        lastTokenAttempt = .distantPast; continue
+                    }
+                    machines.append(result)
+                    let now = ISO8601DateFormatter().string(from: Date())
+                    let ledger = TokenActivityLedger(generatedAt: now, machines: machines.sorted { $0.machine < $1.machine })
+                    tokenActivity = ledger; save(ledger, as: "token-activity.json")
+                    if result.machine == machine {
+                        save(TokenActivityLedger(generatedAt: now, machines: [result]), as: "token-activity.json", in: dataDirectory.deletingLastPathComponent())
+                    }
+                }
+            }
         }
     }
     func enableNotifications(_ enabled: Bool) {

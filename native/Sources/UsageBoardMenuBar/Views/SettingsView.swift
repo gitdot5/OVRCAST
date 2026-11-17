@@ -99,6 +99,15 @@ struct SettingsView: View {
                     Text("Switching changes which readings this app displays.").font(.caption).foregroundStyle(.secondary)
                 }
             }
+            Section("Local agents") {
+                Toggle("Allow agents to read capacity", isOn: $store.preferences.agentAccess)
+                Text("Local commands can read anonymous usage and reset times and recommend capacity. They cannot access credentials, start work or change accounts. No network service is opened.").font(.caption).foregroundStyle(.secondary)
+            }
+            Section("Token history") {
+                Toggle("Read local token counters", isOn: Binding(get: { store.preferences.tokenHistory }, set: { store.setTokenHistory($0) }))
+                Text("Shows Today and Last 7 days by harness and computer. Only counters are exported, without conversation content. Your configured Macs can read them over existing SSH. Local records may be incomplete.").font(.caption).foregroundStyle(.secondary)
+                Button("View token activity") { store.showTokenActivity = true }
+            }
         }.formStyle(.grouped)
     }
     private var health: some View {

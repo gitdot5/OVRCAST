@@ -25,6 +25,8 @@ struct RemoteMachine: Codable, Identifiable, Equatable {
 struct BoardPreferences: Codable {
     var compactMenuBar = false
     var showForecasts = false
+    var agentAccess = false
+    var tokenHistory = false
     var setupComplete = false
     var nativeCollection = false
     var providers = ["Codex", "Claude"]
@@ -43,13 +45,15 @@ struct BoardPreferences: Codable {
 
     init() {}
     private enum CodingKeys: String, CodingKey {
-        case compactMenuBar, showForecasts, setupComplete, nativeCollection, providers, machineName, aliases, privacyMode, shortcutEnabled, notifications, lowThreshold, quietStart, quietEnd, snoozeUntil, remotes, recommendationProvider, recommendationWindow
+        case compactMenuBar, showForecasts, agentAccess, tokenHistory, setupComplete, nativeCollection, providers, machineName, aliases, privacyMode, shortcutEnabled, notifications, lowThreshold, quietStart, quietEnd, snoozeUntil, remotes, recommendationProvider, recommendationWindow
     }
     init(from decoder: Decoder) throws {
         self.init()
         let values = try decoder.container(keyedBy: CodingKeys.self)
         compactMenuBar = try values.decodeIfPresent(Bool.self, forKey: .compactMenuBar) ?? compactMenuBar
         showForecasts = try values.decodeIfPresent(Bool.self, forKey: .showForecasts) ?? showForecasts
+        agentAccess = try values.decodeIfPresent(Bool.self, forKey: .agentAccess) ?? agentAccess
+        tokenHistory = try values.decodeIfPresent(Bool.self, forKey: .tokenHistory) ?? tokenHistory
         setupComplete = try values.decodeIfPresent(Bool.self, forKey: .setupComplete) ?? setupComplete
         nativeCollection = try values.decodeIfPresent(Bool.self, forKey: .nativeCollection) ?? nativeCollection
         providers = try values.decodeIfPresent([String].self, forKey: .providers) ?? providers

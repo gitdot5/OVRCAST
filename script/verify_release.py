@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parent.parent
 
 PRIVATE_PATH = re.compile(rb'/Users/[^/\x00\r\n]{1,80}/')
 CREDENTIAL_MATERIAL = re.compile(rb'-----BEGIN (?:RSA |EC |OPENSSH |ENCRYPTED )?PRIVATE KEY-----|\bsk-(?:ant-)?[A-Za-z0-9_-]{20,}|\b(?:AKIA|ASIA)[A-Z0-9]{16}\b|\bgh[pousr]_[A-Za-z0-9]{25,}')
-PRIVATE_FILE = re.compile(r'(?i)(?:^|/)(?:config\.local\.json|\.env(?:\.[^/]*)?|\.ssh|\.aws|\.codex|\.claude|keychains?|cookies|login data|snapshot\.json|preferences\.json|auth\.json|overview\.json|native-overview\.json|history\.json|alerts\.json|connection-(?:health|readings)\.json)(?:/|$)|\.(?:p12|pfx|key|kdbx)$')
+PRIVATE_FILE = re.compile(r'(?i)(?:^|/)(?:config\.local\.json|\.env(?:\.[^/]*)?|\.ssh|\.aws|\.codex|\.claude|keychains?|cookies|login data|snapshot\.json|preferences\.json|auth\.json|overview\.json|native-overview\.json|history\.json|alerts\.json|token-activity\.json|connection-(?:health|readings)\.json)(?:/|$)|\.(?:p12|pfx|key|kdbx)$')
 
 
 def reject_private_payload(name, data):

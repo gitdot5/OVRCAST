@@ -1,6 +1,6 @@
 # OVRCAST 0.5.0 candidate
 
-Updated November 6, 2026. Build 12 supersedes the earlier build 11 candidate. **Unpublished; release acceptance is pending.** Version 0.4.3
+Updated November 17, 2026. Build 13 adds opt-in local agent access. **Unpublished; release acceptance is pending.** Version 0.4.3
 remains the public release. This document records candidate scope and does not
 claim completed hardware, provider, notification or updater installation checks.
 
@@ -24,6 +24,28 @@ claim completed hardware, provider, notification or updater installation checks.
   stale/reset/discontinuous data and remain explicitly labeled estimates.
 - Notification test control and unchanged bundle/data/provider compatibility.
 
+## November 17 build 13 changes
+
+- Opt-in local `--agent status` and `--agent recommend` JSON commands. They read
+  the GUI's selected saved snapshot without starting the GUI, network requests,
+  collectors or job execution. Disabling access is effective on the next command.
+- Anonymous snapshot-scoped account/machine/window references and an output
+  allowlist exclude identities, credentials, SSH routes and raw provider text.
+- Recommendations respect every quota window, stale and failed readings, reset
+  boundaries and minimum remaining capacity. Shared account quota is counted once
+  across machines. Capacity options are separate by provider; no unsupported
+  cross-provider dollar savings or automatic spending is claimed.
+- See [AGENT_INTEGRATION.md](AGENT_INTEGRATION.md) for the contract and limitations.
+- Opt-in Today / Last 7 days token counters per harness and Mac, with input,
+  output and cache components where recorded. Local-only parser projections
+  exclude content and identities; partial/missing data stays explicit. Copied
+  sessions are not summed across Macs. See [TOKEN_ACTIVITY.md](TOKEN_ACTIVITY.md).
+
+Build 12's three hosted jobs have all passed, including the clean universal package
+contract: https://github.com/gitdot5/OVRCAST/actions/runs/42304960992.
+That is a verified baseline, not acceptance of the new build 13 runtime. Build 13
+must receive fresh source, package, signing and interactive acceptance evidence.
+
 ## November 6 build 12 changes
 
 - Distinguish unreadable Claude credentials, local credential permission failures
@@ -41,19 +63,21 @@ claim completed hardware, provider, notification or updater installation checks.
 
 ## Acceptance checklist
 
-Build 11's signed-package, remote launch and updater results below are historical
-baselines, not acceptance of changed build 12. New source needs its own package/CI
-checks. The prior runtime's full CI did pass on all three jobs:
-https://github.com/gitdot5/OVRCAST/actions/runs/41937588751
+Build 12's package and hosted results below are historical baselines. The new
+build 13 runtime needs fresh acceptance; none of the old package passes are
+silently carried forward.
 
-- [x] Build 12 local source tests: 92 Swift and 102 Python checks.
-- [ ] Fresh build 12 hosted tests and universal package contract.
-- [x] Final build 12 signing, notarization, payload and packaged-preview checks.
+- [x] Build 13 local source tests: 108 Swift and 102 Python checks.
+- [ ] Fresh build 13 hosted tests and universal package contract.
+- [ ] Final build 13 signing, notarization, payload and packaged-preview checks.
+- [ ] Agent interface and token activity on the final packaged build, including
+  permission revocation, numeric-only projections and unavailable/partial states.
 - [ ] Live provider acceptance with consenting testers using their own connections.
   Detailed account and connection results remain private.
 - [ ] Notification delivery with the required macOS permissions.
-- [ ] Standard updater dialogs and interactive keyboard/VoiceOver checks. The
-  computer-use tool stalled and was interrupted; no successful UI action is claimed.
+- [ ] Standard updater dialogs and full interactive keyboard/VoiceOver checks.
+  Earlier build 13 app controls were exercised using an isolated fictional fixture;
+  that is not full VoiceOver or updater acceptance.
 - [ ] Physical Intel/macOS 14 and actual sleep/wake/network endurance.
 - [ ] Opt-in beta participants and scenario results. The plan and invitation are
   prepared in [BETA_TEST_PLAN.md](BETA_TEST_PLAN.md); nobody has been enrolled or contacted.
@@ -99,8 +123,8 @@ Signed feed/archive checks accept this package and reject altered copies.
 
 SHA-256: `0de5a21b05f39fda61ab3a274a241de5735375c17c10203633cbb3fd49c5cc13`.
 
-Current-source test jobs passed on Intel/macOS 15 and Apple Silicon/macOS 26;
-the full clean universal package job is still running as of this review:
+Build 12 test jobs passed on Intel/macOS 15 and Apple Silicon/macOS 26;
+the full clean universal package job also passed (verified November 17):
 https://github.com/gitdot5/OVRCAST/actions/runs/42304960992
 Runtime commit: `97fe9138fafaf8a4247c49f4b5f4d7ac8b14890a`.
 Later documentation/readiness updates do not change the tested runtime.

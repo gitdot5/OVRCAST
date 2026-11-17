@@ -176,3 +176,6 @@ the provider/allowance layout.
 Its copyright and license are preserved under [LICENSES](LICENSES/CodexBar-MIT.txt).
 See [third-party notices](THIRD_PARTY_NOTICES.md) for scope and exclusions.
 The [brand guide](docs/BRAND.md) describes the product identity and attribution.
+
+Local agent integration for the unpublished 0.5.0 candidate is documented in
+[AGENT_INTEGRATION.md](docs/AGENT_INTEGRATION.md). It is opt-in and read-only.

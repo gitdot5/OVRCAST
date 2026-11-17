@@ -20,7 +20,7 @@ class ReleasePrivacyTest(unittest.TestCase):
 
     def test_private_account_files_are_rejected(self):
         for name in ['Contents/Resources/config.local.json', 'Contents/Resources/auth.json',
-                     'Contents/Resources/.env', 'Contents/Resources/connection-readings.json', 'Contents/Resources/connection-health.json', 'Contents/Resources/overview.json', 'Contents/Resources/native-overview.json', 'Contents/Resources/history.json', 'Contents/Resources/signing.p12', 'Contents/Resources/snapshot.json']:
+                     'Contents/Resources/token-activity.json', 'Contents/Resources/.env', 'Contents/Resources/connection-readings.json', 'Contents/Resources/connection-health.json', 'Contents/Resources/overview.json', 'Contents/Resources/native-overview.json', 'Contents/Resources/history.json', 'Contents/Resources/signing.p12', 'Contents/Resources/snapshot.json']:
             with self.subTest(name=name), self.assertRaises(ValueError):
                 release_verify.reject_private_payload(name, b'{}')
 
