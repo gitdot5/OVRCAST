@@ -66,7 +66,9 @@ final class TokenActivityTests: XCTestCase {
         row = harness(); row.error = "PRIVATE_ERROR"; XCTAssertFalse(valid(row))
     }
     func testAgentOutputRedactsMachineNamesAndKeepsComputersSeparate() throws {
-        let row = harness(days: [day("2026-11-17", total: 25)])
+        var row = harness(days: [day("2026-11-17", total: 25)])
+        // Foundation accepts trailing text after an ISO date. It must never reach an agent.
+        row.generatedAt += " PRIVATE_UNTRUSTED_INSTRUCTION"
         let ledger = TokenActivityLedger(generatedAt: "2026-11-17T18:00:00Z", machines: [
             TokenMachine(machine: "Mac Studio PRIVATE_ONE", harnesses: [row]), TokenMachine(machine: "Mac Studio PRIVATE_TWO", harnesses: [row])])
         let result = AgentCLI.tokenReport(ledger, provider: "Codex", machine: nil, now: now)

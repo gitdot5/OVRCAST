@@ -80,7 +80,8 @@ enum AgentCLI {
                             "cacheRead": row?.cacheRead as Any? ?? NSNull(), "cacheWrite": row?.cacheWrite as Any? ?? NSNull(),
                             "total": row?.total as Any? ?? NSNull()]
                 }
-                return ["harness": harness.title, "timeZone": harness.timeZone, "observedAt": harness.generatedAt,
+                return ["harness": harness.title, "timeZone": harness.timeZone,
+                        "observedAt": parsedDate(harness.generatedAt).map { ISO8601DateFormatter().string(from: $0) } as Any? ?? NSNull(),
                         "historyComplete": harness.historyComplete, "scanComplete": harness.scanComplete as Any? ?? NSNull(), "state": harness.error != nil ? "unavailable" :
                             parsedDate(harness.generatedAt).map { (-60...1200).contains(now.timeIntervalSince($0)) } == true ? "recorded_local_history" : "last_known",
                         "today": counters(1), "last7Days": counters(7)]
