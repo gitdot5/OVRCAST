@@ -25,6 +25,10 @@ with tempfile.TemporaryDirectory(prefix='ovrcast-token-fixture-') as folder:
           'usage':{'input_tokens':100,'output_tokens':20,'cache_read_input_tokens':50,'cache_creation_input_tokens':10}}}
  # Duplicate delivery of the same request must not multiply its token counters.
  (projects/'session-fixture.jsonl').write_text((json.dumps(message)+'\n')*2)
+ # A different backed-up profile must not be mixed into the active Claude Code harness.
+ backup=home/'.claude-swap-backup/sessions/1-other/projects/other-project';backup.mkdir(parents=True)
+ other=dict(message,requestId='other-request',sessionId='other-session',message=dict(message['message'],id='other-message'))
+ (backup/'other-session.jsonl').write_text(json.dumps(other)+'\n')
  env={'PATH':'/usr/bin:/bin:/usr/sbin:/sbin','HOME':str(home),'CFFIXED_USER_HOME':str(home),'CODEX_HOME':str(codex),
       'CLAUDE_CONFIG_DIR':str(claude),'XDG_CACHE_HOME':str(home/'.cache'),'XDG_CONFIG_HOME':str(home/'.config'),'TMPDIR':folder,'TZ':'America/New_York'}
  for provider,expected in [('codex',120),('claude',180),('antigravity',None)]:

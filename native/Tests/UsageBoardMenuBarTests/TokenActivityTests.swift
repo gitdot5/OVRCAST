@@ -44,9 +44,9 @@ final class TokenActivityTests: XCTestCase {
         defer { try? FileManager.default.removeItem(at: folder) }
         let marker = folder.appendingPathComponent("started"), group = UUID().uuidString
         let child = Task.detached {
-            try CommandRunner.run("/usr/bin/python3", ["-c", "import pathlib,sys,time; pathlib.Path(sys.argv[1]).touch(); time.sleep(30)", marker.path], timeout: 10, cancellationGroup: group)
+            try CommandRunner.run("/bin/sh", ["-c", ": > \"$1\"; exec /bin/sleep 30", "token-fixture", marker.path], timeout: 10, cancellationGroup: group)
         }
-        for _ in 0..<200 where !FileManager.default.fileExists(atPath: marker.path) { try await Task.sleep(nanoseconds: 10_000_000) }
+        for _ in 0..<500 where !FileManager.default.fileExists(atPath: marker.path) { try await Task.sleep(nanoseconds: 10_000_000) }
         XCTAssertTrue(FileManager.default.fileExists(atPath: marker.path))
         let start = Date(); CommandRunner.cancel(group: group)
         let result = try await child.value

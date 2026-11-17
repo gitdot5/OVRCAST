@@ -18,6 +18,9 @@ other-harness merging and credential fallback are disabled for this command.
 Local parser caches stay on the source Mac. Source-reported totals are preserved;
 cache components must not be added to them a second time.
 
+Claude Code is limited to the active CLI profile's project logs; Desktop history
+and backed-up profiles are not silently mixed into that harness.
+
 Local history is not necessarily account-wide: deleted or copied logs, another
 machine, other profiles and unrecognized records can affect coverage. Local readings are labeled recorded subtotals, even when the scan has finished.
 A finished scan does not prove that every event was recorded or recognized. An absent counter or unreadable history

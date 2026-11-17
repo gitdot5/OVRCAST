@@ -14,6 +14,9 @@ public enum OVRCASTTokenActivity {
             try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: cache.path)
             var scanOptions = CostUsageScanner.Options(cacheRoot: cache, calendar: calendar)
             scanOptions.maxCodexScanDurationPerRefresh = 2
+            // A Claude Code harness total must not silently include Desktop or backup profiles.
+            scanOptions.claudeProjectsRoots = [ClaudeConfigPaths.configRoot(environment: ProcessInfo.processInfo.environment)
+                .appendingPathComponent("projects", isDirectory: true)]
             // This API is internal to the core, so all network/pricing and other-harness fallbacks
             // can be explicitly disabled instead of relying on CLI defaults.
             let snapshot = try await CostUsageFetcher.loadTokenSnapshot(provider: provider, now: now,
