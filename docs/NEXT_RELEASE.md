@@ -67,7 +67,7 @@ Build 12's package and hosted results below are historical baselines. The new
 build 13 runtime needs fresh acceptance; none of the old package passes are
 silently carried forward.
 
-- [x] Build 13 local source tests: 108 Swift and 102 Python checks.
+- [x] Build 13 local source tests: 109 Swift and 102 Python checks.
 - [ ] Fresh build 13 hosted tests and universal package contract.
 - [ ] Final build 13 signing, notarization, payload and packaged-preview checks.
 - [ ] Agent interface and token activity on the final packaged build, including

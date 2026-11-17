@@ -38,6 +38,20 @@ final class TokenActivityTests: XCTestCase {
         let row = harness(days: [day("2026-11-16", total: Int.max), day("2026-11-17", total: 1)])
         XCTAssertNil(row.summary(days: 7, now: now)?.total)
     }
+    func testOptOutCancelsTheActualScopedSubprocessRatherThanOnlyItsResult() async throws {
+        let folder = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let marker = folder.appendingPathComponent("started"), group = UUID().uuidString
+        let child = Task.detached {
+            try CommandRunner.run("/usr/bin/python3", ["-c", "import pathlib,sys,time; pathlib.Path(sys.argv[1]).touch(); time.sleep(30)", marker.path], timeout: 10, cancellationGroup: group)
+        }
+        for _ in 0..<200 where !FileManager.default.fileExists(atPath: marker.path) { try await Task.sleep(nanoseconds: 10_000_000) }
+        XCTAssertTrue(FileManager.default.fileExists(atPath: marker.path))
+        let start = Date(); CommandRunner.cancel(group: group)
+        let result = try await child.value
+        XCTAssertNotEqual(result.code, 0); XCTAssertLessThan(Date().timeIntervalSince(start), 3)
+    }
     func testMalformedDuplicateNegativeAndUnknownProviderDataAreRejected() throws {
         var row = harness(days: [day("2026-11-17")])
         func valid(_ value: TokenHarness) -> Bool {
@@ -80,6 +94,7 @@ final class TokenActivityTests: XCTestCase {
         XCTAssertEqual(AgentCLI.run(["tokens"], home: home, now: now).code, 0)
         store.setTokenHistory(false)
         XCTAssertFalse(FileManager.default.fileExists(atPath: published.path))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: folder.appendingPathComponent("token-activity.json").path))
         XCTAssertEqual(AgentCLI.run(["tokens"], home: home, now: now).code, 77)
     }
 }

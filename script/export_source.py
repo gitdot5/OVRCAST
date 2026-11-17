@@ -13,7 +13,7 @@ FILES = (
     'dashboard.js', 'gather.py', 'install_agent.py', 'native_snapshot.py',
     'assets/provider-logos/codex.png', 'assets/provider-logos/claude.png', 'assets/provider-logos/antigravity.png',
     'native/Package.swift', 'native/Package.resolved', 'app/updates.json',
-    'app/release-readiness.json', 'script/check_release_readiness.py',
+    'app/release-readiness.json', 'script/check_release_readiness.py', 'script/check_token_activity.py',
     'script/prepare_bundle.py', 'script/sign_bundle.py', 'script/generate_update_feed.sh', 'app/install_app.sh', 'app/build_icon.sh', 'app/version.json',
     '.github/workflows/reliability.yml', 'script/verify_release.py',
     'app/icon.svg', 'app/icon-master.png', 'app/icon_1024.png', 'app/UsageBoard.icns',

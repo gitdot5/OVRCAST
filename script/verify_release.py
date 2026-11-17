@@ -75,6 +75,8 @@ def verify(archive, notarized=False):
             if path.is_symlink() and not path.resolve().is_relative_to(app.resolve()):
                 raise ValueError('Symlink escapes app bundle')
             if path.is_file(): reject_private_payload(path.relative_to(app).as_posix(), path.read_bytes())
+        token_check = run(['/usr/bin/python3', str(ROOT / 'script/check_token_activity.py'), str(app)])
+        assert json.loads(token_check.stdout)['cacheOwnerOnly']
         resources = app / 'Contents/Resources'
         assert (resources / 'LICENSES/Sparkle.txt').is_file()
         framework = app / 'Contents/Frameworks/Sparkle.framework'

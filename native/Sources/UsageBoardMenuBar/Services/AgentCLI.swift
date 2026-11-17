@@ -81,7 +81,7 @@ enum AgentCLI {
                             "total": row?.total as Any? ?? NSNull()]
                 }
                 return ["harness": harness.title, "timeZone": harness.timeZone, "observedAt": harness.generatedAt,
-                        "historyComplete": harness.historyComplete, "state": harness.error != nil ? "unavailable" :
+                        "historyComplete": harness.historyComplete, "scanComplete": harness.scanComplete as Any? ?? NSNull(), "state": harness.error != nil ? "unavailable" :
                             parsedDate(harness.generatedAt).map { (-60...1200).contains(now.timeIntervalSince($0)) } == true ? "recorded_local_history" : "last_known",
                         "today": counters(1), "last7Days": counters(7)]
             }

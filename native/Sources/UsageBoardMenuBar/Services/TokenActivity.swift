@@ -10,6 +10,7 @@ struct TokenHarness: Codable {
     var generatedAt: String
     var timeZone: String
     var historyComplete: Bool
+    var scanComplete: Bool? = nil
     var days: [TokenDay]
     var error: String?
     var title: String { ["codex": "Codex", "claude": "Claude Code", "antigravity": "Antigravity"][provider] ?? "Other" }
@@ -70,7 +71,7 @@ enum TokenActivityCollector {
     static func local(helper: String, machine: String) -> TokenMachine {
         let rows = providers.map { provider -> TokenHarness in
             if Task.isCancelled { return unavailable(provider) }
-            guard let output = try? CommandRunner.run(helper, ["token-activity", "--provider", provider], timeout: 45), output.code == 0,
+            guard let output = try? CommandRunner.run(helper, ["token-activity", "--provider", provider], timeout: 45, cancellationGroup: "tokens"), output.code == 0,
                   NativeCollector.safePayload(output.data), let row = try? JSONDecoder().decode(TokenHarness.self, from: output.data),
                   row.provider == provider, valid(row) else { return unavailable(provider) }
             return row
@@ -79,7 +80,7 @@ enum TokenActivityCollector {
     }
     static func remote(name: String, ssh: [String]) -> TokenMachine {
         let output = try? CommandRunner.run("/usr/bin/ssh", ["-o", "ClearAllForwardings=yes"] + ssh +
-            [#"cat "$HOME/Library/Application Support/UsageBoard/token-activity.json""#], timeout: 25)
+            [#"cat "$HOME/Library/Application Support/UsageBoard/token-activity.json""#], timeout: 25, cancellationGroup: "tokens")
         guard let output, output.code == 0, let ledger = try? TokenActivityLedger.decode(output.data), ledger.machines.count == 1 else {
             return TokenMachine(machine: name, harnesses: providers.map(unavailable))
         }

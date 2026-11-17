@@ -7,7 +7,7 @@ public enum OVRCASTTokenActivity {
         var calendar = Calendar(identifier: .gregorian); calendar.timeZone = .current
         var payload: [String: Any] = ["schemaVersion": 1, "provider": provider.rawValue,
             "generatedAt": ISO8601DateFormatter().string(from: now), "timeZone": calendar.timeZone.identifier,
-            "historyComplete": false, "days": []]
+            "historyComplete": false, "scanComplete": false, "days": []]
         do {
             let cache = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Caches/OVRCAST/TokenActivity")
             try FileManager.default.createDirectory(at: cache, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
@@ -20,7 +20,9 @@ public enum OVRCASTTokenActivity {
                 allowVertexClaudeFallback: false, historyDays: 7, allowPricingRefresh: false,
                 refreshPricingInBackground: false, includePiSessions: false, scannerOptions: scanOptions,
                 retryUnknownPricing: false)
-            payload["historyComplete"] = snapshot.historyIsFullyScanned
+            // A finished scan does not prove that every usage event was recorded or recognized.
+            // Keep absent days unknown and report the counters as local subtotals.
+            payload["scanComplete"] = snapshot.historyIsFullyScanned
             payload["days"] = snapshot.daily.map { day -> [String: Any] in
                 func number(_ value: Int?) -> Any { value.flatMap { $0 >= 0 ? $0 : nil } as Any? ?? NSNull() }
                 return ["date": day.date, "input": number(day.inputTokens), "output": number(day.outputTokens),

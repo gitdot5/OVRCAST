@@ -227,7 +227,7 @@ import UniformTypeIdentifiers
         preferences.nativeCollection = true; preferences.setupComplete = true; showSettings = false
     }
     func recoverConnection() { recovery.request() }
-    func stop() { timer?.invalidate(); timer = nil; recovery.stop(); tokenTask?.cancel() }
+    func stop() { timer?.invalidate(); timer = nil; recovery.stop(); tokenTask?.cancel(); CommandRunner.cancel(group: "tokens") }
     var compactStatus: String {
         let provider = preferences.recommendationProvider
         guard let best = Insights.recommend(accounts, provider: provider) else { return provider + " · —" }
@@ -324,10 +324,10 @@ import UniformTypeIdentifiers
         preferences.tokenHistory = enabled
         if enabled { refreshTokenActivity(force: true) }
         else {
-            tokenTask?.cancel(); tokenActivity = nil
+            tokenTask?.cancel(); CommandRunner.cancel(group: "tokens"); tokenActivity = nil
             if !isDemo {
-                let published = dataDirectory.deletingLastPathComponent().appendingPathComponent("token-activity.json")
-                do { if FileManager.default.fileExists(atPath: published.path) { try FileManager.default.removeItem(at: published) } }
+                let files = [dataDirectory.appendingPathComponent("token-activity.json"), dataDirectory.deletingLastPathComponent().appendingPathComponent("token-activity.json")]
+                do { for file in files where FileManager.default.fileExists(atPath: file.path) { try FileManager.default.removeItem(at: file) } }
                 catch { message = "Token history is off, but its saved local counters could not be removed. Check access to OVRCAST’s data folder." }
             }
         }

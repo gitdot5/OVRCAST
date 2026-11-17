@@ -14,7 +14,16 @@ private final class Capture: @unchecked Sendable {
     func result() -> (Data, Bool) { lock.lock(); defer { lock.unlock() }; return (data, oversized) }
 }
 enum CommandRunner {
-    static func run(_ executable: String, _ arguments: [String], timeout: TimeInterval = 60) throws -> CommandOutput {
+    private static let processLock = NSLock()
+    private static var cancellableProcesses: [UUID: (String, Process)] = [:]
+    static func cancel(group: String) {
+        processLock.lock(); defer { processLock.unlock() }
+        for (scope, process) in cancellableProcesses.values where scope == group && process.isRunning {
+            // These are scoped read-only token scans, never provider sign-in or quota refreshes.
+            kill(process.processIdentifier, SIGKILL)
+        }
+    }
+    static func run(_ executable: String, _ arguments: [String], timeout: TimeInterval = 60, cancellationGroup: String? = nil) throws -> CommandOutput {
         let process = Process(), pipe = Pipe(), capture = Capture(), ended = DispatchSemaphore(value: 0)
         process.executableURL = URL(fileURLWithPath: executable)
         process.arguments = arguments
@@ -28,6 +37,12 @@ enum CommandRunner {
         process.terminationHandler = { _ in ended.signal() }
         let drained = DispatchSemaphore(value: 0)
         try process.run()
+        let identifier = UUID()
+        if let cancellationGroup {
+            processLock.lock(); cancellableProcesses[identifier] = (cancellationGroup, process); processLock.unlock()
+            if Task.isCancelled { cancel(group: cancellationGroup) }
+        }
+        defer { processLock.lock(); cancellableProcesses.removeValue(forKey: identifier); processLock.unlock() }
         DispatchQueue.global(qos: .utility).async {
             defer { drained.signal() }
             while let chunk = try? pipe.fileHandleForReading.read(upToCount: 16384), !chunk.isEmpty { capture.append(chunk) }

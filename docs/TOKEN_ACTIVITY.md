@@ -19,10 +19,9 @@ Local parser caches stay on the source Mac. Source-reported totals are preserved
 cache components must not be added to them a second time.
 
 Local history is not necessarily account-wide: deleted or copied logs, another
-machine, other profiles and unrecognized records can affect coverage. Partial
-readings are labeled recorded subtotals. An absent counter or unreadable history
-is **Unavailable**, not zero. Zero is shown for an established empty scan or an
-explicit zero counter. Old readings are labeled **Last known**. Privacy mode hides
+machine, other profiles and unrecognized records can affect coverage. Local readings are labeled recorded subtotals, even when the scan has finished.
+A finished scan does not prove that every event was recorded or recognized. An absent counter or unreadable history
+is **Unavailable**, not zero. Missing days remain unavailable; explicit zero counters remain zero. Old readings are labeled **Last known**. Privacy mode hides
 the counts in the app.
 
 Configured Macs publish a local-only counter snapshot through the existing

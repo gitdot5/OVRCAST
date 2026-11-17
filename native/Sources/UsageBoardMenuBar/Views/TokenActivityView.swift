@@ -28,7 +28,7 @@ struct TokenActivityView: View {
                                     GridRow {
                                         VStack(alignment: .leading, spacing: 2) {
                                             Text(harness.title)
-                                            Text(harness.error != nil ? "History unavailable" : !harness.current ? "Last known" : harness.historyComplete ? "Scanned local history" : "Partial local history")
+                                            Text(harness.error != nil ? "History unavailable" : !harness.current ? "Last known" : harness.historyComplete ? "Scanned local history" : harness.scanComplete == true ? "Recorded local subtotal" : "Partial local history")
                                                 .font(.caption2).foregroundStyle(.secondary)
                                         }
                                         Text(count(summary?.input)); Text(count(summary?.output)); Text(count(summary?.cacheRead)); Text(count(summary?.cacheWrite)); Text(count(summary?.total))
