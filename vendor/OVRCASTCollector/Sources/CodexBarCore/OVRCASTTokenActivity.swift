@@ -9,7 +9,10 @@ public enum OVRCASTTokenActivity {
             "generatedAt": ISO8601DateFormatter().string(from: now), "timeZone": calendar.timeZone.identifier,
             "historyComplete": false, "days": []]
         do {
-            var scanOptions = CostUsageScanner.Options(calendar: calendar)
+            let cache = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Caches/OVRCAST/TokenActivity")
+            try FileManager.default.createDirectory(at: cache, withIntermediateDirectories: true, attributes: [.posixPermissions: 0o700])
+            try FileManager.default.setAttributes([.posixPermissions: 0o700], ofItemAtPath: cache.path)
+            var scanOptions = CostUsageScanner.Options(cacheRoot: cache, calendar: calendar)
             scanOptions.maxCodexScanDurationPerRefresh = 2
             // This API is internal to the core, so all network/pricing and other-harness fallbacks
             // can be explicitly disabled instead of relying on CLI defaults.
