@@ -1,15 +1,15 @@
 {
   "version": "0.5.0",
-  "build": "13",
-  "sha256": "8bd8d42e27c9b602b664411f8f247d0ebbd4ead403bb8a4ca47181ae180c6ec1",
+  "build": "14",
+  "sha256": "",
   "checks": {
     "local_tests": {
       "status": "pass",
-      "evidence": "docs/NEXT_RELEASE.md#acceptance-checklist"
+      "evidence": "Build 14 local source: 112 Swift tests and 102 Python tests passed November 17, 2026. Includes historical/reset-pending quota regressions; see docs/NEXT_RELEASE.md. This is not package or live-provider acceptance."
     },
     "hosted_build": {
-      "status": "pass",
-      "evidence": "https://github.com/gitdot5/OVRCAST/actions/runs/44196832177"
+      "status": "pending",
+      "evidence": ""
     },
     "package_integrity": {
       "status": "pending",
@@ -28,8 +28,8 @@
       "evidence": ""
     },
     "upgrade_recovery": {
-      "status": "pass",
-      "evidence": "docs/NEXT_RELEASE.md#build-13-package-results"
+      "status": "pending",
+      "evidence": ""
     },
     "physical_intel": {
       "status": "pending",
@@ -56,12 +56,12 @@
       "evidence": ""
     },
     "agent_interface": {
-      "status": "pass",
-      "evidence": "docs/NEXT_RELEASE.md#build-13-package-results"
+      "status": "pending",
+      "evidence": ""
     },
     "token_activity": {
-      "status": "pass",
-      "evidence": "docs/NEXT_RELEASE.md#build-13-package-results"
+      "status": "pending",
+      "evidence": ""
     }
   }
 }

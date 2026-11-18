@@ -1,6 +1,8 @@
 # OVRCAST 0.5.0 candidate
 
-Updated November 17, 2026. Build 13 adds opt-in local agent access. **Unpublished; release acceptance is pending.** Version 0.4.3
+Updated November 17, 2026. Build 14 refines usage cards and stale-reading recovery,
+following build 13's opt-in local agent access and token history. **Unpublished;
+release acceptance is pending.** Version 0.4.3
 remains the public release. This document records candidate scope and does not
 claim completed hardware, provider, notification or updater installation checks.
 
@@ -23,6 +25,27 @@ claim completed hardware, provider, notification or updater installation checks.
   at least three continuous readings over 15 minutes in one reset window, exclude
   stale/reset/discontinuous data and remain explicitly labeled estimates.
 - Notification test control and unchanged bundle/data/provider compatibility.
+
+## November 17 build 14 usage-card changes
+
+- Session and Weekly use matching tracks with explicit percentages remaining.
+  A passed historical reset no longer hides its last-known Session bar. Current
+  reset-pending windows still require a new reading before showing capacity.
+- One last-known status and age per card replaces repeated stale warnings.
+  Provider/account and device/status have separate alignment and visual weight.
+- A neutral recovery panel offers Refresh or connection Setup when no current
+  recommendation exists. Historical values never become recommendations.
+- An empty current-reading count is neutral instead of green. Current readings
+  retain capacity colors and their next-reset details.
+- Local fictional-data previews cover stale, fresh, reconnect, Day and Night.
+  Refresh-to-current and account-detail navigation were exercised in isolation.
+  Full VoiceOver and release-package acceptance remain pending.
+
+Build 13's hosted run passed all three jobs:
+https://github.com/gitdot5/OVRCAST/actions/runs/44196832177.
+Those results and its signed package are historical evidence. Build 14 needs its
+own distribution archive, hosted build and release acceptance; old passes are not
+carried into the current readiness record.
 
 ## November 17 build 13 changes
 
@@ -63,14 +86,15 @@ must receive fresh source, package, signing and interactive acceptance evidence.
 
 ## Acceptance checklist
 
-Build 12's package and hosted results below are historical baselines. The new
-build 13 runtime needs fresh acceptance; none of the old package passes are
-silently carried forward.
+Earlier package and hosted results below are historical baselines. The current
+build 14 runtime needs fresh acceptance; none of the old package passes are
+silently carried forward. Local validation is recorded separately from release
+acceptance.
 
-- [x] Build 13 local source tests: 109 Swift and 102 Python checks.
-- [x] Fresh build 13 hosted tests and universal package contract.
-- [ ] Final build 13 signing, notarization, payload and packaged-preview checks.
-- [x] Agent interface and token activity on the signed candidate, including
+- [x] Build 14 local source tests: 112 Swift and 102 Python checks.
+- [ ] Fresh build 14 hosted tests and universal package contract.
+- [ ] Final build 14 signing, notarization, payload and packaged-preview checks.
+- [ ] Repeat build 13's passing agent/token package checks on build 14, including
   permission revocation, numeric-only projections and unavailable/partial states.
 - [ ] Live provider acceptance with consenting testers using their own connections.
   Detailed account and connection results remain private.

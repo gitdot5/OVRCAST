@@ -5,36 +5,64 @@ struct RecommendationView: View {
     @ObservedObject var store: UsageStore
     private var provider: String { store.selectedProvider == "Overview" ? store.preferences.recommendationProvider : store.selectedProvider }
     private var windows: [String] { ["All limits"] + Set(store.visibleAccounts.filter { $0.provider == provider }.flatMap(\.quotas).map(\.label)).sorted() }
+    private var currentProviderReadings: Bool { store.visibleAccounts.contains { $0.provider == provider && $0.current } }
+    private var historicalProviderReadings: Bool { store.visibleAccounts.contains { $0.provider == provider && !$0.quotas.isEmpty } }
+    private var providerNeedsSignIn: Bool { !currentProviderReadings && store.visibleAccounts.contains { $0.provider == provider && $0.requiresSignIn == true } }
+    private var providerMenu: some View {
+        Menu {
+            Picker("Provider", selection: $store.preferences.recommendationProvider) {
+                ForEach(store.providers.filter { $0 != "Overview" }, id: \.self) { Text($0).tag($0) }
+            }.disabled(store.selectedProvider != "Overview")
+            Picker("Allowance", selection: $store.preferences.recommendationWindow) { ForEach(windows, id: \.self) { Text($0).tag($0) } }
+        } label: { Text(provider) }
+        .menuStyle(.borderlessButton).fixedSize().font(.system(size: 10))
+    }
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack(spacing: 6) {
-                Image(systemName: "sparkle").foregroundStyle(.tint)
-                Text("Best headroom").fontWeight(.semibold)
-                Spacer()
-                Menu {
-                    Picker("Provider", selection: $store.preferences.recommendationProvider) {
-                        ForEach(store.providers.filter { $0 != "Overview" }, id: \.self) { Text($0).tag($0) }
-                    }.disabled(store.selectedProvider != "Overview")
-                    Picker("Allowance", selection: $store.preferences.recommendationWindow) { ForEach(windows, id: \.self) { Text($0).tag($0) } }
-                } label: { Text(provider) }
-                .menuStyle(.borderlessButton).fixedSize()
-            }.font(.system(size: 10))
+        Group {
             if let best = store.recommendation {
-                Button { store.selectedAccount = best.account.id } label: {
-                    HStack {
-                        Text(store.accountName(best.account)).lineLimit(1)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "sparkle").foregroundStyle(.tint)
+                        Text("Best headroom").fontWeight(.semibold)
                         Spacer()
-                        Text("\(Int(best.remaining))% left").fontWeight(.semibold).monospacedDigit()
-                    }.font(.system(size: 11))
-                }.buttonStyle(.plain)
-                HStack {
-                    Text("\(best.limitingWindow) · \(best.account.activeMachines.map(store.machineName).joined(separator: ", "))").lineLimit(1)
-                    Spacer()
-                    Text(resetLabel(best.account.quotas.first { $0.label == best.limitingWindow }?.resetsAt)).lineLimit(1)
-                }.font(.system(size: 9)).foregroundStyle(.secondary)
-            } else { Text("No fresh, usable reading for this selection.").font(.system(size: 10)).foregroundStyle(.secondary) }
-        }.padding(.horizontal, 12).padding(.vertical, 8)
-            .background(Color.accentColor.opacity(0.07), in: RoundedRectangle(cornerRadius: 9))
+                        providerMenu
+                    }.font(.system(size: 10))
+                    Button { store.selectedAccount = best.account.id } label: {
+                        HStack {
+                            Text(store.accountName(best.account)).lineLimit(1)
+                            Spacer()
+                            Text("\(Int(best.remaining))% left").fontWeight(.semibold).monospacedDigit()
+                        }.font(.system(size: 11))
+                    }.buttonStyle(.plain)
+                    HStack {
+                        Text("\(best.limitingWindow) · \(best.account.activeMachines.map(store.machineName).joined(separator: ", "))").lineLimit(1)
+                        Spacer()
+                        Text(resetLabel(best.account.quotas.first { $0.label == best.limitingWindow }?.resetsAt)).lineLimit(1)
+                    }.font(.system(size: 9)).foregroundStyle(.secondary)
+                }.padding(.horizontal, 12).padding(.vertical, 10)
+                    .background(Color.accentColor.opacity(0.07), in: RoundedRectangle(cornerRadius: 9))
+            } else {
+                HStack(spacing: 9) {
+                    Image(systemName: currentProviderReadings ? "gauge.with.needle" : "arrow.clockwise.circle")
+                        .font(.system(size: 16)).foregroundStyle(.secondary).accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(providerNeedsSignIn ? "Reconnect \(provider)" : currentProviderReadings ? "No headroom for this selection" : "Readings need a refresh")
+                            .font(.system(size: 10, weight: .semibold))
+                        Text(providerNeedsSignIn ? "Sign in to refresh these allowances." : currentProviderReadings ? "Check another provider or allowance." : historicalProviderReadings ? "Last known allowances are shown below." : "Check your connections to load usage.")
+                            .font(.system(size: 9)).foregroundStyle(.secondary)
+                    }.frame(maxWidth: .infinity, alignment: .leading)
+                    VStack(alignment: .trailing, spacing: 5) {
+                        providerMenu
+                        Button(providerNeedsSignIn ? "Setup" : store.refreshing ? "Refreshing…" : "Refresh") {
+                            if providerNeedsSignIn { store.showSettings = true } else { store.refresh() }
+                        }
+                            .buttonStyle(.borderedProminent).controlSize(.small).disabled(store.refreshing)
+                            .accessibilityLabel(providerNeedsSignIn ? "Open connection settings" : "Refresh usage readings")
+                    }
+                }.padding(.horizontal, 11).padding(.vertical, 8)
+                    .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 9))
+            }
+        }
             .help("Compares current reported allowance within one provider. Shared quotas are counted once.")
             .onChange(of: provider) { _, _ in store.preferences.recommendationWindow = "All limits" }
     }
