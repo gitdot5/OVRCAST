@@ -6,10 +6,12 @@ struct Logo: View {
     var size: CGFloat = 24
     var body: some View {
         Group {
-            if let image = artwork(name, device: device) {
+            if device {
+                Image(systemName: MachineLabels.symbol(name))
+                    .resizable().scaledToFit().fontWeight(.medium)
+                    .symbolRenderingMode(.monochrome).foregroundStyle(.secondary)
+            } else if let image = artwork(name) {
                 Image(nsImage: image).resizable().scaledToFit()
-            } else if device {
-                Image(systemName: MachineLabels.symbol(name)).foregroundStyle(.secondary)
             } else {
                 Text(["Codex": "Cx", "Claude": "Cl", "Antigravity": "Ag"][name] ?? String(name.prefix(2)))
                     .font(.system(size: size * 0.4, weight: .semibold)).frame(width: size, height: size)
@@ -23,56 +25,80 @@ struct QuotaBar: View {
     let quota: Quota
     var compact = false
     var current = true
+    private var presentation: QuotaPresentation { QuotaPresentation(quota, current: current) }
+    private var tint: Color {
+        guard presentation.state == .current else { return .secondary.opacity(0.65) }
+        return quota.remaining < 15 ? .red : quota.remaining <= 40 ? .orange : .green
+    }
+    private var accessibilitySummary: String {
+        guard !compact && current else { return presentation.accessibilityValue }
+        let reset = resetLabel(quota.resetsAt)
+        if let date = parsedDate(quota.resetsAt), !quota.awaiting {
+            return "\(presentation.accessibilityValue); \(reset); \(resetLocalTime(date))"
+        }
+        return "\(presentation.accessibilityValue); \(reset)"
+    }
     var body: some View {
-        VStack(alignment: .leading, spacing: compact ? 3 : 5) {
+        VStack(alignment: .leading, spacing: compact ? 6 : 7) {
             HStack {
-                Text(quota.label).lineLimit(1)
+                Text(quota.label).foregroundStyle(.secondary).lineLimit(1)
                 Spacer(minLength: 3)
-                Text(!current ? "\(Int(quota.remaining.rounded()))% last known" : quota.awaiting ? "Pending" : "\(Int(quota.remaining.rounded()))% left")
-                    .fontWeight(.medium).monospacedDigit().foregroundStyle(current ? Color.primary : Color.secondary)
-            }.font(.system(size: compact ? 9 : 11))
-            if !quota.awaiting {
-                GeometryReader { proxy in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(Color.primary.opacity(0.08))
-                        Capsule().fill(!current ? Color.secondary : quota.remaining < 15 ? Color.red : quota.remaining <= 40 ? Color.orange : Color.green)
-                            .frame(width: proxy.size.width * max(0, min(100, quota.remaining)) / 100)
-                    }
-                }.frame(height: compact ? 3 : 5)
-            }
-            if !compact {
+                Text(presentation.value).fontWeight(.semibold).monospacedDigit().fixedSize()
+                    .foregroundStyle(current ? Color.primary : Color.primary.opacity(0.72))
+            }.font(.system(size: compact ? 10 : 11))
+            GeometryReader { proxy in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.primary.opacity(0.07))
+                    Capsule().fill(tint).frame(width: proxy.size.width * presentation.fraction)
+                }
+            }.frame(height: compact ? 5 : 6)
+            if !compact && current {
                 Text(resetLabel(quota.resetsAt)).font(.system(size: 10)).foregroundStyle(.secondary)
                 if let date = parsedDate(quota.resetsAt), !quota.awaiting {
                     Text(resetLocalTime(date)).font(.system(size: 10)).foregroundStyle(.secondary)
                 }
             }
-        }.accessibilityElement(children: .combine)
+        }.accessibilityElement(children: .ignore)
+            .accessibilityLabel(quota.label).accessibilityValue(accessibilitySummary)
+            .help(current ? "Reported remaining allowance" : "Remaining allowance at the last reading; refresh before relying on it")
     }
 }
 struct AccountRow: View {
     let account: UsageAccount
     @ObservedObject var store: UsageStore
     var expanded = false
+    private var historical: Bool { !account.current && !account.quotas.isEmpty }
+    private var statusText: String {
+        if historical { return "Last known · " + age(account.observedAt) }
+        if account.current && !account.quotas.isEmpty { return account.shortStatus + " · " + age(account.observedAt) }
+        return account.quotas.isEmpty && account.requiresSignIn != true ? "No reading" : account.shortStatus
+    }
+    private var devices: String { account.activeMachines.map(store.machineName).joined(separator: ", ") }
+    private var statusColor: Color {
+        guard account.current else { return .secondary }
+        if account.requiresSignIn == true { return .orange }
+        if account.quotas.isEmpty || account.quotas.contains(where: \.awaiting) { return .secondary }
+        return account.color
+    }
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 9) {
-                Logo(name: account.provider, size: 25)
+        VStack(alignment: .leading, spacing: expanded ? 11 : 9) {
+            HStack(alignment: .top, spacing: 9) {
+                Logo(name: account.provider, size: 24).padding(.top, 1)
                 VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 5) {
-                        Text(account.provider).font(.system(size: 11, weight: .semibold))
-                        ForEach(account.activeMachines, id: \.self) { machine in
-                            Logo(name: store.machineName(machine), device: true, size: expanded ? 19 : 13)
-                            Text(store.machineName(machine)).font(.system(size: 9)).foregroundStyle(.secondary)
-                        }
-                        Spacer(minLength: 3)
-                    }
+                    Text(account.provider).font(.system(size: 12, weight: .semibold)).lineLimit(1)
                     Text(store.accountName(account)).font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(1)
-                }
-                VStack(alignment: .trailing, spacing: 3) {
-                    Text(account.shortStatus).font(.system(size: 9, weight: .medium)).foregroundStyle(account.color)
-                    Text(account.quotas.isEmpty && !account.current ? "No reading" : age(account.observedAt))
-                        .font(.system(size: 9)).foregroundStyle(.secondary)
-                }
+                }.frame(maxWidth: .infinity, alignment: .leading)
+                VStack(alignment: .trailing, spacing: 4) {
+                    HStack(spacing: 4) {
+                        if let first = account.activeMachines.first { Logo(name: store.machineName(first), device: true, size: 12) }
+                        Text(devices).lineLimit(1).truncationMode(.tail)
+                    }.font(.system(size: 10)).foregroundStyle(.secondary).help(devices)
+                    HStack(spacing: 4) {
+                        if historical { Image(systemName: "clock").accessibilityHidden(true) }
+                        Text(statusText)
+                    }.font(.system(size: 9, weight: .medium)).monospacedDigit()
+                        .foregroundStyle(statusColor)
+                }.frame(maxWidth: 190, alignment: .trailing)
             }
             if expanded {
                 ForEach(Array(account.quotas.enumerated()), id: \.offset) { _, quota in QuotaBar(quota: quota, current: account.current) }
@@ -81,19 +107,29 @@ struct AccountRow: View {
                     Spacer()
                     Text("Resets: \(account.savedResets.map(String.init) ?? "Unknown")")
                 }.font(.system(size: 10)).foregroundStyle(.secondary)
+            } else if account.quotas.count > 2 {
+                VStack(spacing: 8) {
+                    ForEach(Array(account.quotas.prefix(3).enumerated()), id: \.offset) { _, quota in
+                        QuotaBar(quota: quota, compact: true, current: account.current)
+                    }
+                }
             } else {
-                HStack(alignment: .top, spacing: 12) {
+                HStack(alignment: .top, spacing: 18) {
                     ForEach(Array(account.quotas.prefix(3).enumerated()), id: \.offset) { _, quota in
                         QuotaBar(quota: quota, compact: true, current: account.current).frame(maxWidth: .infinity)
                     }
                     if account.quotas.isEmpty { Text("No quota reading").font(.system(size: 10)).foregroundStyle(.secondary) }
                 }
             }
-            if !expanded { ResetScheduleView(account: account) }
-        }.padding(.horizontal, 12).padding(.vertical, expanded ? 12 : 7)
-        .background(.background.opacity(0.7), in: RoundedRectangle(cornerRadius: 10))
-        .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.primary.opacity(0.06)))
-        .contentShape(RoundedRectangle(cornerRadius: 10))
+            if historical && account.requiresSignIn == true {
+                Label("Sign in to refresh this account", systemImage: "person.crop.circle.badge.exclamationmark")
+                    .font(.system(size: 9)).foregroundStyle(.orange)
+            } else if !expanded && account.current { ResetScheduleView(account: account) }
+        }.padding(.horizontal, 13).padding(.vertical, expanded ? 13 : 9)
+        .background(.background.opacity(0.75), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.primary.opacity(0.06)))
+        .contentShape(RoundedRectangle(cornerRadius: 12))
+        .accessibilityElement(children: .combine)
     }
 }
 struct AccountDetail: View {
@@ -106,6 +142,16 @@ struct AccountDetail: View {
             AccountRow(account: account, store: store, expanded: true)
             if !account.current || account.requiresSignIn == true || account.quotas.contains(where: \.awaiting) {
                 ConnectionHelpView(account: account, store: store)
+            }
+            if store.preferences.showForecasts {
+                ForEach(Array(account.quotas.enumerated()), id: \.offset) { _, quota in
+                    if let forecast = CapacityForecast.estimate(account: account, quota: quota, history: store.history) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(quota.label + " · " + forecast.label).font(.caption)
+                            Text("Based on recent local readings. Your pace can change.").font(.caption2).foregroundStyle(.secondary)
+                        }
+                    }
+                }
             }
             AccountHistoryView(points: store.history.filter { $0.accountID == account.id })
             VStack(alignment: .leading, spacing: 8) {
@@ -133,6 +179,7 @@ struct AccountDetail: View {
 }
 struct MenuView: View {
     @ObservedObject var store: UsageStore
+    @ObservedObject private var updates = AppUpdates.shared
     let openBoard: () -> Void
     var maxHeight: CGFloat = 710
     var floating = false
@@ -156,19 +203,23 @@ struct MenuView: View {
                 }
                 Button { store.preferences.privacyMode.toggle() } label: { Image(systemName: store.preferences.privacyMode ? "eye.slash.fill" : "eye") }
                     .buttonStyle(.plain).help("Hide account identities and balances").accessibilityLabel("Privacy mode")
+                    .accessibilityValue(store.preferences.privacyMode ? "On" : "Off")
                 if store.refreshing { ProgressView().controlSize(.small) }
                 Button { store.refresh() } label: { Image(systemName: "arrow.clockwise") }
                     .buttonStyle(.plain).help("Refresh usage").accessibilityLabel("Refresh usage")
+                    .disabled(store.refreshing).keyboardShortcut("r", modifiers: .command)
                 Menu {
+                    Button("Check for Updates…") { updates.check() }.disabled(!updates.ready)
                     Button("Settings…") { store.showSettings = true }
-                    Button("Copy support report") { store.copySupportReport() }
+                    Button("Token activity…") { store.showTokenActivity = true }
+                    Button("Review support report…") { store.copySupportReport() }
                     Button("Export snapshot…") { store.exportSnapshot() }
                     Divider()
                     Button("Open full board", action: openBoard)
                     Button("Refresh readings") { store.refresh() }
                     Divider()
                     Button("Quit OVRCAST") { NSApp.terminate(nil) }
-                } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).fixedSize()
+                } label: { Image(systemName: "ellipsis.circle") }.menuStyle(.borderlessButton).fixedSize().accessibilityLabel("More actions")
             }.padding(.horizontal, 17).padding(.top, 16).padding(.bottom, 12)
             HStack(spacing: 3) {
                 ForEach(store.providers, id: \.self) { provider in
@@ -181,12 +232,14 @@ struct MenuView: View {
                             Text(provider).font(.system(size: 10, weight: store.selectedProvider == provider ? .semibold : .regular))
                         }.padding(.vertical, 7).frame(maxWidth: .infinity)
                         .background(store.selectedProvider == provider ? Color.primary.opacity(0.08) : .clear, in: RoundedRectangle(cornerRadius: 7))
-                    }.buttonStyle(.plain)
+                    }.buttonStyle(.plain).accessibilityValue(store.selectedProvider == provider ? "Selected" : "Not selected")
                 }
             }.padding(.horizontal, 12).padding(.bottom, 11)
             if selected == nil {
                 HStack {
-                    Label("\(store.visibleAccounts.filter(\.available).count) available", systemImage: "circle.fill").foregroundStyle(.green)
+                    let available = store.visibleAccounts.filter(\.available).count
+                    Label(available > 0 ? "\(available) available" : store.visibleAccounts.contains(where: \.current) ? "0 available" : "No current readings", systemImage: "circle.fill")
+                        .foregroundStyle(available > 0 ? Color.green : Color.secondary)
                     Spacer()
                     Text("\(store.visibleAccounts.count) of \(store.accounts.count)").foregroundStyle(.secondary)
                     Text("·").foregroundStyle(.tertiary)

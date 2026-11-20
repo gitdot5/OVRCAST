@@ -146,7 +146,9 @@ extension CostUsageScanner {
                 onLine: { line in
                     guard !line.bytes.isEmpty else { return }
                     guard !line.wasTruncated else { return }
-                    guard line.bytes.containsAscii(#""type":"assistant""#) else { return }
+                    // JSON whitespace is valid. The decoded type check below is authoritative;
+                    // an exact compact-JSON prefix silently discarded readable history.
+                    guard line.bytes.containsAscii(#""assistant""#) else { return }
                     guard line.bytes.containsAscii(#""usage""#) else { return }
                     let couldContainMetadata = providerFilter != .all && Self.couldContainVertexAIMetadata(line.bytes)
                     if providerFilter == .vertexAIOnly, !couldContainMetadata,

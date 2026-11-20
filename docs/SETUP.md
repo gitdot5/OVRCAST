@@ -122,3 +122,13 @@ services use OVRCAST namespaces. Provider-owned authentication locations are
 retained. CodexBar's configuration, sessions and installation are not modified
 or required. Advanced existing token-account configurations require deliberate
 setup for this fork; the normal Connect flow uses provider software directly.
+
+## 0.5.0 candidate additions
+
+Setup requires a current usage reading for at least one selected provider.
+Use Health for connection states, last success and automatic retry times.
+Manual Retry bypasses backoff. Review support report shows exactly what will
+be copied or saved; it never uploads anything. Personalize controls optional
+menu-bar capacity and local usage estimates. About controls signed updates;
+automatic checks/installations start off. See [NEXT_RELEASE.md](NEXT_RELEASE.md)
+and [UPDATES.md](UPDATES.md) before candidate distribution.

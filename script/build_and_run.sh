@@ -19,18 +19,8 @@ cp "$ROOT_DIR/app/UsageBoard.icns" "$CONTENTS/Resources/UsageBoard.icns"
 ditto "$ROOT_DIR/assets" "$CONTENTS/Resources/assets"
 cp "$ROOT_DIR/LICENSE" "$ROOT_DIR/THIRD_PARTY_NOTICES.md" "$CONTENTS/Resources/"
 ditto "$ROOT_DIR/LICENSES" "$CONTENTS/Resources/LICENSES"
-/usr/bin/python3 - "$CONTENTS/Info.plist" "$ROOT_DIR/app/version.json" <<'PY'
-import json,plistlib,sys
-version=json.load(open(sys.argv[2]))
-with open(sys.argv[1], 'wb') as f:
- plistlib.dump({'CFBundleExecutable':'UsageBoardMenuBar','CFBundleIdentifier':'com.weekthink.usageboard',
- 'CFBundleName':'OVRCAST','CFBundleDisplayName':'OVRCAST','CFBundlePackageType':'APPL',
- 'CFBundleShortVersionString':version['version'],'CFBundleVersion':version['build'],'CFBundleIconFile':'UsageBoard.icns',
- 'LSMinimumSystemVersion':'14.0','NSPrincipalClass':'NSApplication','LSUIElement':True,
- 'CFBundleURLTypes':[{'CFBundleURLName':'com.weekthink.usageboard','CFBundleURLSchemes':['usageboard']}]},f)
-PY
-codesign --force -s - "$CONTENTS/Helpers/OVRCASTCollector"
-codesign --force -s - "$APP_BUNDLE"
+/usr/bin/python3 "$ROOT_DIR/script/prepare_bundle.py" "$APP_BUNDLE" "$ROOT_DIR"
+/usr/bin/python3 "$ROOT_DIR/script/sign_bundle.py" "$APP_BUNDLE"
 codesign --verify --deep --strict "$APP_BUNDLE"
 if [[ "$MODE" == "--build-only" ]]; then exit 0; fi
 /usr/bin/python3 -I "$ROOT_DIR/gather.py" --quiet

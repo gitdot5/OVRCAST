@@ -1,3 +1,8 @@
+## Next release candidate
+
+The unpublished 0.5.0 changes and acceptance gates are tracked in
+[NEXT_RELEASE.md](NEXT_RELEASE.md). The evidence below describes published 0.4.2.
+
 # Reliability work for 0.4.2
 
 Reviewed November 3, 2026. This remains a public preview. Automated checks cannot
@@ -50,13 +55,12 @@ timeouts. Packaged offline previews use `--demo --demo-offline --privacy` with
 fictional data; they never read provider accounts.
 
 Hosted CI and the exact signed/notarized artifact are separate acceptance checks;
-their completed results are linked in release notes. Previous live Codex and
-Antigravity readings belong to the 0.4.0 baseline, not a new provider certification.
+their completed results are linked in release notes. Live provider acceptance uses separate private evidence; automated tests do not
+sign in or certify provider accounts.
 
 Before removing the preview label, complete a clean-user installation, upgrade,
 sleep/wake and notification-delivery check on the oldest supported macOS version
-and both hardware families. The previous separate-Mac launch timeout still needs
-console inspection. Complete a live Claude Code OAuth usage check with the user
+and both hardware families. Complete live provider acceptance with each tester
 signing in directly; do not copy tokens or authenticate automatically.
 
 ## Next product priorities
