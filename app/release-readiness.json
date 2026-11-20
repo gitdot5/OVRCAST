@@ -8,12 +8,12 @@
       "evidence": "Build 14 local source: 112 Swift and 102 Python tests passed November 20, 2026. Fictional native previews also cover long labels, three quota windows, 0/100 percent, reset-pending, unavailable and empty states. Package and live-provider acceptance are separate."
     },
     "hosted_build": {
-      "status": "pending",
-      "evidence": ""
+      "status": "pass",
+      "evidence": "Runtime82366b710fb1fb065c3cbdb2dbba03b691e228a3: Intel/macOS15 and AppleSilicon/macOS26 source jobs plus clean universal package/resource contract passed November20,2026. https://github.com/gitdot5/OVRCAST/actions/runs/44823607900"
     },
     "package_integrity": {
       "status": "pending",
-      "evidence": ""
+      "evidence": "Local build14 signed universal candidate passes strict signature/resource/private-payload checks and signed-feed/archive tamper rejection. Apple notarization and exact final archive SHA acceptance remain pending."
     },
     "live_providers": {
       "status": "pending",
@@ -25,11 +25,11 @@
     },
     "updater_dialogs": {
       "status": "pending",
-      "evidence": ""
+      "evidence": "The exact signed build14 candidate reports updater ready at startup. A disposable loopback-feed UI attempt did not yield an accepted standard dialog observation. Full update-dialog/install/restart acceptance remains pending."
     },
     "upgrade_recovery": {
-      "status": "pending",
-      "evidence": ""
+      "status": "pass",
+      "evidence": "Disposable 0.4.3 to build14 to 0.4.3 launch/rollback passes strict signatures, preserved fixture preferences/privacy and no live collection November 20, 2026. Full Sparkle dialogs/installation remain under updater_dialogs."
     },
     "physical_intel": {
       "status": "pending",
@@ -45,7 +45,7 @@
     },
     "accessibility": {
       "status": "pending",
-      "evidence": ""
+      "evidence": "Build14 fictional Day/Night and layout edge cases inspected; AX quota/status values and Cmd+R refresh observed. Full keyboard and VoiceOver acceptance remain pending."
     },
     "resource_use": {
       "status": "pending",
@@ -56,12 +56,12 @@
       "evidence": ""
     },
     "agent_interface": {
-      "status": "pending",
-      "evidence": ""
+      "status": "pass",
+      "evidence": "Build 14 signed universal candidate at runtime 82366b7: network/real-home-denied status, recommend and tokens fixtures pass; permission revocation, stale decline, numeric-only redaction and unchanged source files verified November 20, 2026."
     },
     "token_activity": {
-      "status": "pending",
-      "evidence": ""
+      "status": "pass",
+      "evidence": "Build 14 signed universal candidate: bundled parser fixtures with network/real-home access denied pass owner-only numeric counter/cache contracts; Swift token history tests and agent token readback pass November 20, 2026. This is not account-wide billing or live-provider acceptance."
     }
   }
 }

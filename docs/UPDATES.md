@@ -37,7 +37,10 @@ Do not export private keys into the repository, build environment or download ho
    the record does not substitute for the underlying tests.
 6. Publish the exact verified archive, compare anonymous download hashes, then
    publish its generated signed `appcast.xml` unchanged. Never hand-edit a signed
-   feed. Retain the previous signed release for manual recovery.
+   feed. The first updater release must create this file on `main`; signing a ZIP
+   does not make the configured feed available. Check the public feed response,
+   its signature and archive download hash after publication. Retain the previous
+   signed release for manual recovery.
 
 ## Recovery
 

@@ -48,9 +48,34 @@ claim completed hardware, provider, notification or updater installation checks.
 
 Build 13's hosted run passed all three jobs:
 https://github.com/gitdot5/OVRCAST/actions/runs/44196832177.
-Those results and its signed package are historical evidence. Build 14 needs its
-own distribution archive, hosted build and release acceptance; old passes are not
-carried into the current readiness record.
+Those results and its signed package are historical evidence. Build 14 evidence
+is recorded separately below; earlier passes were not carried forward into its
+readiness record.
+
+### November 20 build 14 package checks
+
+Runtime commit: `82366b710fb1fb065c3cbdb2dbba03b691e228a3`.
+The local Developer ID signed universal candidate passes strict signature,
+minimum-macOS, resource and private-payload checks. Network/home-denied token
+parser and agent fixtures pass, including redaction, unchanged input files,
+revoked permissions and stale-routing rejection. Signed feed/archive checks
+accept the candidate and reject altered copies.
+
+A disposable 0.4.3 → build14 → 0.4.3 launch/rollback preserves preferences and
+privacy. Both existing remote Apple Silicon Macs launch this exact candidate
+with demo data and pass signature/resource checks. These checks do not establish
+live-provider, physical Intel/macOS 14, updater-dialog or endurance acceptance.
+The build 14 Intel GUI slice also launches and renders through Rosetta with
+fictional data and privacy mode enabled.
+The local Cmd+R refresh shortcut also transitions a stale fictional fixture to
+current readings with reset times; full keyboard/VoiceOver acceptance is pending.
+
+The candidate is not notarized or installed. Its generated signed feed is a
+local fixture; the configured public feed is not yet published. Initial feed
+publication and final download/signature checks follow [UPDATES.md](UPDATES.md).
+Both build 14 hosted source jobs and the clean universal package/resource contract
+passed:
+https://github.com/gitdot5/OVRCAST/actions/runs/44823607900.
 
 ## November 17 build 13 changes
 
@@ -97,9 +122,9 @@ silently carried forward. Local validation is recorded separately from release
 acceptance.
 
 - [x] Build 14 local source tests: 112 Swift and 102 Python checks.
-- [ ] Fresh build 14 hosted tests and universal package contract.
+- [x] Fresh build 14 hosted tests and universal package contract.
 - [ ] Final build 14 signing, notarization, payload and packaged-preview checks.
-- [ ] Repeat build 13's passing agent/token package checks on build 14, including
+- [x] Repeat build 13's passing agent/token package checks on build 14, including
   permission revocation, numeric-only projections and unavailable/partial states.
 - [ ] Live provider acceptance with consenting testers using their own connections.
   Detailed account and connection results remain private.
