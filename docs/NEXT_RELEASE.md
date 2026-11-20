@@ -1,6 +1,6 @@
 # OVRCAST 0.5.0 candidate
 
-Updated November 17, 2026. Build 14 refines usage cards and stale-reading recovery,
+Updated November 20, 2026. Build 14 refines usage cards and stale-reading recovery,
 following build 13's opt-in local agent access and token history. **Unpublished;
 release acceptance is pending.** Version 0.4.3
 remains the public release. This document records candidate scope and does not
@@ -37,9 +37,14 @@ claim completed hardware, provider, notification or updater installation checks.
   recommendation exists. Historical values never become recommendations.
 - An empty current-reading count is neutral instead of green. Current readings
   retain capacity colors and their next-reset details.
+- Device symbols adapt to Day/Night. Pending or missing readings use neutral status
+  color. Long recommendation labels preserve the percentage, and three quota
+  windows stack vertically so their labels remain readable.
 - Local fictional-data previews cover stale, fresh, reconnect, Day and Night.
   Refresh-to-current and account-detail navigation were exercised in isolation.
-  Full VoiceOver and release-package acceptance remain pending.
+  November 20 previews also cover long names, zero/full allowance, three windows,
+  reset-pending, unreadable and empty states. Local tests pass 112 Swift and 102
+  Python checks. Full VoiceOver and release-package acceptance remain pending.
 
 Build 13's hosted run passed all three jobs:
 https://github.com/gitdot5/OVRCAST/actions/runs/44196832177.

@@ -8,6 +8,18 @@ struct RecommendationView: View {
     private var currentProviderReadings: Bool { store.visibleAccounts.contains { $0.provider == provider && $0.current } }
     private var historicalProviderReadings: Bool { store.visibleAccounts.contains { $0.provider == provider && !$0.quotas.isEmpty } }
     private var providerNeedsSignIn: Bool { !currentProviderReadings && store.visibleAccounts.contains { $0.provider == provider && $0.requiresSignIn == true } }
+    private var providerPendingReset: Bool { store.visibleAccounts.contains { $0.provider == provider && $0.current && $0.quotas.contains(where: \.awaiting) } }
+    private var recoveryTitle: String {
+        if providerNeedsSignIn { return "Reconnect \(provider)" }
+        if providerPendingReset { return "Waiting for reset confirmation" }
+        return currentProviderReadings ? "No headroom for this selection" : "Readings need a refresh"
+    }
+    private var recoveryHint: String {
+        if providerNeedsSignIn { return "Sign in to refresh these allowances." }
+        if providerPendingReset { return "Refresh to confirm the new allowance." }
+        if currentProviderReadings { return "Check another provider or allowance." }
+        return historicalProviderReadings ? "Last known allowances are shown below." : "Check your connections to load usage."
+    }
     private var providerMenu: some View {
         Menu {
             Picker("Provider", selection: $store.preferences.recommendationProvider) {
@@ -29,10 +41,11 @@ struct RecommendationView: View {
                     }.font(.system(size: 10))
                     Button { store.selectedAccount = best.account.id } label: {
                         HStack {
-                            Text(store.accountName(best.account)).lineLimit(1)
-                            Spacer()
-                            Text("\(Int(best.remaining))% left").fontWeight(.semibold).monospacedDigit()
-                        }.font(.system(size: 11))
+                            Text(store.accountName(best.account)).lineLimit(1).truncationMode(.middle)
+                                .help(store.accountName(best.account))
+                            Spacer(minLength: 8)
+                            Text("\(Int(best.remaining))% left").fontWeight(.semibold).monospacedDigit().fixedSize()
+                        }.font(.system(size: 11)).frame(maxWidth: .infinity, alignment: .leading)
                     }.buttonStyle(.plain)
                     HStack {
                         Text("\(best.limitingWindow) · \(best.account.activeMachines.map(store.machineName).joined(separator: ", "))").lineLimit(1)
@@ -43,12 +56,12 @@ struct RecommendationView: View {
                     .background(Color.accentColor.opacity(0.07), in: RoundedRectangle(cornerRadius: 9))
             } else {
                 HStack(spacing: 9) {
-                    Image(systemName: currentProviderReadings ? "gauge.with.needle" : "arrow.clockwise.circle")
+                    Image(systemName: currentProviderReadings && !providerPendingReset ? "gauge.with.needle" : "arrow.clockwise.circle")
                         .font(.system(size: 16)).foregroundStyle(.secondary).accessibilityHidden(true)
                     VStack(alignment: .leading, spacing: 3) {
-                        Text(providerNeedsSignIn ? "Reconnect \(provider)" : currentProviderReadings ? "No headroom for this selection" : "Readings need a refresh")
+                        Text(recoveryTitle)
                             .font(.system(size: 10, weight: .semibold))
-                        Text(providerNeedsSignIn ? "Sign in to refresh these allowances." : currentProviderReadings ? "Check another provider or allowance." : historicalProviderReadings ? "Last known allowances are shown below." : "Check your connections to load usage.")
+                        Text(recoveryHint)
                             .font(.system(size: 9)).foregroundStyle(.secondary)
                     }.frame(maxWidth: .infinity, alignment: .leading)
                     VStack(alignment: .trailing, spacing: 5) {

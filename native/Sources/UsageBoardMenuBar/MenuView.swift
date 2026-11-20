@@ -6,10 +6,12 @@ struct Logo: View {
     var size: CGFloat = 24
     var body: some View {
         Group {
-            if let image = artwork(name, device: device) {
+            if device {
+                Image(systemName: MachineLabels.symbol(name))
+                    .resizable().scaledToFit().fontWeight(.medium)
+                    .symbolRenderingMode(.monochrome).foregroundStyle(.secondary)
+            } else if let image = artwork(name) {
                 Image(nsImage: image).resizable().scaledToFit()
-            } else if device {
-                Image(systemName: MachineLabels.symbol(name)).foregroundStyle(.secondary)
             } else {
                 Text(["Codex": "Cx", "Claude": "Cl", "Antigravity": "Ag"][name] ?? String(name.prefix(2)))
                     .font(.system(size: size * 0.4, weight: .semibold)).frame(width: size, height: size)
@@ -41,7 +43,7 @@ struct QuotaBar: View {
             HStack {
                 Text(quota.label).foregroundStyle(.secondary).lineLimit(1)
                 Spacer(minLength: 3)
-                Text(presentation.value).fontWeight(.semibold).monospacedDigit()
+                Text(presentation.value).fontWeight(.semibold).monospacedDigit().fixedSize()
                     .foregroundStyle(current ? Color.primary : Color.primary.opacity(0.72))
             }.font(.system(size: compact ? 10 : 11))
             GeometryReader { proxy in
@@ -72,6 +74,12 @@ struct AccountRow: View {
         return account.quotas.isEmpty && account.requiresSignIn != true ? "No reading" : account.shortStatus
     }
     private var devices: String { account.activeMachines.map(store.machineName).joined(separator: ", ") }
+    private var statusColor: Color {
+        guard account.current else { return .secondary }
+        if account.requiresSignIn == true { return .orange }
+        if account.quotas.isEmpty || account.quotas.contains(where: \.awaiting) { return .secondary }
+        return account.color
+    }
     var body: some View {
         VStack(alignment: .leading, spacing: expanded ? 11 : 9) {
             HStack(alignment: .top, spacing: 9) {
@@ -89,7 +97,7 @@ struct AccountRow: View {
                         if historical { Image(systemName: "clock").accessibilityHidden(true) }
                         Text(statusText)
                     }.font(.system(size: 9, weight: .medium)).monospacedDigit()
-                        .foregroundStyle(historical ? Color.secondary : account.color)
+                        .foregroundStyle(statusColor)
                 }.frame(maxWidth: 190, alignment: .trailing)
             }
             if expanded {
@@ -99,6 +107,12 @@ struct AccountRow: View {
                     Spacer()
                     Text("Resets: \(account.savedResets.map(String.init) ?? "Unknown")")
                 }.font(.system(size: 10)).foregroundStyle(.secondary)
+            } else if account.quotas.count > 2 {
+                VStack(spacing: 8) {
+                    ForEach(Array(account.quotas.prefix(3).enumerated()), id: \.offset) { _, quota in
+                        QuotaBar(quota: quota, compact: true, current: account.current)
+                    }
+                }
             } else {
                 HStack(alignment: .top, spacing: 18) {
                     ForEach(Array(account.quotas.prefix(3).enumerated()), id: \.offset) { _, quota in

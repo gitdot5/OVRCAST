@@ -5,7 +5,7 @@
   "checks": {
     "local_tests": {
       "status": "pass",
-      "evidence": "Build 14 local source: 112 Swift tests and 102 Python tests passed November 17, 2026. Includes historical/reset-pending quota regressions; see docs/NEXT_RELEASE.md. This is not package or live-provider acceptance."
+      "evidence": "Build 14 local source: 112 Swift and 102 Python tests passed November 20, 2026. Fictional native previews also cover long labels, three quota windows, 0/100 percent, reset-pending, unavailable and empty states. Package and live-provider acceptance are separate."
     },
     "hosted_build": {
       "status": "pending",
