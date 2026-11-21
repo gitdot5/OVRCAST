@@ -1,10 +1,26 @@
 # OVRCAST 0.5.0 candidate
 
-Updated November 20, 2026. Build 14 refines usage cards and stale-reading recovery,
-following build 13's opt-in local agent access and token history. **Unpublished;
-release acceptance is pending.** Version 0.4.3
-remains the public release. This document records candidate scope and does not
-claim completed hardware, provider, notification or updater installation checks.
+Updated November 21, 2026. Build 15 reads Claude usage through its signed-in
+Claude Code session, following build 14's usage-card refinements. **Unpublished;
+release acceptance is pending.** Earlier build results below are historical and
+are not acceptance of build 15.
+
+## November 21 build 15 Claude connection fix
+
+- Read Claude quota through the currently signed-in Claude Code session. Direct
+  access to Claude Code's raw OAuth credentials is not required or enabled.
+- Claude uses the active local session rather than a configured token-account
+  override. A failed connection does not silently switch sources or accounts.
+- The existing standalone collector follows the same route and preserves its
+  configured Claude profile. Codex and Antigravity collection remain unchanged.
+- Live desktop-session diagnostics returned current, expected-account Claude
+  readings on all three configured Macs through the signed collector's CLI route.
+  SSH-only auth checks did not represent desktop-session access.
+- Notification permission is enabled and the signed build 14 baseline delivered
+  a test alert to Notification Center. Repeat delivery on the final build 15.
+
+Current build 15 acceptance is tracked in `app/release-readiness.json`; fresh
+source, hosted, package and live acceptance evidence is required after this change.
 
 ## Changes
 
@@ -114,12 +130,11 @@ must receive fresh source, package, signing and interactive acceptance evidence.
 - Publication readiness requires reviewed evidence and the exact archive hash.
   A pending gate prevents `script/check_release_readiness.py` from passing.
 
-## Acceptance checklist
+## Build 14 acceptance baseline
 
-Earlier package and hosted results below are historical baselines. The current
-build 14 runtime needs fresh acceptance; none of the old package passes are
-silently carried forward. Local validation is recorded separately from release
-acceptance.
+The checklist below records build 14. Build 15 has a separate readiness record;
+these passes are not carried forward. Local validation remains separate from
+release acceptance.
 
 - [x] Build 14 local source tests: 112 Swift and 102 Python checks.
 - [x] Fresh build 14 hosted tests and universal package contract.

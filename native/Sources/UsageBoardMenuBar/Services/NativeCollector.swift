@@ -73,13 +73,16 @@ enum NativeCollector {
     }
     static func collect(provider: String, machine: String, helper: String,
                         run: (String, [String]) throws -> CommandOutput = { try CommandRunner.run($0, $1, timeout: 90) }) -> [UsageAccount] {
-        let source = provider == "Codex" ? ["--source", "cli"] : provider == "Claude" ? ["--source", "oauth"] : []
+        // Claude Code owns its sign-in and Keychain access. Read its active session
+        // rather than requiring another application to read raw OAuth credentials.
+        let source = ["Codex", "Claude"].contains(provider) ? ["--source", "cli"] : []
         let base = ["usage", "--provider", provider.lowercased(), "--format", "json", "--no-color"] + source
         do {
-            var output = try run(helper, base + ["--all-accounts"])
+            let enumeratesAccounts = provider != "Claude"
+            var output = try run(helper, enumeratesAccounts ? base + ["--all-accounts"] : base)
             // CodexBar's account flag means configured token accounts for these providers.
             // A default local connection can still exist when no token accounts are configured.
-            if defaultAccountFallback(output.data, provider: provider) { output = try run(helper, base) }
+            if enumeratesAccounts && defaultAccountFallback(output.data, provider: provider) { output = try run(helper, base) }
             return try parse(output.data, provider: provider, machine: machine)
         } catch {
             let timeout = (error as NSError).domain == "UsageBoard" && (error as NSError).code == 1

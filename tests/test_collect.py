@@ -192,7 +192,11 @@ class OwnedCollectorTest(unittest.TestCase):
             self.assertEqual({c.args[1] for c in usage.call_args_list}, {'codex', 'claude', 'antigravity'})
             self.assertTrue(all(c.args[0] == '/owned/helper' for c in usage.call_args_list))
 
-    def test_claude_uses_supported_oauth_without_cli_fallback(self):
+    def test_claude_uses_the_configured_cli_session_without_account_overrides(self):
         with patch('collect._codexbar', return_value=('[]', 0)) as run:
-            collect.provider_usage('/owned/helper', 'claude', {})
-            self.assertEqual(run.call_args.args[1][-2:], ['--source', 'oauth'])
+            env = {'CLAUDE_CONFIG_DIR': '/example/active-profile'}
+            collect.provider_usage('/owned/helper', 'claude', env)
+            run.assert_called_once()
+            self.assertEqual(run.call_args.args[1][-2:], ['--source', 'cli'])
+            self.assertNotIn('--all-accounts', run.call_args.args[1])
+            self.assertIs(run.call_args.args[2], env)

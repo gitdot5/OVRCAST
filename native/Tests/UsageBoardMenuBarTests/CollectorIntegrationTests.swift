@@ -17,15 +17,16 @@ final class CollectorIntegrationTests: XCTestCase {
         XCTAssertFalse(calls[1].contains("--source"))
         XCTAssertEqual(rows.first?.quotas.first?.remaining, 80)
     }
-    func testClaudeUsesSupportedOAuthSourceAndDefaultFallback() {
+    func testClaudeUsesItsSignedInCLISessionWithoutTokenAccountOverrides() {
         var calls: [[String]] = []
         let rows = NativeCollector.collect(provider: "Claude", machine: "Test", helper: "/test/helper") { _, args in
             calls.append(args)
-            return CommandOutput(data: calls.count == 1 ? self.noAccounts("claude") : self.usage, code: 0)
+            return CommandOutput(data: self.usage, code: 0)
         }
-        XCTAssertEqual(calls.count, 2)
-        XCTAssertTrue(calls.allSatisfy { $0.contains("oauth") && !$0.contains("cli") })
-        XCTAssertEqual(rows.count, 1)
+        XCTAssertEqual(calls.count, 1)
+        XCTAssertTrue(calls[0].contains("cli")); XCTAssertFalse(calls[0].contains("oauth"))
+        XCTAssertFalse(calls[0].contains("--all-accounts"))
+        XCTAssertEqual(rows.first?.quotas.first?.remaining, 80)
     }
     func testSuccessfulMultiAccountReadingDoesNotFallback() {
         var count = 0
@@ -35,11 +36,14 @@ final class CollectorIntegrationTests: XCTestCase {
         }
         XCTAssertEqual(count, 1); XCTAssertEqual(rows.first?.quotas.count, 1)
     }
-    func testMissingOAuthCredentialsAreSignInRequiredWithoutRetryLoop() {
+    func testSignedOutClaudeDoesNotRetryWithAnotherSourceOrAccount() {
         var count = 0
-        let data = Data(#"[{"error":{"kind":"provider","message":"Claude OAuth credentials not found. Run `claude` to authenticate."}}]"#.utf8)
-        let rows = NativeCollector.collect(provider: "Claude", machine: "Test", helper: "/test/helper") { _, _ in
-            count += 1; return CommandOutput(data: data, code: 1)
+        let data = Data(#"[{"error":{"kind":"authentication","message":"Claude CLI is not logged in."}}]"#.utf8)
+        let rows = NativeCollector.collect(provider: "Claude", machine: "Test", helper: "/test/helper") { _, args in
+            count += 1
+            XCTAssertTrue(args.contains("cli")); XCTAssertFalse(args.contains("oauth"))
+            XCTAssertFalse(args.contains("--all-accounts"))
+            return CommandOutput(data: data, code: 1)
         }
         XCTAssertEqual(count, 1); XCTAssertEqual(rows.first?.requiresSignIn, true)
         XCTAssertTrue(rows.first?.quotas.isEmpty == true)

@@ -195,7 +195,7 @@ def provider_usage(exe, provider, env):
                 "kind": "authentication", "message": "Claude usage sign-in required. Open Reconnect Claude on this Mac and sign in to the account listed on the board."}}]), 1
     args = ["usage", "--provider", provider, "--format", "json", "--no-color"]
     if provider in ("codex", "claude"):
-        args += ["--source", "cli" if provider == "codex" else "oauth"]
+        args += ["--source", "cli"]
     return _codexbar(exe, args, env)
 
 
