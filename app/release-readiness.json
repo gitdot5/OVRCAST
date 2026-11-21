@@ -9,27 +9,27 @@
     },
     "hosted_build": {
       "status": "pending",
-      "evidence": ""
+      "evidence": "Build16 source tests pass on hosted Intel/macOS15 and Apple Silicon/macOS26. Clean universal package verification remains running in workflow 44958900331."
     },
     "package_integrity": {
-      "status": "pending",
-      "evidence": ""
+      "status": "pass",
+      "evidence": "Build 16 signed universal candidate passes strict nested signatures, min-macOS/resource/private-payload checks. Signed feed/archive verification accepts the candidate and rejects altered copies. Notarization and final release SHA remain pending."
     },
     "live_providers": {
       "status": "pending",
-      "evidence": ""
+      "evidence": "Build16 desktop-context Claude and Codex queries match the expected accounts on all three configured Macs; the signed GUI receives current local readings. Claude captures can omit quota labels/windows, so completeness and this release gate remain pending."
     },
     "notification_delivery": {
-      "status": "pending",
-      "evidence": ""
+      "status": "pass",
+      "evidence": "Signed build 16 delivered a test alert to Notification Center on the owner Mac with macOS and app notification permissions enabled, observed November 21."
     },
     "updater_dialogs": {
       "status": "pending",
       "evidence": ""
     },
     "upgrade_recovery": {
-      "status": "pending",
-      "evidence": ""
+      "status": "pass",
+      "evidence": "Disposable 0.4.3 to build16 to 0.4.3 launches preserve exact preferences and privacy; no live collection. This does not prove the final notarized Sparkle installation/restart path."
     },
     "physical_intel": {
       "status": "pending",
@@ -56,12 +56,12 @@
       "evidence": ""
     },
     "agent_interface": {
-      "status": "pending",
-      "evidence": ""
+      "status": "pass",
+      "evidence": "Build16 signed app passes isolated status/recommend/tokens, anonymous output, stale rejection, revoked permission and unchanged-input-file fixtures. Owner agent access remains off."
     },
     "token_activity": {
-      "status": "pending",
-      "evidence": ""
+      "status": "pass",
+      "evidence": "Build16 package passes home/network-denied token counter resource fixtures. Live history completeness and endurance are not inferred from fixtures."
     }
   }
 }

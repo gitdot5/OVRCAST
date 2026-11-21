@@ -21,6 +21,29 @@ of build 16.
   missing or expired. Developer account sign-in and agreement review remain
   pending; no notarization submission was accepted and nothing is published.
 
+### Build 16 verification scope
+
+Runtime: `14968a3c2901e2defeaf3f031602abe536712196`.
+
+- 115 Swift and 102 Python tests pass. Both hosted source-test jobs pass; the
+  [clean universal package job](https://github.com/gitdot5/OVRCAST/actions/runs/44958900331)
+  is still running.
+- The local Developer ID signed universal candidate passes strict nested signing,
+  resource, minimum-OS metadata and private-payload checks. Isolated token-counter
+  and agent fixtures pass. Signed feed/archive checks reject altered copies.
+- Desktop-context queries match expected Claude and Codex accounts on all three
+  configured Macs. The actual signed GUI receives current local readings and
+  delivers its test notification to Notification Center.
+- Claude captures sometimes omit quota labels or the general weekly window.
+  A successful reading is not sufficient evidence of complete limit capture;
+  live-provider acceptance remains pending while this is investigated.
+- A disposable 0.4.3 to build16 to 0.4.3 launch preserves exact preferences and
+  privacy. The owner app and its original collection mode are restored after
+  testing. Agent and token-history permissions remain off.
+- Notarization and the final accepted archive/update installation remain pending,
+  together with physical Intel/macOS 14, full accessibility, endurance/resource
+  and opt-in beta acceptance. Local fixtures do not establish those outcomes.
+
 ## November 21 build 15 Claude connection fix
 
 - Read Claude quota through the currently signed-in Claude Code session. Direct
