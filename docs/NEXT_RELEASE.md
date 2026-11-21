@@ -1,9 +1,25 @@
 # OVRCAST 0.5.0 candidate
 
-Updated November 21, 2026. Build 15 reads Claude usage through its signed-in
-Claude Code session, following build 14's usage-card refinements. **Unpublished;
-release acceptance is pending.** Earlier build results below are historical and
-are not acceptance of build 15.
+Updated November 21, 2026. Build 16 preserves an existing OVRCAST Claude profile
+when reading its signed-in Claude Code session. **Unpublished; release acceptance
+is pending.** Earlier build results below are historical and are not acceptance
+of build 16.
+
+## November 21 build 16 Claude profile continuity
+
+- A desktop-session check found that an existing connection could be signed in
+  under an OVRCAST-managed profile while the default Claude profile was signed out.
+- Built-in quota and token-history collection preserve the profile selected by
+  an existing OVRCAST collector. An explicit profile in the app environment,
+  including an explicit default profile, takes priority.
+- Connect Claude uses the same profile and CLI path as collection. Migration reads
+  only the profile selector from the existing OVRCAST LaunchAgent; it does not
+  import credentials or unrelated environment settings.
+- Fresh installs retain Claude Code's ordinary profile. Collection does not retry
+  another account after a failed connection.
+- Apple rejected the notarization export because a required legal agreement is
+  missing or expired. Developer account sign-in and agreement review remain
+  pending; no notarization submission was accepted and nothing is published.
 
 ## November 21 build 15 Claude connection fix
 
@@ -19,7 +35,7 @@ are not acceptance of build 15.
 - Notification permission is enabled and the signed build 14 baseline delivered
   a test alert to Notification Center. Repeat delivery on the final build 15.
 
-Current build 15 acceptance is tracked in `app/release-readiness.json`; fresh
+Current build 16 acceptance is tracked in `app/release-readiness.json`; fresh
 source, hosted, package and live acceptance evidence is required after this change.
 
 ## Changes

@@ -1,11 +1,11 @@
 {
   "version": "0.5.0",
-  "build": "15",
+  "build": "16",
   "sha256": "",
   "checks": {
     "local_tests": {
       "status": "pass",
-      "evidence": "Build 15: 112 Swift and 102 Python tests passed November 21, 2026. Claude dispatch regressions verify the signed-in CLI authority, no token-account override or cross-source retry, and preservation of configured profile environment. Package/live acceptance remains separate."
+      "evidence": "Build 16: 115 Swift and 102 Python tests passed November 21, 2026. Connection regressions cover existing OVRCAST profile migration, explicit profile precedence including the default profile, matching CLI selection, safe login-script quoting and no import of unrelated LaunchAgent settings. Package/live acceptance remains separate."
     },
     "hosted_build": {
       "status": "pending",
