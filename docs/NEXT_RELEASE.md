@@ -34,6 +34,47 @@ establish acceptance of build 18.
 Build 18 acceptance is tracked in `app/release-readiness.json`. Apple Developer
 sign-in/agreement review remains pending before notarization can proceed.
 
+### Build 18 verification scope
+
+Runtime: `2d8e894750665605de8aa356d3bf1078a9e7acb6`.
+
+- 115 app Swift, 10 collector Swift and 106 Python tests pass. Both hosted
+  architecture test jobs and the clean universal package/resource job pass in
+  [the build 18 workflow](https://github.com/gitdot5/OVRCAST/actions/runs/45097870599).
+- The signed universal preflight ZIP passes nested signatures, minimum-OS
+  metadata, resources and private-payload checks. Packaged token and agent
+  fixtures pass with network and real-home access denied. Signed feed/archive
+  checks accept the candidate and reject altered copies.
+- Desktop-context checks on three existing Apple Silicon Macs return current
+  readings from all seven configured connections with expected-account matches.
+  The GUI displays their reported quota windows and next reset times. Connection
+  identities, raw captures and quota values remain in private acceptance evidence.
+- The standard updater offers build 18 to a separate build 17 installation.
+  Cancel/retry, download, extraction, installation and relaunch pass. Both installed
+  executables match the candidate, strict signing remains valid, and the owner's
+  provider, privacy, computer, notification and appearance preferences are preserved.
+  This uses a signed loopback test feed; no public feed is changed.
+- A disposable 0.4.3 → build 18 → 0.4.3 launch preserves exact preferences and
+  privacy. The signed build 18 GUI delivers its test alert to Notification Center;
+  visible banners and Focus behavior are separate observations.
+- Both existing remote Apple Silicon Macs launch the exact staged candidate with
+  fictional data and pass signing/resource checks. The GUI and helper's Intel
+  slices also run locally through Rosetta. These are not physical Intel or
+  macOS 14 runtime acceptance.
+- The reviewed support report saves locally and passes the actual field and
+  private-identity checks. Nothing is sent automatically. In existing-collector
+  mode, its connection rows describe the saved built-in connection settings;
+  the current-reading count describes the displayed fleet.
+- A 303-second owner-GUI sample averages 0.046% CPU, with a 2.8% peak and RSS
+  from 131.77 to 137.17 MiB (137.27 MiB peak). This is a short observation,
+  not battery, leak or overnight acceptance.
+
+The candidate is **not ready for public distribution**. Apple notarization and
+final archive/update acceptance, physical Intel/macOS 14, full keyboard/VoiceOver,
+sleep/network/endurance, battery/resource observations and opt-in beta results
+remain required. Agent and token-history permissions remain off in the owner's
+app. The existing Applications installation and public release are unchanged.
+
 ## November 21 build 16 Claude profile continuity
 
 - A desktop-session check found that an existing connection could be signed in
@@ -87,8 +128,8 @@ Runtime: `14968a3c2901e2defeaf3f031602abe536712196`.
 - Notification permission is enabled and the signed build 14 baseline delivered
   a test alert to Notification Center. Repeat delivery on the final build 15.
 
-Current build 17 acceptance is tracked in `app/release-readiness.json`; fresh
-source, hosted, package and live acceptance evidence is required after this change.
+Build 15 required fresh source, hosted, package and live acceptance evidence.
+The current candidate's acceptance record is `app/release-readiness.json`.
 
 ## Changes
 
