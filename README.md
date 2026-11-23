@@ -17,7 +17,7 @@ with its own bundled collector derived from [CodexBar](https://github.com/steipe
 
 - One compact overview for Codex, Claude and Antigravity accounts.
 - Clear MacBook, Mac mini and Mac Studio labels, including in privacy mode.
-- Session, weekly and model allowances, with next-reset countdowns and exact local times.
+- Session, weekly and model allowances as reported by the provider, with next-reset countdowns and exact local times.
 - Recognizable Codex, Claude and Antigravity identification icons.
 - Saved-reset inventory and separate credit pools when a source reports them.
 - Day and Night appearance, provider tabs, machine/status filters and usage sorting.
@@ -58,7 +58,7 @@ On first launch, Settings → Connect reports whether the built-in collector is
 ready. Choose Connect Codex, Claude or Antigravity, complete the provider’s own
 sign-in, then choose Check for that provider. Setup finishes only after a current usage
 reading arrives for at least one selected provider. Codex and Antigravity use their official
-app/CLI connections; Claude uses Claude Code OAuth. Connect Claude opens the
+app/CLI connections; Claude reads usage through its signed-in Claude Code session. Connect Claude opens the
 installed Claude Code login command in Terminal, or its setup documentation if
 it is missing. A Claude Desktop sign-in alone may not supply this usage connection.
 OVRCAST never asks for a pasted token. Existing provider sessions may work;
@@ -75,6 +75,8 @@ CodexBar-specific token-account configuration is not silently imported.
   on multiple Macs count once. This is not a task-completion prediction.
 - **Account details:** connection help, separate credit pools, and seven days of
   measured local history. Unknown source fields stay unknown.
+  Some accounts report weekly limits without a Session limit; absent windows
+  stay absent rather than receiving another window's percentage.
 - **Settings → Alerts:** opt into low-usage, confirmed-reset and explicit credit
   expiry alerts, with a threshold, quiet hours and snooze. Alerts omit identities.
 - **Settings → Health:** see each connection’s last successful reading, state and

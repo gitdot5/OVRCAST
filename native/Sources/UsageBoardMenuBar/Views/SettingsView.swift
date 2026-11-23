@@ -85,7 +85,7 @@ struct SettingsView: View {
                         Button("Check") { store.refresh(provider: provider) }.controlSize(.small).disabled(store.refreshing || !helperAvailable)
                     }
                 }
-                Text("Complete sign-in in the provider software, then Check. Claude requires Claude Code OAuth. Opening sign-in alone does not verify a connection.").font(.caption).foregroundStyle(.secondary)
+                Text("Complete sign-in in the provider software, then Check. Sign into Claude through Claude Code. Opening sign-in alone does not verify a connection.").font(.caption).foregroundStyle(.secondary)
                 if !store.preferences.setupComplete {
                     Text(store.canFinishSetup ? "Verified: " + store.verifiedProviders.joined(separator: ", ") + ". You can open your board." : "Receive at least one current usage reading to finish setup. You can connect other providers later.")
                         .font(.caption).foregroundStyle(store.canFinishSetup ? .green : .secondary)

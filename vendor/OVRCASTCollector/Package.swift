@@ -8,5 +8,6 @@ let package = Package(
     targets: [
         .target(name: "CQuickJS", path: "Sources/CQuickJS", exclude: ["README.md", "LICENSE"], publicHeadersPath: "include", cSettings: [.define("_GNU_SOURCE")]),
         .target(name: "CodexBarCore", dependencies: ["CQuickJS", .product(name: "Logging", package: "swift-log"), .product(name: "SweetCookieKit", package: "SweetCookieKit")], resources: [.process("Resources")], linkerSettings: [.linkedFramework("JavaScriptCore")]),
-        .executableTarget(name: "CodexBarCLI", dependencies: ["CodexBarCore", .product(name: "Commander", package: "Commander")], path: "Sources/CodexBarCLI")
+        .executableTarget(name: "CodexBarCLI", dependencies: ["CodexBarCore", .product(name: "Commander", package: "Commander")], path: "Sources/CodexBarCLI"),
+        .testTarget(name: "OVRCASTCollectorTests", dependencies: ["CodexBarCore"])
     ])

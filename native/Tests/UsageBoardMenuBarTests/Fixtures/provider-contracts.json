@@ -10,5 +10,7 @@
   {"name":"antigravity-unavailable","provider":"Antigravity","response":[{"error":{"kind":"provider","message":"Provider could not be reached."}}],"remaining":[],"state":"unavailable","signIn":false},
   {"name":"schema-changed-percent","provider":"Codex","response":[{"usage":{"updatedAt":"NOW","primary":{"usedPercent":"23","resetsAt":"FUTURE"}}}],"remaining":[],"state":"unavailable","signIn":false},
   {"name":"invalid-percent","provider":"Claude","response":[{"usage":{"updatedAt":"NOW","primary":{"usedPercent":-1,"resetsAt":"FUTURE"}}}],"remaining":[],"state":"unavailable","signIn":false},
-  {"name":"boolean-percent","provider":"Antigravity","response":[{"usage":{"updatedAt":"NOW","primary":{"usedPercent":true,"resetsAt":"FUTURE"}}}],"remaining":[],"state":"unavailable","signIn":false}
+  {"name":"boolean-percent","provider":"Antigravity","response":[{"usage":{"updatedAt":"NOW","primary":{"usedPercent":true,"resetsAt":"FUTURE"}}}],"remaining":[],"state":"unavailable","signIn":false},
+  {"name":"claude-weekly-only","provider":"Claude","response":[{"usage":{"accountEmail":"weekly@example.invalid","updatedAt":"NOW","secondary":{"usedPercent":37,"resetsAt":"FUTURE"},"extraRateWindows":[{"title":"Fable only","window":{"usedPercent":9,"resetsAt":"FUTURE"}}]}}],"remaining":[63,91],"state":"connected","signIn":false},
+  {"name":"claude-model-only","provider":"Claude","response":[{"usage":{"accountEmail":"model@example.invalid","updatedAt":"NOW","extraRateWindows":[{"title":"Fable only","window":{"usedPercent":23,"resetsAt":"FUTURE"}}]}}],"remaining":[77],"state":"connected","signIn":false}
 ]

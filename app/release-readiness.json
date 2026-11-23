@@ -1,35 +1,35 @@
 {
   "version": "0.5.0",
-  "build": "16",
+  "build": "17",
   "sha256": "",
   "checks": {
     "local_tests": {
       "status": "pass",
-      "evidence": "Build 16: 115 Swift and 102 Python tests passed November 21, 2026. Connection regressions cover existing OVRCAST profile migration, explicit profile precedence including the default profile, matching CLI selection, safe login-script quoting and no import of unrelated LaunchAgent settings. Package/live acceptance remains separate."
+      "evidence": "Build17: 115 app Swift, 10 maintained-collector Swift and 102 Python tests passed November 22, 2026. Weekly/session/model-only, incomplete-window, cross-window/credit borrowing, capture-completion and app-adapter regressions pass. Package/live acceptance remains separate."
     },
     "hosted_build": {
       "status": "pending",
-      "evidence": "Build16 source tests pass on hosted Intel/macOS15 and Apple Silicon/macOS26. Clean universal package verification remains running in workflow 44958900331."
+      "evidence": ""
     },
     "package_integrity": {
-      "status": "pass",
-      "evidence": "Build 16 signed universal candidate passes strict nested signatures, min-macOS/resource/private-payload checks. Signed feed/archive verification accepts the candidate and rejects altered copies. Notarization and final release SHA remain pending."
+      "status": "pending",
+      "evidence": ""
     },
     "live_providers": {
       "status": "pending",
-      "evidence": "Build16 desktop-context Claude and Codex queries match the expected accounts on all three configured Macs; the signed GUI receives current local readings. Claude captures can omit quota labels/windows, so completeness and this release gate remain pending."
+      "evidence": ""
     },
     "notification_delivery": {
-      "status": "pass",
-      "evidence": "Signed build 16 delivered a test alert to Notification Center on the owner Mac with macOS and app notification permissions enabled, observed November 21."
+      "status": "pending",
+      "evidence": ""
     },
     "updater_dialogs": {
       "status": "pending",
       "evidence": ""
     },
     "upgrade_recovery": {
-      "status": "pass",
-      "evidence": "Disposable 0.4.3 to build16 to 0.4.3 launches preserve exact preferences and privacy; no live collection. This does not prove the final notarized Sparkle installation/restart path."
+      "status": "pending",
+      "evidence": ""
     },
     "physical_intel": {
       "status": "pending",
@@ -56,12 +56,12 @@
       "evidence": ""
     },
     "agent_interface": {
-      "status": "pass",
-      "evidence": "Build16 signed app passes isolated status/recommend/tokens, anonymous output, stale rejection, revoked permission and unchanged-input-file fixtures. Owner agent access remains off."
+      "status": "pending",
+      "evidence": ""
     },
     "token_activity": {
-      "status": "pass",
-      "evidence": "Build16 package passes home/network-denied token counter resource fixtures. Live history completeness and endurance are not inferred from fixtures."
+      "status": "pending",
+      "evidence": ""
     }
   }
 }

@@ -1,9 +1,27 @@
 # OVRCAST 0.5.0 candidate
 
-Updated November 21, 2026. Build 16 preserves an existing OVRCAST Claude profile
-when reading its signed-in Claude Code session. **Unpublished; release acceptance
-is pending.** Earlier build results below are historical and are not acceptance
-of build 16.
+Updated November 22, 2026. Build 17 preserves Claude quota-window labels and
+accepts weekly-only readings without inventing a Session limit. **Unpublished;
+release acceptance is pending.** Earlier results below are historical and do not
+establish acceptance of build 17.
+
+## November 22 build 17 Claude quota accuracy
+
+- A current Claude usage panel can report weekly and model limits without a
+  Session allowance. The first weekly percentage now stays Weekly; it is never
+  copied into an unreported Session window.
+- Valid weekly-only, session-only and model-only readings retain their actual
+  window types. Advertised windows whose values are still loading require a
+  bounded retry of the same source, rather than a partial current reading.
+- Capture completion recognizes labeled weekly values, so a weekly-only panel
+  can finish without waiting for a Session label that is absent.
+- Collector regressions now run directly against the maintained fork on both
+  hosted architectures. The app adapter also has a weekly-only contract fixture.
+- The prior build 16 hosted workflow completed all three jobs, including the
+  clean universal package contract. That is historical build 16 evidence.
+
+Build 17 acceptance is tracked in `app/release-readiness.json`. Apple Developer
+sign-in/agreement review remains pending before notarization can proceed.
 
 ## November 21 build 16 Claude profile continuity
 
@@ -25,9 +43,9 @@ of build 16.
 
 Runtime: `14968a3c2901e2defeaf3f031602abe536712196`.
 
-- 115 Swift and 102 Python tests pass. Both hosted source-test jobs pass; the
+- 115 Swift and 102 Python tests pass. Both hosted source-test jobs and the
   [clean universal package job](https://github.com/gitdot5/OVRCAST/actions/runs/44958900331)
-  is still running.
+  passed.
 - The local Developer ID signed universal candidate passes strict nested signing,
   resource, minimum-OS metadata and private-payload checks. Isolated token-counter
   and agent fixtures pass. Signed feed/archive checks reject altered copies.
@@ -58,7 +76,7 @@ Runtime: `14968a3c2901e2defeaf3f031602abe536712196`.
 - Notification permission is enabled and the signed build 14 baseline delivered
   a test alert to Notification Center. Repeat delivery on the final build 15.
 
-Current build 16 acceptance is tracked in `app/release-readiness.json`; fresh
+Current build 17 acceptance is tracked in `app/release-readiness.json`; fresh
 source, hosted, package and live acceptance evidence is required after this change.
 
 ## Changes

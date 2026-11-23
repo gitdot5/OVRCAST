@@ -17,6 +17,11 @@ configuration mutation, session focus, hooks and reset/purchase actions are not
 available through this executable. The GUI invokes read-only usage commands. Local user provider plugins are not activated.
 Internal module/type and JSON schema names remain unchanged for compatibility.
 
+Claude CLI captures keep each allowance with its reported window label. Weekly-only
+and model-only panels keep Session absent. Visible windows whose values are still
+loading are retried within the same source; percentages are not borrowed from
+another window or usage credits. A local XCTest target covers these contracts.
+
 Token activity permits only Codex, Claude Code and Antigravity local history.
 It disables pricing refreshes, other-harness merging and credential fallbacks.
 Only dates, numeric token counters, timezone and coverage are emitted. It never
