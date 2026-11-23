@@ -243,7 +243,7 @@ struct MenuView: View {
                     Spacer()
                     Text("\(store.visibleAccounts.count) of \(store.accounts.count)").foregroundStyle(.secondary)
                     Text("·").foregroundStyle(.tertiary)
-                    Text(store.visibleResetAccounts.isEmpty ? "Resets unknown" : "\(store.visibleResetTotal) reset\(store.visibleResetTotal == 1 ? "" : "s")")
+                    Text(store.visibleResetAccounts.isEmpty ? "Saved resets unknown" : "\(store.visibleResetTotal) saved reset\(store.visibleResetTotal == 1 ? "" : "s")")
                         .foregroundStyle(.secondary)
                         .help("\(store.visibleResetAccounts.count) visible accounts report current saved-reset inventory")
                     Menu {

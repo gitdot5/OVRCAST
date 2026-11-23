@@ -1,9 +1,20 @@
 # OVRCAST 0.5.0 candidate
 
-Updated November 22, 2026. Build 17 preserves Claude quota-window labels and
-accepts weekly-only readings without inventing a Session limit. **Unpublished;
+Updated November 22, 2026. Build 18 preserves existing standalone provider
+selections and carries forward the verified Claude quota-window fix. **Unpublished;
 release acceptance is pending.** Earlier results below are historical and do not
-establish acceptance of build 17.
+establish acceptance of build 18.
+
+## November 22 build 18 fleet compatibility
+
+- Standalone agents can retain their selected providers while using the bundled
+  OVRCAST collector, without reading CodexBar's provider configuration. Empty or
+  invalid selections do not launch a provider or modify its CLI path.
+- The board labels saved-reset inventory separately from the next usage reset,
+  avoiding an ambiguous “Resets unknown” beside known reset times.
+- Build 17 passed all three hosted jobs in workflow 45093812091. Its Claude
+  parser and signed update installation/relaunch are verified
+  separately. Those results do not establish acceptance of the build 18 archive.
 
 ## November 22 build 17 Claude quota accuracy
 
@@ -20,7 +31,7 @@ establish acceptance of build 17.
 - The prior build 16 hosted workflow completed all three jobs, including the
   clean universal package contract. That is historical build 16 evidence.
 
-Build 17 acceptance is tracked in `app/release-readiness.json`. Apple Developer
+Build 18 acceptance is tracked in `app/release-readiness.json`. Apple Developer
 sign-in/agreement review remains pending before notarization can proceed.
 
 ## November 21 build 16 Claude profile continuity

@@ -211,14 +211,31 @@ def collector_executable(env):
     return next((p for p in candidates if os.path.isfile(p) and os.access(p, os.X_OK)), None)
 
 
+def selected_providers(env):
+    supported = ("codex", "claude", "antigravity")
+    selection = env.get("OVRCAST_PROVIDERS")
+    if selection is None:
+        return supported
+    requested = {p.strip().lower() for p in selection.split(",") if p.strip()}
+    if requested - set(supported):
+        raise ValueError("invalid-provider-selection")
+    return tuple(p for p in supported if p in requested)
+
+
 def run_codexbar():
     # Keep the function and snapshot key for existing fleet/schema compatibility.
     env = dict(os.environ)
-    _claude_on_path(env)
+    try:
+        providers = selected_providers(env)
+    except ValueError:
+        return "", "invalid-provider-selection"
+    if not providers:
+        return "[]", 0
+    if "claude" in providers:
+        _claude_on_path(env)
     exe = collector_executable(env)
     if not exe:
         return "", "ovrcast-collector-not-found"
-    providers = ("codex", "claude", "antigravity")
     with ThreadPoolExecutor(max_workers=len(providers)) as pool:
         futures = {p: pool.submit(provider_usage, exe, p, env) for p in providers}
         results = {p: f.result() for p, f in futures.items()}
@@ -327,13 +344,19 @@ def codex_account_usage(timeout=30):
 
 
 def main() -> None:
-    requested_auth_check()
     now = datetime.now(timezone.utc)
+    try:
+        providers = selected_providers(os.environ)
+    except ValueError:
+        write_atomic(OUT, build_snapshot("", "invalid-provider-selection", None, now))
+        return
+    if "claude" in providers:
+        requested_auth_check()
     with ThreadPoolExecutor(max_workers=2) as pool:
-        live = pool.submit(codex_account_usage)
+        live = pool.submit(codex_account_usage) if "codex" in providers else None
         stdout, rc = run_codexbar()
-        codex_usage = live.result()
-    logs = latest_codex_rate_limits(SESSIONS, now)
+        codex_usage = live.result() if live else None
+    logs = latest_codex_rate_limits(SESSIONS, now) if "codex" in providers else None
     snapshot = build_snapshot(stdout, rc, logs, now)
     snapshot["codex_account"] = codex_usage
     write_atomic(OUT, snapshot)

@@ -41,3 +41,8 @@ Live checks and a human-reviewed credential/permission flow are separate release
 evidence. The fixture suite does not establish compatibility with every plan or
 future provider response. Review again when a concrete upstream change or user
 failure occurs; do not rotate working credentials as a maintenance routine.
+
+Existing standalone collectors can set `OVRCAST_PROVIDERS` to a comma-separated
+subset of `codex,claude,antigravity`. Unset retains all three supported probes;
+empty disables them and unknown values refuse collection. This preserves an
+older agent's provider selection without depending on CodexBar configuration.

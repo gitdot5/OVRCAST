@@ -1,11 +1,11 @@
 {
   "version": "0.5.0",
-  "build": "17",
+  "build": "18",
   "sha256": "",
   "checks": {
     "local_tests": {
       "status": "pass",
-      "evidence": "Build17: 115 app Swift, 10 maintained-collector Swift and 102 Python tests passed November 22, 2026. Weekly/session/model-only, incomplete-window, cross-window/credit borrowing, capture-completion and app-adapter regressions pass. Package/live acceptance remains separate."
+      "evidence": "Build18: 115 app Swift, 10 collector Swift and 106 Python tests passed November 22, 2026. Explicit legacy provider selection covers disabled providers, empty/invalid inputs and Codex app/history fallbacks. Claude window regressions remain passing."
     },
     "hosted_build": {
       "status": "pending",

@@ -187,10 +187,35 @@ class OwnedCollectorTest(unittest.TestCase):
             which.assert_not_called()
 
     def test_collection_uses_three_supported_providers(self):
-        with patch('collect.collector_executable', return_value='/owned/helper'), patch('collect._claude_on_path'), patch('collect.provider_usage', return_value=('[]', 0)) as usage:
+        with patch.dict('collect.os.environ', {}, clear=True), patch('collect.collector_executable', return_value='/owned/helper'), patch('collect._claude_on_path'), patch('collect.provider_usage', return_value=('[]', 0)) as usage:
             collect.run_codexbar()
             self.assertEqual({c.args[1] for c in usage.call_args_list}, {'codex', 'claude', 'antigravity'})
             self.assertTrue(all(c.args[0] == '/owned/helper' for c in usage.call_args_list))
+
+    def test_explicit_provider_selection_does_not_probe_unselected_harnesses(self):
+        with patch.dict('collect.os.environ', {'OVRCAST_PROVIDERS': 'Claude,codex,claude'}, clear=True), patch('collect.collector_executable', return_value='/owned/helper'), patch('collect._claude_on_path'), patch('collect.provider_usage', return_value=('[]', 0)) as usage:
+            collect.run_codexbar()
+            self.assertEqual({c.args[1] for c in usage.call_args_list}, {'codex', 'claude'})
+            self.assertEqual(usage.call_count, 2)
+
+    def test_empty_or_invalid_selection_never_runs_a_provider_or_changes_its_path(self):
+        for selection, expected in [('', ('[]', 0)), ('codex,unknown', ('', 'invalid-provider-selection'))]:
+            with self.subTest(selection=selection), patch.dict('collect.os.environ', {'OVRCAST_PROVIDERS': selection}, clear=True), patch('collect.collector_executable') as helper, patch('collect._claude_on_path') as prepare, patch('collect.provider_usage') as usage:
+                self.assertEqual(collect.run_codexbar(), expected)
+                helper.assert_not_called(); prepare.assert_not_called(); usage.assert_not_called()
+
+    def test_claude_only_collection_does_not_read_codex_app_or_history(self):
+        with patch.dict('collect.os.environ', {'OVRCAST_PROVIDERS': 'claude'}, clear=True), patch('collect.requested_auth_check') as auth, patch('collect.run_codexbar', return_value=('[]', 0)), patch('collect.codex_account_usage') as app, patch('collect.latest_codex_rate_limits') as history, patch('collect.write_atomic') as write:
+            collect.main()
+            app.assert_not_called(); history.assert_not_called(); auth.assert_called_once()
+            self.assertIsNone(write.call_args.args[1]['codex_account'])
+
+    def test_empty_and_invalid_main_selection_do_not_read_any_provider(self):
+        for selection in ['', 'unknown']:
+            with self.subTest(selection=selection), patch.dict('collect.os.environ', {'OVRCAST_PROVIDERS': selection}, clear=True), patch('collect.requested_auth_check') as auth, patch('collect.codex_account_usage') as app, patch('collect.latest_codex_rate_limits') as history, patch('collect.provider_usage') as usage, patch('collect.write_atomic') as write:
+                collect.main()
+                auth.assert_not_called(); app.assert_not_called(); history.assert_not_called(); usage.assert_not_called()
+                self.assertEqual(write.call_args.args[1]['codexbar']['rows'], [])
 
     def test_claude_uses_the_configured_cli_session_without_account_overrides(self):
         with patch('collect._codexbar', return_value=('[]', 0)) as run:
