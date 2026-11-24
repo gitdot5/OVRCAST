@@ -30,6 +30,12 @@ The sections below describe optional legacy scripted collection.
 Keep personal configuration in the ignored local file. Relative snapshot data
 is written under `state/`; the generated overview is `board.html` and `board.txt`.
 
+If Antigravity is open and signed in but the scheduled reading remains last known,
+check the collector LaunchAgent's `ProcessType`. The current installer uses
+`Standard` for collector jobs. When updating an existing job, preserve its custom
+environment settings. The standalone collector retries the same Antigravity
+connection once after an offline fallback. A failed retry keeps the last known state.
+
 ## Account labels
 
 The optional `expected`, `plans` and `also_used_by` fields use this form:

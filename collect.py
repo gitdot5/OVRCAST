@@ -166,12 +166,27 @@ def merge_provider_outputs(results: dict) -> list:
     return rows
 
 
-def _codexbar(exe, args, env):
+def _codexbar(exe, args, env, *, timeout=CODEXBAR_TIMEOUT):
     try:
-        p = subprocess.run([exe] + args, capture_output=True, text=True, timeout=CODEXBAR_TIMEOUT, env=env)
+        p = subprocess.run([exe] + args, capture_output=True, text=True, timeout=timeout, env=env)
         return p.stdout, p.returncode
     except subprocess.TimeoutExpired:
         return "", "timeout"
+
+
+def antigravity_reading_source(output, status):
+    if status != 0 or find_secret(output):
+        return None
+    try:
+        rows = json.loads(output)
+    except ValueError:
+        return None
+    if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], dict):
+        return None
+    row = rows[0]
+    if row.get("provider") == "antigravity" and row.get("usage") and not row.get("error"):
+        return row.get("source")
+    return None
 
 
 def claude_auth_status(env):
@@ -196,7 +211,23 @@ def provider_usage(exe, provider, env):
     args = ["usage", "--provider", provider, "--format", "json", "--no-color"]
     if provider in ("codex", "claude"):
         args += ["--source", "cli"]
-    return _codexbar(exe, args, env)
+    if provider != "antigravity":
+        return _codexbar(exe, args, env)
+
+    # The desktop app can miss a live quota request transiently. Retry the same
+    # connection once when the helper falls back to offline data.
+    deadline = time.monotonic() + CODEXBAR_TIMEOUT
+    result = _codexbar(exe, args, env)
+    remaining = min(20, deadline - time.monotonic())
+    if remaining > 0 and antigravity_reading_source(*result) == "offline":
+        try:
+            retry = _codexbar(exe, args, env, timeout=remaining)
+        except OSError:
+            return result
+        source = antigravity_reading_source(*retry)
+        if isinstance(source, str) and source and source != "offline":
+            return retry
+    return result
 
 
 def collector_executable(env):

@@ -64,6 +64,35 @@ class ClaudeAuthPreflightTest(unittest.TestCase):
             auth.assert_not_called()
 
 
+class AntigravityRetryTest(unittest.TestCase):
+    @staticmethod
+    def reading(source):
+        return (json.dumps([{"provider": "antigravity", "source": source, "usage": {"primary": {"usedPercent": 40}}}]), 0)
+
+    def test_offline_read_retries_same_connection_with_remaining_budget(self):
+        offline = self.reading("offline")
+        live = self.reading("app")
+        with patch('collect.time.monotonic', side_effect=[0, 147]), patch('collect._codexbar', side_effect=[offline, live]) as probe:
+            self.assertEqual(collect.provider_usage('/owned/helper', 'antigravity', {}), live)
+        first, retry = probe.call_args_list
+        self.assertEqual(first.args, retry.args)
+        self.assertEqual(retry.kwargs, {"timeout": 3})
+
+    def test_failed_retry_preserves_offline_state(self):
+        offline = self.reading("offline")
+        for failure in (('', 'timeout'), FileNotFoundError()):
+            with self.subTest(failure=failure), patch('collect._codexbar', side_effect=[offline, failure]) as probe:
+                self.assertEqual(collect.provider_usage('/owned/helper', 'antigravity', {}), offline)
+                self.assertEqual(probe.call_count, 2)
+
+    def test_live_or_refused_output_does_not_retry(self):
+        secret = ('[{"provider":"antigravity","source":"offline","usage":{"access_token":"fake"}}]', 0)
+        for result in (self.reading("app"), secret, ('[]', 1)):
+            with self.subTest(result=result), patch('collect._codexbar', return_value=result) as probe:
+                self.assertEqual(collect.provider_usage('/owned/helper', 'antigravity', {}), result)
+                probe.assert_called_once()
+
+
 class BuildSnapshotTest(unittest.TestCase):
     def test_keeps_codexbar_rows(self):
         snap = collect.build_snapshot(fixture("macbook_raw.json"), 0, None, NOW)

@@ -5,7 +5,7 @@
   "checks": {
     "local_tests": {
       "status": "pass",
-      "evidence": "Build 18: 115 app Swift, 10 collector Swift and 106 Python tests passed November 22, 2026. Explicit legacy provider selection covers disabled providers, empty/invalid inputs and Codex app/history fallbacks. Claude window regressions remain passing."
+      "evidence": "Build 18: 115 app Swift, 10 collector Swift and 106 Python tests passed November 22, 2026. Explicit legacy provider selection covers disabled providers, empty/invalid inputs and Codex app/history fallbacks. Claude window regressions remain passing. The later standalone Antigravity recovery change passed all 109 Python tests, including budget, offline fallback and credential-shaped output cases. Eight focused Swift provider and recovery tests also passed."
     },
     "hosted_build": {
       "status": "pass",
@@ -17,11 +17,11 @@
     },
     "live_providers": {
       "status": "pass",
-      "evidence": "Final notarized build 18 installed in Applications on all three owner Apple Silicon Macs. Existing provider selections and profile selectors were preserved; temporary helper overrides were removed and existing collectors reloaded. All seven configured expected-account connections produced fresh readings after final installation. The MacBook installed GUI shows those seven current cards. Detailed identities and quota values remain private."
+      "evidence": "Final notarized build 18 installed in Applications on all three owner Apple Silicon Macs. Existing provider selections and profile selectors were preserved; temporary helper overrides were removed and existing collectors reloaded. All seven configured expected-account connections produced fresh readings after final installation. The MacBook installed GUI shows those seven current cards. Detailed identities and quota values remain private. An intermittent Antigravity offline fallback was reproduced in scheduled MacBook collection and recovered on a later scheduled run. The standalone collector now retries once within its existing time budget. The deployed script produced a new live Antigravity reading with all seven connections fresh."
     },
     "notification_delivery": {
-      "status": "pending",
-      "evidence": "Earlier signed preflight 18 delivered a test alert to Notification Center on November 22. After final notarized 18 installation in Applications on November 24, macOS accepted the authorized test notification, but immediate Center delivery was not confirmed. No notification permission or Focus setting changed. Visible delivery feedback remains pending; acceptance is not being reported as delivery."
+      "status": "pass",
+      "evidence": "On November 24, the installed final notarized build 18 sent a test alert. OVRCAST confirmed delivery and the OVRCAST test alert was visible in macOS Notification Center. This validates test delivery on the owner MacBook."
     },
     "updater_dialogs": {
       "status": "pass",
@@ -49,7 +49,7 @@
     },
     "resource_use": {
       "status": "pending",
-      "evidence": "Same preflight 18 GUI process remained running for 29.09 hours in existing-collector mode. Initial five-minute sample averaged 0.046% CPU and ended at 137.17 MiB RSS. November 24 snapshots were 141.70 MiB before accessibility interaction and 202.48 MiB afterward; latest CPU snapshot 0.0%. These are uncontrolled endpoints, not a continuous trace or leak/battery acceptance."
+      "evidence": "Same preflight 18 GUI process remained running for 29.09 hours in existing-collector mode. Initial five-minute sample averaged 0.046% CPU and ended at 137.17 MiB RSS. November 24 snapshots were 141.70 MiB before accessibility interaction and 202.48 MiB afterward; latest CPU snapshot 0.0%. These are uncontrolled endpoints, not a continuous trace or leak/battery acceptance. A November 24 sample of the installed notarized app on AC power recorded 21 samples over 100 seconds: 143.5 MiB RSS at start and end, 143.6 MiB peak RSS and 0.1% peak sampled CPU. The battery run remains pending."
     },
     "opt_in_beta": {
       "status": "pending",

@@ -38,16 +38,20 @@ current results follow; earlier dated sections retain historical evidence.
   and 202.48 MiB afterward. These are uncontrolled endpoints, not a leak/battery
   trace. A qualifying reset transition and sleep/wake event were not established
   by this bounded review; native sleep/network/endurance acceptance remains open.
-- The installed app's authorized test alert was accepted by macOS. Visible
-  Notification Center delivery remains unconfirmed, distinct from the earlier
-  preflight's observed delivery. Notification permissions and Focus settings were
-  not changed to force a passing result.
+- The installed notarized app's test alert appeared in Notification Center.
+  This confirms on-device delivery from the final package on the owner MacBook.
+- An intermittent Antigravity offline fallback was reproduced in the standalone
+  MacBook collector. Scheduled collection recovered, and the updated script
+  produced a live reading with all seven connections fresh. The standalone script
+  now makes one bounded retry after an offline fallback and retains the stale
+  state if the retry fails. Python tests cover both outcomes and the time budget.
+  The notarized app ZIP is unchanged.
 
 Final ZIP SHA-256:
 `76b4f5183c4b6d6cc5be78a163b84bef11d6016c14633e29b580c2202cbaa5ec`.
 
 The current acceptance record remains blocked by physical Intel/macOS 14,
-remaining screen-reader, notification, native recovery/endurance and battery
+remaining screen-reader, native recovery/endurance and battery
 observations, and opt-in beta results. The notarized owner pilot is not a public
 release. No volunteers have been enrolled or contacted.
 
