@@ -9,7 +9,7 @@
     },
     "hosted_build": {
       "status": "pass",
-      "evidence": "Runtime 2d8e894750665605de8aa356d3bf1078a9e7acb6: all three hosted jobs passed, including Intel/macOS 15 source tests, Apple Silicon/macOS 26 source tests and the clean universal package/resource contract. https://github.com/gitdot5/OVRCAST/actions/runs/45097870599"
+      "evidence": "Runtime 2d8e894750665605de8aa356d3bf1078a9e7acb6: all three hosted jobs passed, including Intel/macOS 15 source tests, Apple Silicon/macOS 26 source tests and the clean universal package/resource contract. https://github.com/gitdot5/OVRCAST/actions/runs/45097870599 The follow-up standalone collector commit 41998f44c3ca35e0db538cf0dc2715700d226a73 also passed both architectures and the clean universal package contract. https://github.com/gitdot5/OVRCAST/actions/runs/45462996964"
     },
     "package_integrity": {
       "status": "pass",
@@ -17,7 +17,7 @@
     },
     "live_providers": {
       "status": "pass",
-      "evidence": "Final notarized build 18 installed in Applications on all three owner Apple Silicon Macs. Existing provider selections and profile selectors were preserved; temporary helper overrides were removed and existing collectors reloaded. All seven configured expected-account connections produced fresh readings after final installation. The MacBook installed GUI shows those seven current cards. Detailed identities and quota values remain private. An intermittent Antigravity offline fallback was reproduced in scheduled MacBook collection and recovered on a later scheduled run. The standalone collector now retries once within its existing time budget. The deployed script produced a new live Antigravity reading with all seven connections fresh."
+      "evidence": "Final notarized build 18 installed in Applications on all three owner Apple Silicon Macs. Existing provider selections and profile selectors were preserved; temporary helper overrides were removed and existing collectors reloaded. All seven configured expected-account connections produced fresh readings after final installation. The MacBook installed GUI shows those seven current cards. Detailed identities and quota values remain private. An intermittent Antigravity offline fallback was reproduced in scheduled MacBook collection and recovered on a later scheduled run. The standalone collector now retries once within its existing time budget. The deployed script produced a new live Antigravity reading with all seven connections fresh. After the Studio Ultra Codex CLI reported a ChatGPT sign-in again, a requested collector run verified fresh quota readings from its expected account through both the CLI and app server. The fleet board showed seven of seven fresh connections."
     },
     "notification_delivery": {
       "status": "pass",
@@ -41,7 +41,7 @@
     },
     "sleep_network_endurance": {
       "status": "pending",
-      "evidence": "Owner existing-collector pilot retained 6,086 saved points for all seven current fleet connections over 29.05 hours. No qualifying reset transition or sleep/wake event was established by this bounded review. Actual native-collection sleep/wake, network interruption/recovery and battery/endurance acceptance remain required; no system sleep or network setting was changed."
+      "evidence": "Owner existing-collector pilot retained 6,086 saved points for all seven current fleet connections over 29.05 hours. No qualifying reset transition or sleep/wake event was established by this bounded review. Actual native-collection sleep/wake, network interruption/recovery and battery/endurance acceptance remain required; no system sleep or network setting was changed. A later installed-pilot history check found fresh Claude readings on both sides of a reported reset, with the next reset advancing. The MacBook stayed on AC, and its power log showed no sleep/wake event during the installed-pilot window. Native recovery remains open."
     },
     "accessibility": {
       "status": "pending",

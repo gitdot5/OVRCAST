@@ -46,6 +46,10 @@ current results follow; earlier dated sections retain historical evidence.
   now makes one bounded retry after an offline fallback and retains the stale
   state if the retry fails. Python tests cover both outcomes and the time budget.
   The notarized app ZIP is unchanged.
+- The Ultra's Codex sign-in returned, and a new refresh verified quotas from
+  its expected account through both the CLI and app server. The owner board
+  showed all seven connections fresh. The standalone fix passed all three
+  [follow-up hosted jobs](https://github.com/gitdot5/OVRCAST/actions/runs/45462996964).
 
 Final ZIP SHA-256:
 `76b4f5183c4b6d6cc5be78a163b84bef11d6016c14633e29b580c2202cbaa5ec`.
