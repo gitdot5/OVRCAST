@@ -1,7 +1,7 @@
 {
   "version": "0.5.0",
   "build": "18",
-  "sha256": "",
+  "sha256": "76b4f5183c4b6d6cc5be78a163b84bef11d6016c14633e29b580c2202cbaa5ec",
   "checks": {
     "local_tests": {
       "status": "pass",
@@ -12,24 +12,24 @@
       "evidence": "Runtime 2d8e894750665605de8aa356d3bf1078a9e7acb6: all three hosted jobs passed, including Intel/macOS 15 source tests, Apple Silicon/macOS 26 source tests and the clean universal package/resource contract. https://github.com/gitdot5/OVRCAST/actions/runs/45097870599"
     },
     "package_integrity": {
-      "status": "pending",
-      "evidence": "Build 18 signed universal preflight ZIP passes strict nested signatures, macOS 14 deployment metadata, resources and private-payload checks. Final notarization, stapled ticket, Gatekeeper and final ZIP SHA-256 remain pending because Apple requires an agreement."
+      "status": "pass",
+      "evidence": "Build 18 final ZIP, notarized November 24, passes strict nested signatures, stapled-ticket validation, Gatekeeper Notarized Developer ID, universal/minimum-OS metadata, resources and private-payload checks. Final packaged token/agent fixtures and signed feed/archive tamper rejection pass. Both GUI/helper unsigned CPU slices match the tested preflight exactly; Xcode changed their signature envelopes. SHA-256 is pinned to this final archive."
     },
     "live_providers": {
       "status": "pass",
-      "evidence": "Build 18 signed collector in GUI sessions on three Apple Silicon Macs returns current readings for all seven configured connections, matching expected accounts. Actual GUI shows current cards and provider-reported quota/reset windows. Profile repair selected an already signed-in expected account; no credentials were changed. Detailed results remain private."
+      "evidence": "Final notarized build 18 installed in Applications on all three owner Apple Silicon Macs. Existing provider selections and profile selectors were preserved; temporary helper overrides were removed and existing collectors reloaded. All seven configured expected-account connections produced fresh readings after final installation. The MacBook installed GUI shows those seven current cards. Detailed identities and quota values remain private."
     },
     "notification_delivery": {
-      "status": "pass",
-      "evidence": "Build 18 signed GUI test alert reported delivered to Notification Center on November 22. Notification permission was already enabled. A visible banner and Focus behavior were not established."
+      "status": "pending",
+      "evidence": "Earlier signed preflight 18 delivered a test alert to Notification Center on November 22. After final notarized 18 installation in Applications on November 24, macOS accepted the authorized test notification, but immediate Center delivery was not confirmed. No notification permission or Focus setting changed. Visible delivery feedback remains pending; acceptance is not being reported as delivery."
     },
     "updater_dialogs": {
       "status": "pass",
-      "evidence": "Build17-to-18 separate installation: actual standard update offer, cancel/retry, download/extraction, Install and Relaunch, exact candidate executable hashes and strict signing passed. Signed loopback feed only; no public feed change. Final notarized archive remains gated by package acceptance."
+      "evidence": "Final notarized build 18 ZIP: actual separate build17-to-18 standard update offer, cancel/retry, installation and relaunch passed November 24. Installed GUI/helper bytes match the accepted export; strict signature, ticket and Gatekeeper pass. Production HTTPS feed is restored and the fixture-only local-network exception is absent. Signed loopback feed only; no public feed changed."
     },
     "upgrade_recovery": {
       "status": "pass",
-      "evidence": "Build 18 disposable 0.4.3-to-18-to-0.4.3 launch/rollback preserves exact fixture preferences and privacy. Actual signed build17-to-18 update/relaunch also preserves owner provider, privacy, computer, alert and appearance preferences. Applications bundle unchanged."
+      "evidence": "Build 18 disposable 0.4.3-to-18-to-0.4.3 preflight launch/rollback preserves exact preferences and privacy. Actual build17-to-final-notarized 18 update/relaunch preserves owner preferences exactly. The previous signed release and owner installation backups remain available for manual recovery."
     },
     "physical_intel": {
       "status": "pending",
@@ -41,15 +41,15 @@
     },
     "sleep_network_endurance": {
       "status": "pending",
-      "evidence": "Recovery regressions pass locally. Actual sleep/wake, network interruption/restoration and overnight operation through a reset remain unverified; no user-wide sleep/network setting was changed."
+      "evidence": "Owner existing-collector pilot retained 6,086 saved points for all seven current fleet connections over 29.05 hours. No qualifying reset transition or sleep/wake event was established by this bounded review. Actual native-collection sleep/wake, network interruption/recovery and battery/endurance acceptance remain required; no system sleep or network setting was changed."
     },
     "accessibility": {
       "status": "pending",
-      "evidence": "Build 18 menu arrow-key selection and Return opens Settings; named controls and privacy/selected states are exposed. Full keyboard navigation and VoiceOver require an observed test; temporary macOS setting changes await user confirmation."
+      "evidence": "November 24 build 18 keyboard checks passed: visible Tab/ShiftTab toolbar focus, Space provider/menu activation, arrow/Return settings access, all six settings tabs/reverse navigation and Escape dismissal. Original macOS keyboard navigation and VoiceOver were both off; both restored off and the testing utility quit. VoiceOver ran, but its cursor/activation/spoken readout was not verified through computer control. Full screen-reader acceptance remains unverified; no app defect established by that attempt."
     },
     "resource_use": {
       "status": "pending",
-      "evidence": "Build 18 owner fleet GUI sampled for 303s across 61 observations: average 0.046% CPU, peak 2.8%; RSS 131.77 to 137.17 MiB, peak 137.27 MiB. This short observation does not establish battery, overnight memory or refresh acceptance."
+      "evidence": "Same preflight 18 GUI process remained running for 29.09 hours in existing-collector mode. Initial five-minute sample averaged 0.046% CPU and ended at 137.17 MiB RSS. November 24 snapshots were 141.70 MiB before accessibility interaction and 202.48 MiB afterward; latest CPU snapshot 0.0%. These are uncontrolled endpoints, not a continuous trace or leak/battery acceptance."
     },
     "opt_in_beta": {
       "status": "pending",
@@ -57,11 +57,11 @@
     },
     "agent_interface": {
       "status": "pass",
-      "evidence": "Exact signed build18 agent status/recommend/tokens fixtures pass with network and real-home access denied. Anonymous JSON excludes private markers, reads do not modify inputs, stale routing declines and revocation returns disabled immediately. No GUI or server is started."
+      "evidence": "Exact signed build 18 agent status/recommend/tokens fixtures pass with network and real-home access denied. Anonymous JSON excludes private markers, reads do not modify inputs, stale routing declines and revocation returns disabled immediately. No GUI or server is started."
     },
     "token_activity": {
       "status": "pass",
-      "evidence": "Exact signed build18 packaged token fixtures pass with network and real-home access denied. Codex/Claude numeric counters match synthetic events, duplicate Claude deliveries count once, another profile is excluded, unavailable data stays explicit and cache permissions are owner-only. This does not claim complete provider billing history."
+      "evidence": "Exact signed build 18 packaged token fixtures pass with network and real-home access denied. Codex/Claude numeric counters match synthetic events, duplicate Claude deliveries count once, another profile is excluded, unavailable data stays explicit and cache permissions are owner-only. This does not claim complete provider billing history."
     }
   }
 }

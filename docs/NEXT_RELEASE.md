@@ -1,9 +1,55 @@
 # OVRCAST 0.5.0 candidate
 
-Updated November 22, 2026. Build 18 preserves existing standalone provider
-selections and carries forward the verified Claude quota-window fix. **Unpublished;
-release acceptance is pending.** Earlier results below are historical and do not
-establish acceptance of build 18.
+Updated November 24, 2026. Build 18 preserves standalone provider selections and
+Claude quota-window accuracy. **Unpublished; release acceptance is pending.** The
+current results follow; earlier dated sections retain historical evidence.
+
+## November 24 final notarized build 18
+
+- Apple records the updated developer agreement as accepted. The frozen build 18
+  archive now exports successfully with a valid stapled notarization ticket and
+  Gatekeeper's Notarized Developer ID assessment. Strict signing, universal and
+  minimum-target metadata, resources, private-payload and packaged token/agent
+  checks pass on the exact final ZIP. Both executable slices of the GUI and
+  collector match the tested preflight after removing signatures in disposable
+  copies; Xcode changed the signature envelopes, not executable code.
+- Signed feed/archive verification accepts that ZIP and rejects altered copies.
+  The actual separate build 17 → final notarized 18 update offers, cancels/retries,
+  installs and relaunches correctly. Installed executable bytes, ticket and
+  signatures match; owner preferences are unchanged. The shipping HTTPS feed is
+  restored and the fixture-only local-network exception is absent. The test feed
+  was loopback-only and its server is closed; no public feed is published.
+- The final app is installed in Applications on three owner Apple Silicon Macs.
+  Two Macs previously had only a collector, so those were fresh app installations.
+  Existing collection schedules, provider selections, profiles and preferences
+  are preserved. Collectors now resolve the current Applications helper instead
+  of a temporary versioned path. Seven expected-account connections produced
+  fresh readings after installation. Backups retain the prior local app and agent
+  configurations; no credentials were copied or changed.
+- Keyboard checks pass for visible Tab/ShiftTab focus, Space activation, menu
+  arrows/Return, all six settings tabs and reverse navigation, provider tabs and
+  Escape dismissal. VoiceOver and keyboard navigation were restored to their
+  original off states, and the testing utility was closed. VoiceOver's spoken
+  readout and command activation remain unverified through the control route;
+  no successful screen-reader acceptance or app defect is inferred from that test.
+- The earlier owner process remained running for 29.09 hours in existing-collector
+  mode, retaining 6,086 history points across all seven current connections over
+  a 29.05-hour span. RSS snapshots were 141.70 MiB before accessibility interaction
+  and 202.48 MiB afterward. These are uncontrolled endpoints, not a leak/battery
+  trace. A qualifying reset transition and sleep/wake event were not established
+  by this bounded review; native sleep/network/endurance acceptance remains open.
+- The installed app's authorized test alert was accepted by macOS. Visible
+  Notification Center delivery remains unconfirmed, distinct from the earlier
+  preflight's observed delivery. Notification permissions and Focus settings were
+  not changed to force a passing result.
+
+Final ZIP SHA-256:
+`76b4f5183c4b6d6cc5be78a163b84bef11d6016c14633e29b580c2202cbaa5ec`.
+
+The current acceptance record remains blocked by physical Intel/macOS 14,
+remaining screen-reader, notification, native recovery/endurance and battery
+observations, and opt-in beta results. The notarized owner pilot is not a public
+release. No volunteers have been enrolled or contacted.
 
 ## November 22 build 18 fleet compatibility
 
@@ -31,10 +77,10 @@ establish acceptance of build 18.
 - The prior build 16 hosted workflow completed all three jobs, including the
   clean universal package contract. That is historical build 16 evidence.
 
-Build 18 acceptance is tracked in `app/release-readiness.json`. Apple Developer
-sign-in/agreement review remains pending before notarization can proceed.
+Build 18 acceptance is tracked in `app/release-readiness.json`. The agreement and
+notarization checks completed November 24; see the current results above.
 
-### Build 18 verification scope
+### November 22 build 18 preflight verification
 
 Runtime: `2d8e894750665605de8aa356d3bf1078a9e7acb6`.
 
@@ -69,11 +115,11 @@ Runtime: `2d8e894750665605de8aa356d3bf1078a9e7acb6`.
   from 131.77 to 137.17 MiB (137.27 MiB peak). This is a short observation,
   not battery, leak or overnight acceptance.
 
-The candidate is **not ready for public distribution**. Apple notarization and
-final archive/update acceptance, physical Intel/macOS 14, full keyboard/VoiceOver,
-sleep/network/endurance, battery/resource observations and opt-in beta results
-remain required. Agent and token-history permissions remain off in the owner's
-app. The existing Applications installation and public release are unchanged.
+At the November 22 checkpoint, notarization, final archive/update acceptance,
+physical Intel/macOS 14, full keyboard/VoiceOver, sleep/network/endurance,
+battery/resource and opt-in beta results remained open. The November 24 results
+above supersede that checkpoint. Owner agent and token-history permissions remain
+off; the public release remains unchanged.
 
 ## November 21 build 16 Claude profile continuity
 
