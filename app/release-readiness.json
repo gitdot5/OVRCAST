@@ -1,0 +1,72 @@
+{
+  "version": "0.5.0",
+  "build": "18",
+  "sha256": "76b4f5183c4b6d6cc5be78a163b84bef11d6016c14633e29b580c2202cbaa5ec",
+  "manualPreview": {
+    "tag": "v0.5.0-preview.18",
+    "approvedSha256": "76b4f5183c4b6d6cc5be78a163b84bef11d6016c14633e29b580c2202cbaa5ec",
+    "evidence": "Approved November 25, 2026 for direct download as a GitHub prerelease. Omit build 18 from the automatic update feed. Sleep/wake and overnight recovery, battery testing, full VoiceOver verification and independent beta feedback remain pending for the stable release."
+  },
+  "checks": {
+    "local_tests": {
+      "status": "pass",
+      "evidence": "Build 18: 115 app Swift, 10 collector Swift and 106 Python tests passed November 22, 2026. Explicit legacy provider selection covers disabled providers, empty/invalid inputs and Codex app/history fallbacks. Claude window regressions remain passing. The later standalone Antigravity recovery change passed all 109 Python tests, including budget, offline fallback and credential-shaped output cases. Eight focused Swift provider and recovery tests also passed."
+    },
+    "hosted_build": {
+      "status": "pass",
+      "evidence": "Runtime 2d8e894750665605de8aa356d3bf1078a9e7acb6: all three hosted jobs passed, including Intel/macOS 15 source tests, Apple Silicon/macOS 26 source tests and the clean universal package/resource contract. https://github.com/gitdot5/OVRCAST/actions/runs/45097870599 The follow-up standalone collector commit 41998f44c3ca35e0db538cf0dc2715700d226a73 also passed both architectures and the clean universal package contract. https://github.com/gitdot5/OVRCAST/actions/runs/45462996964"
+    },
+    "package_integrity": {
+      "status": "pass",
+      "evidence": "Build 18 final ZIP, notarized November 24, passes strict nested signatures, stapled-ticket validation, Gatekeeper Notarized Developer ID, universal/minimum-OS metadata, resources and private-payload checks. Final packaged token/agent fixtures and signed feed/archive tamper rejection pass. Both GUI/helper unsigned CPU slices match the tested preflight exactly; Xcode changed their signature envelopes. SHA-256 is pinned to this final archive."
+    },
+    "live_providers": {
+      "status": "pass",
+      "evidence": "Final notarized build 18 installed in Applications on all three owner Apple Silicon Macs. Existing provider selections and profile selectors were preserved; temporary helper overrides were removed and existing collectors reloaded. All seven configured expected-account connections produced fresh readings after final installation. The MacBook installed GUI shows those seven current cards. Detailed identities and quota values remain private. An intermittent Antigravity offline fallback was reproduced in scheduled MacBook collection and recovered on a later scheduled run. The standalone collector now retries once within its existing time budget. The deployed script produced a new live Antigravity reading with all seven connections fresh. After the Studio Ultra Codex CLI reported a ChatGPT sign-in again, a requested collector run verified fresh quota readings from its expected account through both the CLI and app server. The fleet board showed seven of seven fresh connections."
+    },
+    "notification_delivery": {
+      "status": "pass",
+      "evidence": "On November 24, the installed final notarized build 18 sent a test alert. OVRCAST confirmed delivery and the OVRCAST test alert was visible in macOS Notification Center. This validates test delivery on the owner MacBook."
+    },
+    "updater_dialogs": {
+      "status": "pass",
+      "evidence": "Final notarized build 18 ZIP: actual separate build17-to-18 standard update offer, cancel/retry, installation and relaunch passed November 24. Installed GUI/helper bytes match the accepted export; strict signature, ticket and Gatekeeper pass. Production HTTPS feed is restored and the fixture-only local-network exception is absent. Signed loopback feed only; no public feed changed."
+    },
+    "upgrade_recovery": {
+      "status": "pass",
+      "evidence": "Build 18 disposable 0.4.3-to-18-to-0.4.3 preflight launch/rollback preserves exact preferences and privacy. Actual build17-to-final-notarized 18 update/relaunch preserves owner preferences exactly. The previous signed release and owner installation backups remain available for manual recovery."
+    },
+    "intel_runtime": {
+      "status": "pass",
+      "evidence": "GitHub Actions run 45536490656 installed the exact build 18 notarized ZIP on a native Intel (GenuineIntel, x86_64) macOS 15.7.9 desktop VM. SHA-256, strict nested code signatures and Gatekeeper's Notarized Developer ID assessment passed. After assessment, the test removed its quarantine marker to allow unattended launch. LaunchServices opened the installed app, clean onboarding created its menu item, the bundled collector ran, agent access defaulted to off, and the privacy-mode board rendered synthetic readings. The separate macOS 14 runtime check used an Apple Silicon VM."
+    },
+    "minimum_macos": {
+      "status": "pass",
+      "evidence": "November 24 exact notarized build 18 ZIP passed a clean install on macOS 14.8.7 (23J520) in an isolated Apple Silicon VM. Archive SHA-256 matched. With Gatekeeper enabled, the quarantined app was accepted as Notarized Developer ID. The bundled collector ran, agent access defaulted to off, and first launch created the menu item and opened clean onboarding. The full board loaded, and nine app-owned view captures covered the menu, settings, privacy mode, last-known readings and support preview using synthetic accounts. Intel desktop coverage remains a separate check."
+    },
+    "sleep_network_endurance": {
+      "status": "pending",
+      "evidence": "Owner existing-collector pilot retained 6,086 saved points for all seven fleet connections over 29.05 hours. The installed pilot recorded fresh Claude readings on both sides of a reported reset. In the isolated Sonoma VM, native collection on final build 18 retained saved connection health through a 12-second guest network outage and retried from the same process after restoration, with 14.78 seconds between attempts. The VM used a signed-out Codex fixture. Guest sleep failed at the OS level (0xe00002e2). Physical Mac sleep/wake and overnight native collection with live provider accounts remain open."
+    },
+    "accessibility": {
+      "status": "pending",
+      "evidence": "November 24 build 18 keyboard checks passed: visible Tab/ShiftTab toolbar focus, Space provider/menu activation, arrow/Return settings access, all six settings tabs/reverse navigation and Escape dismissal. Original macOS keyboard navigation and VoiceOver were both off; both restored off and the testing utility quit. VoiceOver ran, but its cursor/activation/spoken readout was not verified through computer control. Full screen-reader acceptance remains unverified; no app defect established by that attempt."
+    },
+    "resource_use": {
+      "status": "pending",
+      "evidence": "Same preflight 18 GUI process remained running for 29.09 hours in existing-collector mode. Initial five-minute sample averaged 0.046% CPU and ended at 137.17 MiB RSS. November 24 snapshots were 141.70 MiB before accessibility interaction and 202.48 MiB afterward. A 100-second sample of the installed notarized app on AC power recorded stable RSS around 143.5 MiB and 0.1% peak sampled CPU. On Sonoma, 21 samples over 100 seconds of idling with a signed-out Codex fixture recorded 31.83 MiB peak RSS and 1.8% peak sampled CPU. Battery and live native-collection endurance measurements remain open. A separate 10.5-minute installed-build baseline on the MacBook recorded 43 samples, with 106.34–115.42 MiB RSS and 1.0% peak sampled CPU while on AC. The existing collector refreshed its snapshot during the sample."
+    },
+    "opt_in_beta": {
+      "status": "pending",
+      "evidence": "Plan and invitation draft prepared. No volunteers enrolled or contacted; 5-10 consenting testers with their own accounts and the required hardware/scenarios remain needed."
+    },
+    "agent_interface": {
+      "status": "pass",
+      "evidence": "Exact signed build 18 agent status/recommend/tokens fixtures pass with network and real-home access denied. Anonymous JSON excludes private markers, reads do not modify inputs, stale routing declines and revocation returns disabled immediately. No GUI or server is started."
+    },
+    "token_activity": {
+      "status": "pass",
+      "evidence": "Exact signed build 18 packaged token fixtures pass with network and real-home access denied. Codex/Claude numeric counters match synthetic events, duplicate Claude deliveries count once, another profile is excluded, unavailable data stays explicit and cache permissions are owner-only. This does not claim complete provider billing history."
+    }
+  }
+}

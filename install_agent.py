@@ -21,12 +21,14 @@ PATH = ":".join([os.path.join(HOME, ".local", "bin"), "/opt/homebrew/bin", "/usr
 
 
 def agent(label, program, env):
+    gathers_snapshots = label.endswith(".gather")
     return {
         "Label": label,
-        "ProgramArguments": ["/usr/bin/python3", "-I", program] + (["--quiet"] if label.endswith("gather") else []),
+        "ProgramArguments": ["/usr/bin/python3", "-I", program] + (["--quiet"] if gathers_snapshots else []),
         "StartInterval": 180,
         "RunAtLoad": True,
-        "ProcessType": "Background",
+        # The Antigravity live app probe can fall back to offline data under Background.
+        "ProcessType": "Background" if gathers_snapshots else "Standard",
         "LowPriorityIO": True,
         "Nice": 10,
         "EnvironmentVariables": dict({"PATH": PATH, "HOME": HOME}, **env),

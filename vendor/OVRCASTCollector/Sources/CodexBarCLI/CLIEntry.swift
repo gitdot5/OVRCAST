@@ -30,6 +30,15 @@ enum CodexBarCLI {
         self.configureLinuxTimeZoneIfNeeded()
 
         let rawArgv = Array(CommandLine.arguments.dropFirst())
+        if rawArgv.first == "token-activity" {
+            guard rawArgv.count == 3, rawArgv[1] == "--provider",
+                  let provider = [UsageProvider.codex, .claude, .antigravity].first(where: { $0.rawValue == rawArgv[2] }) else {
+                print("Usage: OVRCASTCollector token-activity --provider codex|claude|antigravity")
+                Self.platformExit(2)
+            }
+            FileHandle.standardOutput.write(await OVRCASTTokenActivity.read(provider: provider))
+            Self.platformExit(0)
+        }
         let allowed = rawArgv.isEmpty || ["usage", "-h", "--help", "-V", "--version"].contains(rawArgv[0]) || rawArgv.starts(with: ["config", "providers"])
         guard allowed else {
             print("This OVRCAST collector supports usage and config providers only.")
@@ -40,6 +49,7 @@ enum CodexBarCLI {
             print("OVRCASTCollector — OVRCAST-maintained usage collector (CodexBar-derived).")
             print("Usage: OVRCASTCollector usage --provider codex|claude|antigravity --format json")
             print("Read provider configuration: OVRCASTCollector config providers --format json")
+            print("Read local token counters: OVRCASTCollector token-activity --provider codex|claude|antigravity")
             print("Sign in through provider software, then check the connection in OVRCAST Settings.")
             Self.platformExit(0)
         }

@@ -166,12 +166,27 @@ def merge_provider_outputs(results: dict) -> list:
     return rows
 
 
-def _codexbar(exe, args, env):
+def _codexbar(exe, args, env, *, timeout=CODEXBAR_TIMEOUT):
     try:
-        p = subprocess.run([exe] + args, capture_output=True, text=True, timeout=CODEXBAR_TIMEOUT, env=env)
+        p = subprocess.run([exe] + args, capture_output=True, text=True, timeout=timeout, env=env)
         return p.stdout, p.returncode
     except subprocess.TimeoutExpired:
         return "", "timeout"
+
+
+def antigravity_reading_source(output, status):
+    if status != 0 or find_secret(output):
+        return None
+    try:
+        rows = json.loads(output)
+    except ValueError:
+        return None
+    if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], dict):
+        return None
+    row = rows[0]
+    if row.get("provider") == "antigravity" and row.get("usage") and not row.get("error"):
+        return row.get("source")
+    return None
 
 
 def claude_auth_status(env):
@@ -195,8 +210,24 @@ def provider_usage(exe, provider, env):
                 "kind": "authentication", "message": "Claude usage sign-in required. Open Reconnect Claude on this Mac and sign in to the account listed on the board."}}]), 1
     args = ["usage", "--provider", provider, "--format", "json", "--no-color"]
     if provider in ("codex", "claude"):
-        args += ["--source", "cli" if provider == "codex" else "oauth"]
-    return _codexbar(exe, args, env)
+        args += ["--source", "cli"]
+    if provider != "antigravity":
+        return _codexbar(exe, args, env)
+
+    # The desktop app can miss a live quota request transiently. Retry the same
+    # connection once when the helper falls back to offline data.
+    deadline = time.monotonic() + CODEXBAR_TIMEOUT
+    result = _codexbar(exe, args, env)
+    remaining = min(20, deadline - time.monotonic())
+    if remaining > 0 and antigravity_reading_source(*result) == "offline":
+        try:
+            retry = _codexbar(exe, args, env, timeout=remaining)
+        except OSError:
+            return result
+        source = antigravity_reading_source(*retry)
+        if isinstance(source, str) and source and source != "offline":
+            return retry
+    return result
 
 
 def collector_executable(env):
@@ -211,14 +242,31 @@ def collector_executable(env):
     return next((p for p in candidates if os.path.isfile(p) and os.access(p, os.X_OK)), None)
 
 
+def selected_providers(env):
+    supported = ("codex", "claude", "antigravity")
+    selection = env.get("OVRCAST_PROVIDERS")
+    if selection is None:
+        return supported
+    requested = {p.strip().lower() for p in selection.split(",") if p.strip()}
+    if requested - set(supported):
+        raise ValueError("invalid-provider-selection")
+    return tuple(p for p in supported if p in requested)
+
+
 def run_codexbar():
     # Keep the function and snapshot key for existing fleet/schema compatibility.
     env = dict(os.environ)
-    _claude_on_path(env)
+    try:
+        providers = selected_providers(env)
+    except ValueError:
+        return "", "invalid-provider-selection"
+    if not providers:
+        return "[]", 0
+    if "claude" in providers:
+        _claude_on_path(env)
     exe = collector_executable(env)
     if not exe:
         return "", "ovrcast-collector-not-found"
-    providers = ("codex", "claude", "antigravity")
     with ThreadPoolExecutor(max_workers=len(providers)) as pool:
         futures = {p: pool.submit(provider_usage, exe, p, env) for p in providers}
         results = {p: f.result() for p, f in futures.items()}
@@ -327,13 +375,19 @@ def codex_account_usage(timeout=30):
 
 
 def main() -> None:
-    requested_auth_check()
     now = datetime.now(timezone.utc)
+    try:
+        providers = selected_providers(os.environ)
+    except ValueError:
+        write_atomic(OUT, build_snapshot("", "invalid-provider-selection", None, now))
+        return
+    if "claude" in providers:
+        requested_auth_check()
     with ThreadPoolExecutor(max_workers=2) as pool:
-        live = pool.submit(codex_account_usage)
+        live = pool.submit(codex_account_usage) if "codex" in providers else None
         stdout, rc = run_codexbar()
-        codex_usage = live.result()
-    logs = latest_codex_rate_limits(SESSIONS, now)
+        codex_usage = live.result() if live else None
+    logs = latest_codex_rate_limits(SESSIONS, now) if "codex" in providers else None
     snapshot = build_snapshot(stdout, rc, logs, now)
     snapshot["codex_account"] = codex_usage
     write_atomic(OUT, snapshot)

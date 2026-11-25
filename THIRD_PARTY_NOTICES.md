@@ -43,3 +43,9 @@ OpenAI, Anthropic, Google, Apple or CodexBar's authors is implied.
 
 Apple frameworks and system symbols are supplied by macOS, not redistributed
 as source assets in this package.
+
+## Sparkle 2.10.1
+
+Signed macOS software updates use Sparkle, pinned to its official 2.10.1 package.
+Copyright and component license notices are in `LICENSES/Sparkle.txt`.
+https://github.com/sparkle-project/Sparkle

@@ -14,20 +14,32 @@ private final class Capture: @unchecked Sendable {
     func result() -> (Data, Bool) { lock.lock(); defer { lock.unlock() }; return (data, oversized) }
 }
 enum CommandRunner {
-    static func run(_ executable: String, _ arguments: [String], timeout: TimeInterval = 60) throws -> CommandOutput {
+    private static let processLock = NSLock()
+    private static var cancellableProcesses: [UUID: (String, Process)] = [:]
+    static func cancel(group: String) {
+        processLock.lock(); defer { processLock.unlock() }
+        for (scope, process) in cancellableProcesses.values where scope == group && process.isRunning {
+            // These are scoped read-only token scans, never provider sign-in or quota refreshes.
+            kill(process.processIdentifier, SIGKILL)
+        }
+    }
+    static func run(_ executable: String, _ arguments: [String], timeout: TimeInterval = 60, cancellationGroup: String? = nil) throws -> CommandOutput {
         let process = Process(), pipe = Pipe(), capture = Capture(), ended = DispatchSemaphore(value: 0)
         process.executableURL = URL(fileURLWithPath: executable)
         process.arguments = arguments
-        var env = ProcessInfo.processInfo.environment
-        let home = FileManager.default.homeDirectoryForCurrentUser.path
-        env["PATH"] = home + "/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-        process.environment = env
+        process.environment = ClaudeConnectionContext.environment()
         process.standardInput = FileHandle.nullDevice
         process.standardOutput = pipe
         process.standardError = FileHandle.nullDevice
         process.terminationHandler = { _ in ended.signal() }
         let drained = DispatchSemaphore(value: 0)
         try process.run()
+        let identifier = UUID()
+        if let cancellationGroup {
+            processLock.lock(); cancellableProcesses[identifier] = (cancellationGroup, process); processLock.unlock()
+            if Task.isCancelled { cancel(group: cancellationGroup) }
+        }
+        defer { processLock.lock(); cancellableProcesses.removeValue(forKey: identifier); processLock.unlock() }
         DispatchQueue.global(qos: .utility).async {
             defer { drained.signal() }
             while let chunk = try? pipe.fileHandleForReading.read(upToCount: 16384), !chunk.isEmpty { capture.append(chunk) }
@@ -58,13 +70,16 @@ enum NativeCollector {
     }
     static func collect(provider: String, machine: String, helper: String,
                         run: (String, [String]) throws -> CommandOutput = { try CommandRunner.run($0, $1, timeout: 90) }) -> [UsageAccount] {
-        let source = provider == "Codex" ? ["--source", "cli"] : provider == "Claude" ? ["--source", "oauth"] : []
+        // Claude Code owns its sign-in and Keychain access. Read its active session
+        // rather than requiring another application to read raw OAuth credentials.
+        let source = ["Codex", "Claude"].contains(provider) ? ["--source", "cli"] : []
         let base = ["usage", "--provider", provider.lowercased(), "--format", "json", "--no-color"] + source
         do {
-            var output = try run(helper, base + ["--all-accounts"])
+            let enumeratesAccounts = provider != "Claude"
+            var output = try run(helper, enumeratesAccounts ? base + ["--all-accounts"] : base)
             // CodexBar's account flag means configured token accounts for these providers.
             // A default local connection can still exist when no token accounts are configured.
-            if defaultAccountFallback(output.data, provider: provider) { output = try run(helper, base) }
+            if enumeratesAccounts && defaultAccountFallback(output.data, provider: provider) { output = try run(helper, base) }
             return try parse(output.data, provider: provider, machine: machine)
         } catch {
             let timeout = (error as NSError).domain == "UsageBoard" && (error as NSError).code == 1
@@ -92,10 +107,18 @@ enum NativeCollector {
             guard let usage = row["usage"] as? [String: Any] else {
                 let error = row["error"] as? [String: Any] ?? [:]
                 let message = (error["message"] as? String ?? "").lowercased()
-                let auth = error["kind"] as? String == "authentication" || ["sign in", "login", "not logged", "unauthorized", "credentials not found", "authenticate", "token expired"].contains(where: message.contains)
+                let auth = error["kind"] as? String == "authentication" || ["sign in", "sign-in", "login", "not logged", "unauthorized", "credentials not found", "credentials missing", "credentials are invalid", "access token missing", "authenticate", "token expired"].contains(where: message.contains)
                 let missingTool = ["not found in path", "cli not found", "could not find codex", "could not find claude"].contains(where: message.contains)
-                let issue = auth ? "Sign in through the provider app, then check again." : missingTool ? "The provider software needed for this connection is missing. Use Connect \(provider) in OVRCAST Settings, complete its setup, then check again." : "Open the provider connection from OVRCAST Settings, then check again."
-                return failure(provider: provider, machine: machine, issue: issue, signIn: auth)
+                let keychainDenied = message.contains("keychain") && ["denied", "revoked", "interaction not allowed"].contains(where: message.contains)
+                let rateLimited = ["rate limit", "rate-limit", "too many requests", "http 429"].contains(where: message.contains)
+                let issue: String
+                if keychainDenied { issue = "Local credential access needs attention. Open the provider connection and retry; review any macOS Keychain prompt yourself. Your saved credentials have not been changed." }
+                else if rateLimited { issue = "The provider temporarily limited usage checks. Wait for the automatic retry, or try again later. Last-known readings remain visible." }
+                else if message.contains("credentials are invalid") { issue = "The saved provider connection could not be read. Use Connect \(provider) to check the provider software and reconnect, then retry. OVRCAST has not deleted or replaced your credentials." }
+                else if auth { issue = "Sign in through the provider app, then check again." }
+                else if missingTool { issue = "The provider software needed for this connection is missing. Use Connect \(provider) in OVRCAST Settings, complete its setup, then check again." }
+                else { issue = "Open the provider connection from OVRCAST Settings, then check again." }
+                return failure(provider: provider, machine: machine, issue: issue, signIn: auth && !keychainDenied && !rateLimited)
             }
             let email = (usage["accountEmail"] as? String)?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "Account \(index + 1)"
             let observed = usage["updatedAt"] as? String
@@ -148,7 +171,10 @@ enum NativeCollector {
         var result: [String: UsageAccount] = [:]
         for account in accounts {
             if let old = result[account.id] {
-                var winner = (parsedDate(account.observedAt) ?? .distantPast) > (parsedDate(old.observedAt) ?? .distantPast) ? account : old
+                // Prefer a usable local/remote reading over a newer failed cache entry.
+                var winner: UsageAccount
+                if account.current != old.current { winner = account.current ? account : old }
+                else { winner = (parsedDate(account.observedAt) ?? .distantPast) > (parsedDate(old.observedAt) ?? .distantPast) ? account : old }
                 winner.machines = Array(Set(old.machines + account.machines)).sorted()
                 result[account.id] = winner
             } else { result[account.id] = account }

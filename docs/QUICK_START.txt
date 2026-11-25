@@ -1,4 +1,4 @@
-OVRCAST 0.4.3 — Public preview
+OVRCAST 0.5.0 — Unpublished release candidate
 
 Your AI capacity, at a glance.
 Created by Git. Free and open source under the MIT license.
@@ -6,7 +6,7 @@ Created by Git. Free and open source under the MIT license.
 1. Unzip the download, drag OVRCAST into Applications, then open it.
 2. In Settings → Connect, confirm Built-in collector ready. Choose a provider.
 3. Complete sign-in through the official provider software, then choose
-   Check connection and Open my board.
+   Check for that provider. Receive a current usage reading, then Open my board.
 
 No separate CodexBar installation is required. OVRCAST includes its own
 maintained collector derived from CodexBar’s MIT source. Provider accounts and
@@ -21,14 +21,14 @@ To add another Mac, install OVRCAST there and use an existing trusted SSH
 alias in Computers. OVRCAST does not configure Remote Login or SSH keys.
 Both apps must be running to keep their snapshots fresh.
 
-Download OVRCAST-0.4.3-macOS.zip from the official GitHub release. It is signed under
+Download OVRCAST-0.5.0-macOS.zip from the official GitHub release. It is signed under
 Du Nguyen Tran's Developer ID and notarized by Apple. Older preview artifacts
 are separate builds. Do not disable macOS security to install software.
 
 OVRCAST is free and MIT licensed. Original source and license notices are
 included in the source distribution. Provider services may have their own fees.
 
-Official download: https://github.com/gitdot5/OVRCAST/releases/tag/v0.4.3
+Official download: https://github.com/gitdot5/OVRCAST/releases
 Test scope and limitations: docs/RELEASE_REVIEW.md in the source distribution.
 
 Account cards show the next provider-reported usage reset, including the window,
@@ -40,8 +40,10 @@ Claude usage requires a Claude Code OAuth connection. A Claude Desktop sign-in
 alone may not supply it. Connect Claude, complete sign-in, then check again.
 CodexBar-specific token-account configuration is not automatically imported.
 
-Updates are manual: download a newer OVRCAST release and replace the app in
-Applications. Existing UsageBoard storage paths and settings remain compatible.
+For 0.4.x, update manually once. Version 0.5.0 adds Check for Updates in the
+menu and About settings. Automatic checking and installation are optional and
+start off. Updates require signed feed metadata and signed archives.
+For recovery, quit OVRCAST and install the previous signed release manually. Existing UsageBoard storage paths and settings remain compatible.
 
 Privacy mode keeps Mac types visible while hiding custom computer names.
 Your local Mac type is detected from macOS. Two of the same type receive
@@ -55,3 +57,14 @@ private recovery copy; privacy stays on while you review the recovered setup.
 The download includes no publisher account sign-in, API token or SSH credential.
 Connect your own provider accounts. Publisher identity in the signing certificate
 is public verification metadata and does not grant access to an account.
+
+Settings → Health shows last success and retries. Background failures back off
+to at most one attempt per 30 minutes. Retry checks immediately. Other providers
+and Macs can finish independently. Wake and restored network request a refresh.
+
+Review support report previews exactly what you copy or save; nothing is sent.
+Personalize adds an optional capacity menu-bar display and local usage estimates.
+Estimates need three continuous readings over at least 15 minutes in the same
+reset window and are not task-completion guarantees.
+
+This candidate is not published until its release checklist is accepted.

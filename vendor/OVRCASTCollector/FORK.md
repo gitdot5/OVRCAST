@@ -12,10 +12,21 @@ Documentation build plugins and unrelated app/updater targets are excluded.
 macOS supplies CryptoKit; the fork uses it instead of building swift-crypto.
 
 The executable is OVRCASTCollector. Its entrypoint permits usage, config providers,
-help/version and the deterministic resource smoke probe. Upstream server,
+help/version, a narrow local-only token-activity projection and the deterministic resource smoke probe. Upstream server,
 configuration mutation, session focus, hooks and reset/purchase actions are not
 available through this executable. The GUI invokes read-only usage commands. Local user provider plugins are not activated.
 Internal module/type and JSON schema names remain unchanged for compatibility.
+
+Claude CLI captures keep each allowance with its reported window label. Weekly-only
+and model-only panels keep Session absent. Visible windows whose values are still
+loading are retried within the same source; percentages are not borrowed from
+another window or usage credits. A local XCTest target covers these contracts.
+
+Token activity permits only Codex, Claude Code and Antigravity local history.
+It disables pricing refreshes, other-harness merging and credential fallbacks.
+Only dates, numeric token counters, timezone and coverage are emitted. It never
+emits prompts, responses, paths, project/session identities, account identities,
+model strings or dollar estimates. Scanner caches remain local.
 
 Application-owned defaults, configuration and cache namespaces are changed to
 OVRCAST. The default collector config is .config/ovrcast/config.json (or its

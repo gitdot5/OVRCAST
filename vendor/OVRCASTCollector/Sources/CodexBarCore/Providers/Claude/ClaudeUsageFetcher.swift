@@ -1197,8 +1197,9 @@ extension ClaudeUsageFetcher {
         from snap: ClaudeStatusSnapshot,
         now: Date = .init()) throws -> ClaudeUsageSnapshot
     {
-        guard let sessionPctLeft = snap.sessionPercentLeft else {
-            throw ClaudeUsageError.parseFailed("missing session data")
+        guard snap.sessionPercentLeft != nil || snap.weeklyPercentLeft != nil
+            || snap.opusPercentLeft != nil || !snap.extraRateWindows.isEmpty else {
+            throw ClaudeUsageError.parseFailed("missing quota data")
         }
 
         func makeWindow(pctLeft: Int?, reset: String?, windowMinutes: Int) -> RateWindow? {
@@ -1216,9 +1217,9 @@ extension ClaudeUsageFetcher {
         }
 
         let primary = makeWindow(
-            pctLeft: sessionPctLeft,
+            pctLeft: snap.sessionPercentLeft,
             reset: snap.primaryResetDescription,
-            windowMinutes: Self.sessionWindowMinutes)!
+            windowMinutes: Self.sessionWindowMinutes)
         let weekly = makeWindow(
             pctLeft: snap.weeklyPercentLeft,
             reset: snap.secondaryResetDescription,

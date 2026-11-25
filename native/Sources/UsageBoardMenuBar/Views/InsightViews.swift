@@ -5,36 +5,77 @@ struct RecommendationView: View {
     @ObservedObject var store: UsageStore
     private var provider: String { store.selectedProvider == "Overview" ? store.preferences.recommendationProvider : store.selectedProvider }
     private var windows: [String] { ["All limits"] + Set(store.visibleAccounts.filter { $0.provider == provider }.flatMap(\.quotas).map(\.label)).sorted() }
+    private var currentProviderReadings: Bool { store.visibleAccounts.contains { $0.provider == provider && $0.current } }
+    private var historicalProviderReadings: Bool { store.visibleAccounts.contains { $0.provider == provider && !$0.quotas.isEmpty } }
+    private var providerNeedsSignIn: Bool { !currentProviderReadings && store.visibleAccounts.contains { $0.provider == provider && $0.requiresSignIn == true } }
+    private var providerPendingReset: Bool { store.visibleAccounts.contains { $0.provider == provider && $0.current && $0.quotas.contains(where: \.awaiting) } }
+    private var recoveryTitle: String {
+        if providerNeedsSignIn { return "Reconnect \(provider)" }
+        if providerPendingReset { return "Waiting for reset confirmation" }
+        return currentProviderReadings ? "No headroom for this selection" : "Readings need a refresh"
+    }
+    private var recoveryHint: String {
+        if providerNeedsSignIn { return "Sign in to refresh these allowances." }
+        if providerPendingReset { return "Refresh to confirm the new allowance." }
+        if currentProviderReadings { return "Check another provider or allowance." }
+        return historicalProviderReadings ? "Last known allowances are shown below." : "Check your connections to load usage."
+    }
+    private var providerMenu: some View {
+        Menu {
+            Picker("Provider", selection: $store.preferences.recommendationProvider) {
+                ForEach(store.providers.filter { $0 != "Overview" }, id: \.self) { Text($0).tag($0) }
+            }.disabled(store.selectedProvider != "Overview")
+            Picker("Allowance", selection: $store.preferences.recommendationWindow) { ForEach(windows, id: \.self) { Text($0).tag($0) } }
+        } label: { Text(provider) }
+        .menuStyle(.borderlessButton).fixedSize().font(.system(size: 10))
+    }
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack(spacing: 6) {
-                Image(systemName: "sparkle").foregroundStyle(.tint)
-                Text("Best headroom").fontWeight(.semibold)
-                Spacer()
-                Menu {
-                    Picker("Provider", selection: $store.preferences.recommendationProvider) {
-                        ForEach(store.providers.filter { $0 != "Overview" }, id: \.self) { Text($0).tag($0) }
-                    }.disabled(store.selectedProvider != "Overview")
-                    Picker("Allowance", selection: $store.preferences.recommendationWindow) { ForEach(windows, id: \.self) { Text($0).tag($0) } }
-                } label: { Text(provider) }
-                .menuStyle(.borderlessButton).fixedSize()
-            }.font(.system(size: 10))
+        Group {
             if let best = store.recommendation {
-                Button { store.selectedAccount = best.account.id } label: {
-                    HStack {
-                        Text(store.accountName(best.account)).lineLimit(1)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "sparkle").foregroundStyle(.tint)
+                        Text("Best headroom").fontWeight(.semibold)
                         Spacer()
-                        Text("\(Int(best.remaining))% left").fontWeight(.semibold).monospacedDigit()
-                    }.font(.system(size: 11))
-                }.buttonStyle(.plain)
-                HStack {
-                    Text("\(best.limitingWindow) · \(best.account.activeMachines.map(store.machineName).joined(separator: ", "))").lineLimit(1)
-                    Spacer()
-                    Text(resetLabel(best.account.quotas.first { $0.label == best.limitingWindow }?.resetsAt)).lineLimit(1)
-                }.font(.system(size: 9)).foregroundStyle(.secondary)
-            } else { Text("No fresh, usable reading for this selection.").font(.system(size: 10)).foregroundStyle(.secondary) }
-        }.padding(.horizontal, 12).padding(.vertical, 8)
-            .background(Color.accentColor.opacity(0.07), in: RoundedRectangle(cornerRadius: 9))
+                        providerMenu
+                    }.font(.system(size: 10))
+                    Button { store.selectedAccount = best.account.id } label: {
+                        HStack {
+                            Text(store.accountName(best.account)).lineLimit(1).truncationMode(.middle)
+                                .help(store.accountName(best.account))
+                            Spacer(minLength: 8)
+                            Text("\(Int(best.remaining))% left").fontWeight(.semibold).monospacedDigit().fixedSize()
+                        }.font(.system(size: 11)).frame(maxWidth: .infinity, alignment: .leading)
+                    }.buttonStyle(.plain)
+                    HStack {
+                        Text("\(best.limitingWindow) · \(best.account.activeMachines.map(store.machineName).joined(separator: ", "))").lineLimit(1)
+                        Spacer()
+                        Text(resetLabel(best.account.quotas.first { $0.label == best.limitingWindow }?.resetsAt)).lineLimit(1)
+                    }.font(.system(size: 9)).foregroundStyle(.secondary)
+                }.padding(.horizontal, 12).padding(.vertical, 10)
+                    .background(Color.accentColor.opacity(0.07), in: RoundedRectangle(cornerRadius: 9))
+            } else {
+                HStack(spacing: 9) {
+                    Image(systemName: currentProviderReadings && !providerPendingReset ? "gauge.with.needle" : "arrow.clockwise.circle")
+                        .font(.system(size: 16)).foregroundStyle(.secondary).accessibilityHidden(true)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(recoveryTitle)
+                            .font(.system(size: 10, weight: .semibold))
+                        Text(recoveryHint)
+                            .font(.system(size: 9)).foregroundStyle(.secondary)
+                    }.frame(maxWidth: .infinity, alignment: .leading)
+                    VStack(alignment: .trailing, spacing: 5) {
+                        providerMenu
+                        Button(providerNeedsSignIn ? "Setup" : store.refreshing ? "Refreshing…" : "Refresh") {
+                            if providerNeedsSignIn { store.showSettings = true } else { store.refresh() }
+                        }
+                            .buttonStyle(.borderedProminent).controlSize(.small).disabled(store.refreshing)
+                            .accessibilityLabel(providerNeedsSignIn ? "Open connection settings" : "Refresh usage readings")
+                    }
+                }.padding(.horizontal, 11).padding(.vertical, 8)
+                    .background(Color.primary.opacity(0.035), in: RoundedRectangle(cornerRadius: 9))
+            }
+        }
             .help("Compares current reported allowance within one provider. Shared quotas are counted once.")
             .onChange(of: provider) { _, _ in store.preferences.recommendationWindow = "All limits" }
     }
@@ -100,9 +141,10 @@ struct FullBoardView: View {
                     Text("\(store.available) available · \(store.nextReset)").foregroundStyle(.secondary)
                 }
                 Spacer()
-                Button { store.preferences.privacyMode.toggle() } label: { Image(systemName: store.preferences.privacyMode ? "eye.slash.fill" : "eye") }.help("Privacy mode")
-                Button("Refresh") { store.refresh() }.disabled(store.refreshing)
+                Button { store.preferences.privacyMode.toggle() } label: { Image(systemName: store.preferences.privacyMode ? "eye.slash.fill" : "eye") }.help("Privacy mode").accessibilityLabel("Privacy mode").accessibilityValue(store.preferences.privacyMode ? "On" : "Off")
+                Button("Refresh") { store.refresh() }.disabled(store.refreshing).keyboardShortcut("r", modifiers: .command)
                 Button("Settings") { store.showSettings = true }
+                Button("Tokens") { store.showTokenActivity = true }
             }
             if let id = store.selectedAccount, let account = store.accounts.first(where: { $0.id == id }) {
                 ScrollView { AccountDetail(account: account, store: store).frame(maxWidth: 600) }.frame(maxWidth: .infinity)

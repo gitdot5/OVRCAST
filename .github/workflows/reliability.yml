@@ -31,6 +31,7 @@ jobs:
           swift --version
       - run: python3 -m unittest discover -s tests
       - run: swift test --package-path native -j 2
+      - run: swift test --package-path vendor/OVRCASTCollector -j 2
       - run: python3 script/export_source.py
   package:
     name: Universal package contract

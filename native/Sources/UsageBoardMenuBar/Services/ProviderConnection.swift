@@ -3,10 +3,17 @@ import AppKit
 /// Sign-in stays with provider software. No credentials are copied from another app.
 enum ProviderConnection {
     static func shellQuote(_ value: String) -> String { "'" + value.replacingOccurrences(of: "'", with: "'\"'\"'") + "'" }
-    static func claudeLoginScript(executable: String) -> String { "#!/bin/zsh\nexec " + shellQuote(executable) + " auth login\n" }
-    static func claudeExecutable(home: URL = FileManager.default.homeDirectoryForCurrentUser) -> URL? {
+    static func claudeLoginScript(executable: String, environment: [String: String] = ClaudeConnectionContext.environment()) -> String {
+        let profile = environment["CLAUDE_CONFIG_DIR"].map { "export CLAUDE_CONFIG_DIR=" + shellQuote($0) + "\n" } ?? ""
+        return "#!/bin/zsh\n" + profile + "exec " + shellQuote(executable) + " auth login\n"
+    }
+    static func claudeExecutable(home: URL = FileManager.default.homeDirectoryForCurrentUser,
+                                 environment: [String: String] = ClaudeConnectionContext.environment()) -> URL? {
         let fm = FileManager.default
-        var paths = [home.appendingPathComponent(".local/bin/claude"), URL(fileURLWithPath: "/opt/homebrew/bin/claude"), URL(fileURLWithPath: "/usr/local/bin/claude")]
+        var paths = [home.appendingPathComponent("Library/Application Support/UsageBoard/bin/claude"), home.appendingPathComponent(".local/bin/claude"), URL(fileURLWithPath: "/opt/homebrew/bin/claude"), URL(fileURLWithPath: "/usr/local/bin/claude")]
+        if let explicit = environment["CLAUDE_CLI_PATH"]?.trimmingCharacters(in: .whitespacesAndNewlines), !explicit.isEmpty {
+            paths.insert(URL(fileURLWithPath: explicit), at: 0)
+        }
         let installs = home.appendingPathComponent("Library/Application Support/Claude/claude-code")
         let versions = (try? fm.contentsOfDirectory(at: installs, includingPropertiesForKeys: nil)) ?? []
         for version in versions.sorted(by: { $0.lastPathComponent > $1.lastPathComponent }).prefix(20) {

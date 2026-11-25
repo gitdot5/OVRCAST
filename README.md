@@ -17,7 +17,7 @@ with its own bundled collector derived from [CodexBar](https://github.com/steipe
 
 - One compact overview for Codex, Claude and Antigravity accounts.
 - Clear MacBook, Mac mini and Mac Studio labels, including in privacy mode.
-- Session, weekly and model allowances, with next-reset countdowns and exact local times.
+- Session, weekly and model allowances as reported by the provider, with next-reset countdowns and exact local times.
 - Recognizable Codex, Claude and Antigravity identification icons.
 - Saved-reset inventory and separate credit pools when a source reports them.
 - Day and Night appearance, provider tabs, machine/status filters and usage sorting.
@@ -25,6 +25,8 @@ with its own bundled collector derived from [CodexBar](https://github.com/steipe
   to return to the menu bar dropdown. Position and preferences persist.
 - Detailed account views and a full local HTML dashboard.
 - Explicit stale, missing and signed-out states; cached quotas are marked last known.
+- Verified first-run setup, per-connection health, optional signed updates, and
+  independent refreshes with automatic failure backoff and wake/network recovery.
 - Recoverable settings, visible save failures and regression checks on Intel and Apple Silicon.
   See the [reliability review](docs/RELIABILITY.md) for scope and remaining validation.
 
@@ -40,18 +42,23 @@ a development folder or a separate OVRCAST account.
 
 [Download OVRCAST for macOS](https://github.com/gitdot5/OVRCAST/releases)
 
-OVRCAST 0.4.3 includes an OVRCAST-maintained collector compiled from a pinned
+The latest published release is **0.4.3**. This branch prepares **0.5.0**, held for
+the checks in [the candidate review](docs/NEXT_RELEASE.md).
+
+OVRCAST includes an OVRCAST-maintained collector compiled from a pinned
 CodexBar v0.81.0 source fork. **No separate CodexBar installation is required.**
 The collector, its runtime resources and license notices ship inside OVRCAST.
 Updates to this fork ship with OVRCAST releases; upstream changes are reviewed
-and imported deliberately. The app has no automatic updater; install a newer
-release manually into Applications. See the [release review](docs/RELEASE_REVIEW.md)
+and imported deliberately. Version 0.5.0 adds optional signed in-app updates;
+0.4.x must be updated manually once. Automatic checks and installation start off.
+See [update security and recovery](docs/UPDATES.md). See the [release review](docs/RELEASE_REVIEW.md)
 for the exact validation scope and known limits.
 
 On first launch, Settings → Connect reports whether the built-in collector is
 ready. Choose Connect Codex, Claude or Antigravity, complete the provider’s own
-sign-in, then choose Check connection. Codex and Antigravity use their official
-app/CLI connections; Claude uses Claude Code OAuth. Connect Claude opens the
+sign-in, then choose Check for that provider. Setup finishes only after a current usage
+reading arrives for at least one selected provider. Codex and Antigravity use their official
+app/CLI connections; Claude reads usage through its signed-in Claude Code session. Connect Claude opens the
 installed Claude Code login command in Terminal, or its setup documentation if
 it is missing. A Claude Desktop sign-in alone may not supply this usage connection.
 OVRCAST never asks for a pasted token. Existing provider sessions may work;
@@ -68,10 +75,17 @@ CodexBar-specific token-account configuration is not silently imported.
   on multiple Macs count once. This is not a task-completion prediction.
 - **Account details:** connection help, separate credit pools, and seven days of
   measured local history. Unknown source fields stay unknown.
+  Some accounts report weekly limits without a Session limit; absent windows
+  stay absent rather than receiving another window's percentage.
 - **Settings → Alerts:** opt into low-usage, confirmed-reset and explicit credit
   expiry alerts, with a threshold, quiet hours and snooze. Alerts omit identities.
-- **Copy support report:** export only provider/status counts and source health;
-  no account IDs, emails, machine names, aliases, balances or raw diagnostic text.
+- **Settings → Health:** see each connection’s last successful reading, state and
+  next retry. Manual Retry bypasses the automatic failure backoff.
+- **Review support report:** preview, copy or save a structured report without
+  account IDs, emails, computer names, aliases, balances or raw errors. Nothing is sent.
+- **Settings → Personalize:** opt into capacity in the menu bar or estimates based
+  on recent local history. Forecasts stay hidden when readings are stale, too sparse,
+  discontinuous or span a reset; they never promise that a task will finish.
 
 ## Other computers
 
@@ -98,7 +112,10 @@ The [distribution privacy review](docs/DISTRIBUTION_PRIVACY_REVIEW.md) records
 checks of public downloads and source history. Provider credentials and private
 usage snapshots are not distributed. Each user connects their own accounts.
 
-There is no OVRCAST backend, telemetry or listening server. Provider tools
+There is no OVRCAST usage backend, telemetry or listening server. Optional update
+checks contact GitHub for signed release metadata and packages; GitHub receives
+normal connection metadata, but no provider credentials or usage snapshots.
+System-profile fields are disabled. Provider tools
 may contact their services to obtain usage. Remote collection, when configured,
 uses your existing SSH access. Snapshots contain account emails, usage limits,
 reset dates and reported credit balances; they are private local files.
@@ -118,9 +135,10 @@ swift test --package-path native -j 2
 ```
 
 Tests use example account identities and fixed parser samples. They are not live
-provider checks. The optional legacy Python code uses the standard library; the GUI Swift package has no package dependencies. The collector’s Commander,
+provider checks. The optional legacy Python code uses the standard library; the GUI pins Sparkle 2.10.1 (including its binary checksum through SwiftPM). The collector’s Commander,
 SweetCookieKit and swift-log source dependencies are pinned locally in `vendor/`
-with their licenses; no remote Swift packages are fetched during a build.
+with their licenses. The first GUI build downloads the pinned Sparkle package;
+collector dependencies remain local.
 Building requires a Swift 6.2+ toolchain with the macOS SDK and Python 3.9+
 for packaging scripts. The built app requires neither Python nor a compiler.
 
@@ -160,3 +178,6 @@ the provider/allowance layout.
 Its copyright and license are preserved under [LICENSES](LICENSES/CodexBar-MIT.txt).
 See [third-party notices](THIRD_PARTY_NOTICES.md) for scope and exclusions.
 The [brand guide](docs/BRAND.md) describes the product identity and attribution.
+
+Local agent integration for the unpublished 0.5.0 candidate is documented in
+[AGENT_INTEGRATION.md](docs/AGENT_INTEGRATION.md). It is opt-in and read-only.

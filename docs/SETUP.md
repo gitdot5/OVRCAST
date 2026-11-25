@@ -30,6 +30,12 @@ The sections below describe optional legacy scripted collection.
 Keep personal configuration in the ignored local file. Relative snapshot data
 is written under `state/`; the generated overview is `board.html` and `board.txt`.
 
+If Antigravity is open and signed in but the scheduled reading remains last known,
+check the collector LaunchAgent's `ProcessType`. The current installer uses
+`Standard` for collector jobs. When updating an existing job, preserve its custom
+environment settings. The standalone collector retries the same Antigravity
+connection once after an offline fallback. A failed retry keeps the last known state.
+
 ## Account labels
 
 The optional `expected`, `plans` and `also_used_by` fields use this form:
@@ -122,3 +128,13 @@ services use OVRCAST namespaces. Provider-owned authentication locations are
 retained. CodexBar's configuration, sessions and installation are not modified
 or required. Advanced existing token-account configurations require deliberate
 setup for this fork; the normal Connect flow uses provider software directly.
+
+## 0.5.0 candidate additions
+
+Setup requires a current usage reading for at least one selected provider.
+Use Health for connection states, last success and automatic retry times.
+Manual Retry bypasses backoff. Review support report shows exactly what will
+be copied or saved; it never uploads anything. Personalize controls optional
+menu-bar capacity and local usage estimates. About controls signed updates;
+automatic checks/installations start off. See [NEXT_RELEASE.md](NEXT_RELEASE.md)
+and [UPDATES.md](UPDATES.md) before candidate distribution.
