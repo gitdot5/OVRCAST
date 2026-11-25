@@ -2,6 +2,11 @@
   "version": "0.5.0",
   "build": "18",
   "sha256": "76b4f5183c4b6d6cc5be78a163b84bef11d6016c14633e29b580c2202cbaa5ec",
+  "manualPreview": {
+    "tag": "v0.5.0-preview.18",
+    "approvedSha256": "76b4f5183c4b6d6cc5be78a163b84bef11d6016c14633e29b580c2202cbaa5ec",
+    "evidence": "Approved November 25, 2026 for direct download as a GitHub prerelease. Omit build 18 from the automatic update feed. Sleep/wake and overnight recovery, battery testing, full VoiceOver verification and independent beta feedback remain pending for the stable release."
+  },
   "checks": {
     "local_tests": {
       "status": "pass",
@@ -31,17 +36,17 @@
       "status": "pass",
       "evidence": "Build 18 disposable 0.4.3-to-18-to-0.4.3 preflight launch/rollback preserves exact preferences and privacy. Actual build17-to-final-notarized 18 update/relaunch preserves owner preferences exactly. The previous signed release and owner installation backups remain available for manual recovery."
     },
-    "physical_intel": {
-      "status": "pending",
-      "evidence": "Intel slice launches locally through Rosetta and hosted Intel tests pass; no physical Intel Mac installation/runtime test has been completed."
+    "intel_runtime": {
+      "status": "pass",
+      "evidence": "GitHub Actions run 45536490656 installed the exact build 18 notarized ZIP on a native Intel (GenuineIntel, x86_64) macOS 15.7.9 desktop VM. SHA-256, strict nested code signatures and Gatekeeper's Notarized Developer ID assessment passed. After assessment, the test removed its quarantine marker to allow unattended launch. LaunchServices opened the installed app, clean onboarding created its menu item, the bundled collector ran, agent access defaulted to off, and the privacy-mode board rendered synthetic readings. The separate macOS 14 runtime check used an Apple Silicon VM."
     },
     "minimum_macos": {
-      "status": "pending",
-      "evidence": "Universal executables declare macOS 14 minimum. Hosted Intel/macOS 15 tests and newer Apple Silicon Macs do not establish macOS 14 runtime acceptance."
+      "status": "pass",
+      "evidence": "November 24 exact notarized build 18 ZIP passed a clean install on macOS 14.8.7 (23J520) in an isolated Apple Silicon VM. Archive SHA-256 matched. With Gatekeeper enabled, the quarantined app was accepted as Notarized Developer ID. The bundled collector ran, agent access defaulted to off, and first launch created the menu item and opened clean onboarding. The full board loaded, and nine app-owned view captures covered the menu, settings, privacy mode, last-known readings and support preview using synthetic accounts. Intel desktop coverage remains a separate check."
     },
     "sleep_network_endurance": {
       "status": "pending",
-      "evidence": "Owner existing-collector pilot retained 6,086 saved points for all seven current fleet connections over 29.05 hours. No qualifying reset transition or sleep/wake event was established by this bounded review. Actual native-collection sleep/wake, network interruption/recovery and battery/endurance acceptance remain required; no system sleep or network setting was changed. A later installed-pilot history check found fresh Claude readings on both sides of a reported reset, with the next reset advancing. The MacBook stayed on AC, and its power log showed no sleep/wake event during the installed-pilot window. Native recovery remains open."
+      "evidence": "Owner existing-collector pilot retained 6,086 saved points for all seven fleet connections over 29.05 hours. The installed pilot recorded fresh Claude readings on both sides of a reported reset. In the isolated Sonoma VM, native collection on final build 18 retained saved connection health through a 12-second guest network outage and retried from the same process after restoration, with 14.78 seconds between attempts. The VM used a signed-out Codex fixture. Guest sleep failed at the OS level (0xe00002e2). Physical Mac sleep/wake and overnight native collection with live provider accounts remain open."
     },
     "accessibility": {
       "status": "pending",
@@ -49,7 +54,7 @@
     },
     "resource_use": {
       "status": "pending",
-      "evidence": "Same preflight 18 GUI process remained running for 29.09 hours in existing-collector mode. Initial five-minute sample averaged 0.046% CPU and ended at 137.17 MiB RSS. November 24 snapshots were 141.70 MiB before accessibility interaction and 202.48 MiB afterward; latest CPU snapshot 0.0%. These are uncontrolled endpoints, not a continuous trace or leak/battery acceptance. A November 24 sample of the installed notarized app on AC power recorded 21 samples over 100 seconds: 143.5 MiB RSS at start and end, 143.6 MiB peak RSS and 0.1% peak sampled CPU. The battery run remains pending."
+      "evidence": "Same preflight 18 GUI process remained running for 29.09 hours in existing-collector mode. Initial five-minute sample averaged 0.046% CPU and ended at 137.17 MiB RSS. November 24 snapshots were 141.70 MiB before accessibility interaction and 202.48 MiB afterward. A 100-second sample of the installed notarized app on AC power recorded stable RSS around 143.5 MiB and 0.1% peak sampled CPU. On Sonoma, 21 samples over 100 seconds of idling with a signed-out Codex fixture recorded 31.83 MiB peak RSS and 1.8% peak sampled CPU. Battery and live native-collection endurance measurements remain open. A separate 10.5-minute installed-build baseline on the MacBook recorded 43 samples, with 106.34–115.42 MiB RSS and 1.0% peak sampled CPU while on AC. The existing collector refreshed its snapshot during the sample."
     },
     "opt_in_beta": {
       "status": "pending",

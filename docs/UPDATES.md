@@ -42,6 +42,20 @@ Do not export private keys into the repository, build environment or download ho
    its signature and archive download hash after publication. Retain the previous
    signed release for manual recovery.
 
+## Manual preview
+
+Build 18 is approved for direct download as the GitHub prerelease
+`v0.5.0-preview.18`. Run the package checks and
+`python3 script/check_release_readiness.py --manual-preview FINAL_ARCHIVE`.
+Publish the approved ZIP and checksum as a prerelease with the latest-release
+flag off. Verify the anonymous download and compare its SHA-256 to the approved
+archive.
+
+Leave the public appcast untouched for this preview. Stable publication still
+uses the default readiness command and requires all 15 checks. The outstanding
+sleep/wake and overnight recovery, battery, VoiceOver and independent beta
+checks stay pending in the stable record.
+
 ## Recovery
 
 If an update fails, quit OVRCAST, download the previous signed release from the

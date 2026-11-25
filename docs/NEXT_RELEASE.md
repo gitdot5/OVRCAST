@@ -1,8 +1,10 @@
 # OVRCAST 0.5.0 candidate
 
-Updated November 24, 2026. Build 18 preserves standalone provider selections and
-Claude quota-window accuracy. **Unpublished; release acceptance is pending.** The
-current results follow; earlier dated sections retain historical evidence.
+Updated November 25, 2026. Build 18 preserves standalone provider selections and
+Claude quota-window accuracy. It is approved for a
+[manual preview](https://github.com/gitdot5/OVRCAST/releases/tag/v0.5.0-preview.18).
+Stable release acceptance is pending. Earlier dated sections retain historical
+evidence.
 
 ## November 24 final notarized build 18
 
@@ -54,10 +56,28 @@ current results follow; earlier dated sections retain historical evidence.
 Final ZIP SHA-256:
 `76b4f5183c4b6d6cc5be78a163b84bef11d6016c14633e29b580c2202cbaa5ec`.
 
-The current acceptance record remains blocked by physical Intel/macOS 14,
-remaining screen-reader, native recovery/endurance and battery
-observations, and opt-in beta results. The notarized owner pilot is not a public
-release. No volunteers have been enrolled or contacted.
+The exact notarized ZIP passed on macOS 14.8.7 (23J520) in an isolated Apple
+Silicon VM. Gatekeeper accepted the quarantined app. Clean onboarding, full
+board loading, the bundled collector, default agent-access privacy and nine
+app view captures passed with synthetic accounts.
+
+The exact ZIP also passed installation and desktop launch on a hosted
+macOS 15.7.9 Intel VM. The runner verified x86_64 on a GenuineIntel processor,
+matched the archive checksum, accepted the quarantined bundle in Gatekeeper,
+and exercised the menu item, onboarding, bundled collector, agent access
+default and privacy-mode board. This satisfies the Intel runtime gate.
+[Hosted install evidence](https://github.com/gitdot5/OVRCAST/actions/runs/45536490656).
+
+During a 12-second guest network interruption, the app retained saved
+connection health and the same process retried native collection after
+restoration. The guest used a signed-out Codex fixture. The Sonoma guest
+refused the system sleep request. Physical sleep/wake and overnight native
+collection with live accounts still need coverage.
+
+The stable release still requires screen-reader verification, native
+recovery/endurance and battery observations, and opt-in beta results. These
+checks are deferred for the manual preview. The preview is distributed by
+direct download and stays out of the automatic update feed.
 
 ## November 22 build 18 fleet compatibility
 
